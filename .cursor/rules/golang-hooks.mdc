@@ -1,0 +1,25 @@
+---
+description: "Go hooks extending common hooks rule"
+globs: ["**/*.go", "**/go.mod", "**/go.sum"]
+alwaysApply: false
+---
+# Go Hooks
+
+> This file extends the common hooks rule with Go specific content.
+
+## PostToolUse Behavior
+
+After any edit to a `.go` file, run these checks in order. Surface all output and stop until each step succeeds.
+
+1. `gofmt -w` — mandatory formatting
+2. `goimports -w` — group and prune imports
+3. `golangci-lint run --fix` — supersedes `go vet` and `staticcheck`; catches errcheck, ineffassign, unused, revive. Do not run vet or staticcheck separately.
+4. `go test ./... -race` — required because `pkg/registry/` uses concurrent fetches. Catch races at edit time.
+
+Do not run `go build`. The language server already catches compile errors.
+
+### Wire to agent runtime
+
+- Claude Code → `~/.claude/settings.json` (PostToolUse)
+- Cursor → `.cursor/hooks/` (project-local)
+- Other → agent-specific configuration

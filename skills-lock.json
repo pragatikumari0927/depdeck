@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "skills": {
+    "advisor-orchestrator-worker": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "skillPath": "agent_skills/advisor-orchestrator-worker/SKILL.md",
+      "computedHash": "d7f8daea61576739c9b57e309718d94efad3171f59d7a5fdf12242da2d0656c7"
+    },
+    "commit-archaeologist": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "skillPath": "agent_skills/commit-archaeologist/SKILL.md",
+      "computedHash": "adcdc024326df8f5f61946a136ac26d2fd7adf9175908985e8ba14786a18016d"
+    },
+    "dependency-doctor": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "skillPath": "agent_skills/dependency-doctor/SKILL.md",
+      "computedHash": "eb777cb149da63180407a30b3e892b25a2144cbb0c84acd4e12f68747acda2c7"
+    },
+    "paleo": {
+      "source": "mocasus/paleo",
+      "sourceType": "github",
+      "skillPath": "skills/paleo/SKILL.md",
+      "computedHash": "065499a73cc13a0226e126a1e1a60b2bd711deeb3a0cc135bb0623483db33daa"
+    },
+    "paleo-auto": {
+      "source": "mocasus/paleo",
+      "sourceType": "github",
+      "skillPath": "skills/paleo-auto/SKILL.md",
+      "computedHash": "cf2fcab652c821ef55f835e9286adcd33030c30bc5236d1639f403655d7139a2"
+    },
+    "paleo-budget": {
+      "source": "mocasus/paleo",
+      "sourceType": "github",
+      "skillPath": "skills/paleo-budget/SKILL.md",
+      "computedHash": "ef0115acc6783797fd2985cc3e0f2b28e2aee4780fdf11f238cf6605288d7db6"
+    },
+    "paleo-converse": {
+      "source": "mocasus/paleo",
+      "sourceType": "github",
+      "skillPath": "skills/paleo-converse/SKILL.md",
+      "computedHash": "055c96addd9b33a09d5f5263131e6692640394c0c0ea7d7fa3f9c06ad6aced2a"
+    },
+    "paleo-json": {
+      "source": "mocasus/paleo",
+      "sourceType": "github",
+      "skillPath": "skills/paleo-json/SKILL.md",
+      "computedHash": "0b208cb321b1d0e88673d3978a92917d385ba372161112a9b81cf04618baba84"
+    },
+    "paleo-summary": {
+      "source": "mocasus/paleo",
+      "sourceType": "github",
+      "skillPath": "skills/paleo-summary/SKILL.md",
+      "computedHash": "d0b96a7deed5aeeb0c4285aaf0bfefd9d5127f50458c351b6c2996ab9c3e9b90"
+    },
+    "paleo-trim-context": {
+      "source": "mocasus/paleo",
+      "sourceType": "github",
+      "skillPath": "skills/paleo-trim-context/SKILL.md",
+      "computedHash": "14e0b87e22458fcbaf0944f6d8f854bb749147f97d631df573197ef980bbc856"
+    },
+    "project-graveyard": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "skillPath": "agent_skills/project-graveyard/SKILL.md",
+      "computedHash": "9c4ec271cedf92e5a4d21f0000d2ba2f22ebb34ca5f6e69bfbf7b5cced58a51b"
+    },
+    "scope-creep-detector": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "skillPath": "agent_skills/scope-creep-detector/SKILL.md",
+      "computedHash": "5d09cae4760131fa245aa8a1655374ed5d64b801f3205d65c38671bca210471f"
+    },
+    "thinking-out-loud": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "skillPath": "agent_skills/thinking-out-loud/SKILL.md",
+      "computedHash": "37b94cad430e738608498a15095c70b80426209efbfc6172ebb6f92164379087"
+    }
+  }
+}
