@@ -14,6 +14,7 @@ Rule bodies live in those files. This file does not restate them.
 | `golang-hooks.mdc` | golang | `**/*.go`, `**/go.mod`, `**/go.sum` | Post-edit automation chain |
 | `golang-testing.mdc` | golang | `**/*.go`, `**/go.mod`, `**/go.sum` | Table-driven tests, coverage |
 | `cli-contract.mdc` | golang | `cmd/**/*.go`, `internal/cli/**/*.go`, `internal/mcp/**/*.go` | Process status, stdout/stderr, color |
+| `shell-search.mdc` | common | Always | Route shell search through ripgrep, not PowerShell cmdlets |
 
 ## Meta-rules
 
