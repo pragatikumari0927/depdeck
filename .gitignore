@@ -1,0 +1,47 @@
+# Engram local working DB (never commit)
+.engram/engram.db
+.engram/engram.db-*
+
+# Build artifacts
+/depdeck
+/depdeck.exe
+*.test
+*.out
+*.prof
+coverage.txt
+coverage.html
+
+# Generated output (depdeck writes this)
+/deck.html
+
+# Local cache
+.depdeck-cache.json
+
+# CodeRabbit working artifacts
+coderabbit-*.jsonl
+coderabbit-report*.jsonl
+
+# Node residue (from npx skills)
+node_modules/
+package-lock.json
+npm-debug.log*
+
+# Secrets — never commit
+.env
+.env.*
+*.key
+*.pem
+credentials.json
+
+# Editor and OS noise
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
+
+# Scratch
+/tmp/
+*.tmp
