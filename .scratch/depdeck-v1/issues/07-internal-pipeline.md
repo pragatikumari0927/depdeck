@@ -29,7 +29,11 @@ func Run(ctx context.Context, packageJSONPath string, opt Options) ([]types.Depe
 func Check(ctx context.Context, packageJSONPath string, opt Options) (types.CheckData, error)
 ```
 
+`parser.ParseFile` takes a **file** path, not a directory. Pipeline (and CLI) must `filepath.Join(dir, "package.json")` when the user passes a folder. Do not teach the parser to resolve dirs.
+
 Run: invalid flavor `ai` returns flavor.ErrAINotInV1 (do not fetch). Parse error is a Go error (adapter → CLI exit). Per-package fetch failures stay on Dependency.Errors. Check uses stats.DefaultPolicy / Flagged; FailOnFetchErrors false; all-fetch-failed is still a successful CheckData with errors on every dep (CLI maps exit 3).
+
+If the Face receives a directory, join `package.json` before `ParseFile`. `parser.ParseFile` does not accept a directory.
 
 ## Acceptance criteria
 
