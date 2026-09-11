@@ -1,0 +1,8 @@
+{
+  "name": "workspace-root",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "dependencies": {
+    "root-only": "^1.0.0"
+  }
+}

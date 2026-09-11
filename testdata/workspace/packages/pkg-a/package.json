@@ -1,0 +1,6 @@
+{
+  "name": "pkg-a",
+  "dependencies": {
+    "nested-only": "^2.0.0"
+  }
+}
