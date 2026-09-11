@@ -53,6 +53,7 @@ type Dependency struct {
 	LastPublish     string       `json:"last_publish,omitempty"`
 	License         string       `json:"license,omitempty"`
 	FlavorText      string       `json:"flavor_text,omitempty"`
+	SpecialMove     string       `json:"special_move,omitempty"`
 	FlavorSource    FlavorSource `json:"flavor_source,omitempty"`
 	Errors          []FetchError `json:"errors,omitempty"`
 }
