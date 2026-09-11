@@ -1,0 +1,84 @@
+language: "en"
+reviews:
+  profile: "chill"
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  path_instructions:
+    - path: "**/*.go"
+      instructions: |
+        This is a Go CLI project called depdeck. Conventions live in:
+        - SPEC.md (frozen technical contract — authoritative)
+        - DECISIONS.md (index of ADRs in docs/adr/)
+        - .cursor/rules/*.mdc (Go style, architecture, CLI contract)
+
+        Read those before flagging style issues. Do not suggest patterns
+        that contradict an ADR.
+
+        Key constraints:
+        - pkg/types is frozen against renames and removals (ADR-0014).
+          Additive fields with omitempty are allowed.
+        - pkg/stats, pkg/flavor/rule.go, and pkg/cache must not call
+          time.Now() — they take a `now time.Time` parameter for
+          determinism.
+        - pkg/cache must not import net/http. It stores bytes only.
+        - pkg/registry is the only package allowed to do HTTP.
+        - Errors wrap with fmt.Errorf("context: %w", err). No bare returns.
+        - No new external dependencies without an ADR.
+
+    - path: "templates/**"
+      instructions: |
+        Byte-determinism is a hard requirement (ADR-0006). Flag any of:
+        - A timestamp, random ID, or `Date.now()` anywhere in the template.
+        - `safeHTML`, `template.HTML`, `template.JS`, or `template.URL`
+          anywhere — these bypass html/template escaping and are a stored
+          XSS vector.
+        - Any hardcoded color (hex or named) below `:root`. Every color
+          below `:root` must reference a CSS variable like
+          `var(--rarity-common)`.
+        - Any external resource: `<link>`, `<script src=`, `@import`, or
+          a font URL. The deck must be self-contained (ADR-0006).
+
+    - path: "pkg/types/**"
+      instructions: |
+        This package is frozen against renames, removals, and changes to
+        existing field types or JSON tags (ADR-0014). Flag any such change
+        as a blocker. Additive fields with `omitempty` are allowed without
+        an ADR.
+
+    - path: "docs/adr/**"
+      instructions: |
+        ADR files are immutable once `**Status:** accepted`. Do not suggest
+        any edit, addition, or rewording to these files — not even caveats
+        or clarifications. The way to change a policy is a successor ADR.
+
+        If a policy caveat is worth documenting, post it as a comment
+        suggestion on the code that implements the policy, not on the ADR.
+
+    - path: ".cursor/rules/**"
+      instructions: |
+        Rule files must declare `description`, `globs` (if scoped), and
+        `alwaysApply` in frontmatter. A missing field means the rule never
+        fires — flag it as a blocker.
+
+    - path: "**/*_test.go"
+      instructions: |
+        Prefer table-driven tests. Mock HTTP with httptest.NewServer —
+        never hit real APIs in tests. Pure packages (pkg/stats,
+        pkg/flavor/rule.go) should target high coverage.
+
+  tools:
+    golangci-lint:
+      enabled: true
+    markdownlint:
+      enabled: true
+    shellcheck:
+      enabled: false
+    yamllint:
+      enabled: true
+knowledge_base:
+  code_guidelines:
+    enabled: true
+chat:
+  auto_reply: true
