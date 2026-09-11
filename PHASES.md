@@ -22,6 +22,11 @@ Scope lock: [SPEC.md](SPEC.md). Why: [DECISIONS.md](DECISIONS.md).
 - Individual card PNG export via chromedp, falling back to HTML when Chrome is missing
 - `install_size` as a Card stat (requires ADR to unfreeze `pkg/types`)
 - `depdeck doctor` — scan mcp.json, rule files, cache for leak categories
+- Decide whether `.agents/skills/` is tracked or ignored. If ignored,
+  track `skills-lock.json` and add `npx skills install
+  --frozen-lockfile` to `DEVELOPMENT.md`. Standard pattern: ignore the
+  directory like `node_modules/`, track the lock like
+  `package-lock.json`. Triage report: 2026-09-11.
 
 ## v2 — deferred
 
