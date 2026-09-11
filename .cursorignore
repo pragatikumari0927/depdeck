@@ -45,3 +45,7 @@ desktop.ini
 # Scratch
 /tmp/
 *.tmp
+
+# Local Cursor state and npm residue
+.cursor/settings.json
+/package.json
