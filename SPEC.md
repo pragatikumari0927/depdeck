@@ -23,7 +23,7 @@ Requires ADR-0002, ADR-0005, ADR-0007, ADR-0011, and DECISIONS.md v2 to change.
 | `internal/cli` | `scan`, `check`, flags, exit codes |
 | `internal/mcp` | `list_deck`, `get_card`, `check_deck` |
 | `cmd/depdeck` | Wiring only |
-| `templates/deck.html` | HTML template |
+| `pkg/render/templates/` | deck.html, embedded via go:embed |
 | `testdata/` | Fixture npm responses |
 
 `internal/pipeline` has no `os.Stdout`, `flag.Parse`, or `os.Exit`. Requires ADR-0001 to change.
