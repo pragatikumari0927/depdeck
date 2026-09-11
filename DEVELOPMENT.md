@@ -13,3 +13,4 @@ it on ubuntu-latest).
 - gofmt (ships with Go)
 - CodeRabbit CLI — `coderabbit auth login`. Review before merge:
     `coderabbit review --committed --agent`. Config in `.coderabbit.yaml`.
+- ripgrep — `rg` on PATH. Cursor's Shell tool resolves it to `%LOCALAPPDATA%\Programs\cursor\resources\app\node_modules\@vscode\ripgrep\bin\rg.exe` when Cursor is installed user-scoped (the default on Windows). Any system install (Chocolatey, WinGet) works as fallback.
