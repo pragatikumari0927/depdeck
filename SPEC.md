@@ -32,12 +32,12 @@ Requires ADR-0002, ADR-0005, ADR-0007, ADR-0011, and DECISIONS.md v2 to change.
 
 Checkable against `pkg/types`. JSON names:
 
-- Dependency: `name`, `version` (always declared range/exact), `resolved_version` (omitempty), `tag`, `weekly_downloads` (omitempty), `rarity` (omitempty), `chaos` (omitempty), `last_publish` (omitempty), `license` (omitempty), `flavor_text` (omitempty), `flavor_source` (omitempty), `errors` (omitempty).
+- Dependency: `name`, `version` (always declared range/exact), `resolved_version` (omitempty), `tag`, `weekly_downloads` (omitempty), `rarity` (omitempty), `chaos` (omitempty; Go representation is *float64 so omitempty distinguishes unknown from zero.), `last_publish` (omitempty), `license` (omitempty), `flavor_text` (omitempty), `special_move` (omitempty), `flavor_source` (omitempty), `errors` (omitempty).
 - No `stars` or `issues` fields.
 - `tag`: `dependencies` | `devDependencies` | `optionalDependencies`.
 - `rarity`: `Common` | `Rare` | `Epic` | `Legendary` or omitted.
 - `flavor_source`: `rule_full` | `rule_name_only` or omitted.
-- FetchError: `source`, `kind`, `detail`. `source` is always `"npm"` in v1. `kind`: `not_found` | `timeout` | `rate_limit` | `network` | `parse`.
+- FetchError: `source`, `kind`, `detail`. `source` is always `"npm"` in v1. `kind`: `not_found` | `timeout` | `rate_limit` | `network` | `parse`. Go representation is a string field with exported constants; SPEC enum lists the permitted values.
 - Empty Rarity is not Common.
 
 Requires ADR-0001, ADR-0002, ADR-0003, ADR-0011.
