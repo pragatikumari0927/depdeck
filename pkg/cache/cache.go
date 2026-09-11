@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"time"
@@ -34,7 +35,7 @@ func New(root string) (*Store, error) {
 	}
 	base, err := os.UserCacheDir()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("read user cache dir: %w", err)
 	}
 	return &Store{Root: filepath.Join(base, "depdeck")}, nil
 }
@@ -61,16 +62,17 @@ func (s *Store) Get(source, name string, class Class, now time.Time) (Entry, boo
 	if s.Disabled {
 		return zero, false, nil
 	}
-	raw, err := os.ReadFile(s.path(source, name, class))
+	p := s.path(source, name, class)
+	raw, err := os.ReadFile(p)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return zero, false, nil
 		}
-		return zero, false, err
+		return zero, false, fmt.Errorf("read %s: %w", p, err)
 	}
 	var e Entry
 	if err := json.Unmarshal(raw, &e); err != nil {
-		return zero, false, err
+		return zero, false, fmt.Errorf("json %s: %w", p, err)
 	}
 	if !Fresh(e, class, now) {
 		return zero, false, nil
@@ -90,26 +92,30 @@ func (s *Store) Put(source, name string, class Class, e Entry) error {
 		return nil
 	}
 	if err := os.MkdirAll(s.Root, 0o755); err != nil {
-		return err
-	}
-	raw, err := json.Marshal(e)
-	if err != nil {
-		return err
+		return fmt.Errorf("mkdir %s: %w", s.Root, err)
 	}
 	dest := s.path(source, name, class)
+	raw, err := json.Marshal(e)
+	if err != nil {
+		return fmt.Errorf("json %s: %w", dest, err)
+	}
 	tmp, err := os.CreateTemp(s.Root, ".put-*")
 	if err != nil {
-		return err
+		return fmt.Errorf("write %s: %w", dest, err)
 	}
 	tmpName := tmp.Name()
 	if _, err := tmp.Write(raw); err != nil {
 		tmp.Close()
 		os.Remove(tmpName)
-		return err
+		return fmt.Errorf("write %s: %w", tmpName, err)
 	}
 	if err := tmp.Close(); err != nil {
 		os.Remove(tmpName)
-		return err
+		return fmt.Errorf("write %s: %w", tmpName, err)
 	}
-	return os.Rename(tmpName, dest)
+	if err := os.Rename(tmpName, dest); err != nil {
+		os.Remove(tmpName) // best effort
+		return fmt.Errorf("rename cache %s: %w", dest, err)
+	}
+	return nil
 }

@@ -2,6 +2,7 @@ package parser
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 
 	"depdeck/pkg/types"
@@ -16,11 +17,11 @@ type manifest struct {
 func ParseFile(path string) ([]types.Dependency, error) {
 	raw, err := os.ReadFile(path)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("parse %s: %w", path, err)
 	}
 	var m manifest
 	if err := json.Unmarshal(raw, &m); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("decode %s: %w", path, err)
 	}
 	seen := map[string]struct{}{}
 	var out []types.Dependency
