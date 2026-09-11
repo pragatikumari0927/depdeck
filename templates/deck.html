@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>depdeck</title>
+  <style>
+    :root {
+      --rarity-common: #64748B;
+      --rarity-rare: #2563EB;
+      --rarity-epic: #7C3AED;
+      --rarity-legendary: #B45309;
+      --error-ink: #B91C1C;
+      --font-html: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --card-width: 220px;
+      --card-gap: 12px;
+      --paper: #F1F5F9;
+      --ink: #0F172A;
+      --muted: #475569;
+      --card-face: #FFFFFF;
+      --card-line: #CBD5E1;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--font-html);
+    }
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--card-gap);
+      padding: var(--card-gap);
+    }
+    .filters button {
+      background: var(--card-face);
+      color: var(--ink);
+      border: 1px solid var(--card-line);
+      font: inherit;
+      cursor: pointer;
+      padding: 4px 10px;
+    }
+    .filters button[aria-pressed="true"] {
+      border-color: var(--ink);
+    }
+    .deck {
+      display: grid;
+      gap: var(--card-gap);
+      padding: var(--card-gap);
+      grid-template-columns: repeat(auto-fill, minmax(var(--card-width), 1fr));
+    }
+    .card {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      margin: 0;
+      padding: var(--card-gap);
+      background: var(--card-face);
+      color: var(--ink);
+      border: 2px solid var(--card-line);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .card--no-data {
+      border-color: var(--muted);
+    }
+    .card[data-rarity="Common"] { border-color: var(--rarity-common); }
+    .card[data-rarity="Rare"] { border-color: var(--rarity-rare); }
+    .card[data-rarity="Epic"] { border-color: var(--rarity-epic); }
+    .card[data-rarity="Legendary"] { border-color: var(--rarity-legendary); }
+    .rarity {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 0;
+      font-size: 0.8rem;
+    }
+    .card[data-rarity="Common"] .rarity { color: var(--rarity-common); }
+    .card[data-rarity="Rare"] .rarity { color: var(--rarity-rare); }
+    .card[data-rarity="Epic"] .rarity { color: var(--rarity-epic); }
+    .card[data-rarity="Legendary"] .rarity { color: var(--rarity-legendary); }
+    .rarity-swatch {
+      width: 0.75em;
+      height: 0.75em;
+      background: currentColor;
+      flex: none;
+    }
+    .name {
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+    .version, .resolved, .stats, .flavor, .move, .errors {
+      margin: 0;
+      font-size: 0.8rem;
+    }
+    .resolved, .flavor {
+      color: var(--muted);
+    }
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .errors {
+      color: var(--error-ink);
+    }
+    .error-kind + .error-kind::before {
+      content: " ";
+    }
+    @media (max-width: 640px) {
+      .deck { grid-template-columns: 1fr; }
+    }
+    @media (min-width: 1280px) {
+      .deck { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <nav class="filters" aria-label="Tag filter">
+    <button type="button" data-filter="" aria-pressed="true">All</button>
+    <button type="button" data-filter="dependencies">dependencies</button>
+    <button type="button" data-filter="devDependencies">devDependencies</button>
+    <button type="button" data-filter="optionalDependencies">optionalDependencies</button>
+  </nav>
+  <main class="deck">
+    {{ range .Dependencies }}
+    <article class="card{{ if or (not .Rarity) .Errors }} card--no-data{{ end }}" data-rarity="{{ .Rarity }}" data-tag="{{ .Tag }}">
+      {{ if .Rarity }}
+      <p class="rarity"><span class="rarity-swatch"></span><span class="rarity-label">{{ .Rarity }}</span></p>
+      {{ end }}
+      <h2 class="name">{{ .Name }}</h2>
+      <p class="version">{{ .Version }}</p>
+      {{ if .ResolvedVersion }}
+      <p class="resolved">{{ .ResolvedVersion }}</p>
+      {{ end }}
+      <p class="stats">
+        <span>{{ .WeeklyDownloads }}</span>
+        <span>{{ .LastPublish }}</span>
+        {{ with .Chaos }}<span>{{ . }}</span>{{ end }}
+        <span>{{ .License }}</span>
+      </p>
+      <p class="flavor">{{ .FlavorText }}</p>
+      {{ if .SpecialMove }}
+      <p class="move">{{ .SpecialMove }}</p>
+      {{ end }}
+      {{ if .Errors }}
+      <p class="errors">{{ range .Errors }}<span class="error-kind">{{ .Kind }}</span>{{ end }}</p>
+      {{ end }}
+    </article>
+    {{ end }}
+  </main>
+  <script>
+    (function () {
+      var nav = document.querySelector(".filters");
+      if (!nav) return;
+      var cards = document.querySelectorAll(".card");
+      var buttons = nav.querySelectorAll("[data-filter]");
+      nav.addEventListener("click", function (event) {
+        var btn = event.target.closest("[data-filter]");
+        if (!btn || !nav.contains(btn)) return;
+        var tag = btn.getAttribute("data-filter");
+        var i;
+        for (i = 0; i < buttons.length; i++) {
+          buttons[i].setAttribute("aria-pressed", buttons[i] === btn ? "true" : "false");
+        }
+        for (i = 0; i < cards.length; i++) {
+          cards[i].hidden = !(tag === "" || cards[i].getAttribute("data-tag") === tag);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
