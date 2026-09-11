@@ -1,0 +1,47 @@
+# depdeck — Cursor ignore
+# Rule: only generated artifacts, caches, secrets, OS noise.
+# Never ignore source, docs, rules, tickets, or test fixtures.
+
+# Build artifacts
+/depdeck
+/depdeck.exe
+*.test
+*.out
+*.prof
+coverage.txt
+coverage.html
+
+# Generated output
+/deck.html
+
+# Local cache
+.depdeck-cache.json
+
+# CodeRabbit working artifacts
+coderabbit-*.jsonl
+coderabbit-report*.jsonl
+
+# Node residue
+node_modules/
+package-lock.json
+npm-debug.log*
+
+# Secrets — never index, never expose
+.env
+.env.*
+*.key
+*.pem
+credentials.json
+
+# Editor and OS noise
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
+
+# Scratch
+/tmp/
+*.tmp
