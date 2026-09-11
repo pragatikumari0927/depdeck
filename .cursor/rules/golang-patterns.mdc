@@ -37,6 +37,21 @@ func NewUserService(repo UserRepository, logger Logger) *UserService {
 }
 ```
 
+### Outbound HTTP — context timeouts
+
+Every outbound HTTP call passes a `context.Context` with a timeout. No
+bare `http.Get`. No implicit timeouts relying on the default client.
+
+```go
+ctx, cancel := context.WithTimeout(parent, 10*time.Second)
+defer cancel()
+req, _ := http.NewRequestWithContext(ctx, "GET", url, nil)
+```
+
+The timeout value is declared once per package as a named constant, not
+inlined at the call site. The registry package is the only place that
+makes outbound HTTP in v1.
+
 ## Reference
 
 See skill: `golang-patterns` for comprehensive Go patterns including concurrency, error handling, and package organization.
