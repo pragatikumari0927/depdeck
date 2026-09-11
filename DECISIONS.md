@@ -19,6 +19,7 @@ Index only. Reasoning lives in `docs/adr/`.
 | D-011 | Root-only parser; Tag is one enum | [0011](docs/adr/0011-root-roster-and-tag-enum.md) |
 | D-012 | Security threat model: five threats and mitigations | [0012](docs/adr/0012-security-threat-model.md) |
 | D-013 | SpecialMove added to Dependency; pkg/types unfrozen for one field | [0013](docs/adr/0013-add-special-move.md) |
+| D-014 | pkg/types freeze relaxed: additive fields allowed without ADR | [0014](docs/adr/0014-freeze-policy-relaxed.md) |
 
 ## Standing conventions
 
