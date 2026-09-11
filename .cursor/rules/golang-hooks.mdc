@@ -7,7 +7,10 @@ alwaysApply: false
 
 ## PostToolUse Behavior
 
-After any edit to a `.go` file, run these checks in order. Surface all output and stop until each step succeeds.
+After any edit to a `.go` file, run these checks in order. Surface
+each step's output. If a required binary is missing, skip that step
+with a one-time warning and continue — the hook does not fail on
+missing tools.
 
 1. `gofmt -w` — mandatory formatting
 2. `goimports -w` — group and prune imports
