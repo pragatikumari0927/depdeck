@@ -28,6 +28,22 @@ Requires ADR-0002, ADR-0005, ADR-0007, ADR-0011, and DECISIONS.md v2 to change.
 
 `internal/pipeline` has no `os.Stdout`, `flag.Parse`, or `os.Exit`. Requires ADR-0001 to change.
 
+## Runtime flow
+
+`depdeck scan [path]` executes:
+
+  1. Parse     internal/cli reads <path>/package.json via pkg/parser
+  2. Cache     pkg/cache checks for cached npm responses
+  3. Fetch     pkg/registry fetches uncached deps, bounded at 8 concurrent
+  4. Stats     pkg/stats.Apply computes Rarity, Chaos per dep
+  5. Flavor    pkg/flavor.Apply fills SpecialMove, FlavorText, FlavorSource
+  6. Render    pkg/render.Render writes deck.html (unless --json)
+
+`depdeck check [path]` is identical through step 5, then evaluates
+pkg/stats.Flagged and exits 1 if any dependency is flagged.
+
+Both CLI and MCP call the same pipeline. See ADR-0001.
+
 ## Core types
 
 Checkable against `pkg/types`. JSON names:
