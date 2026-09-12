@@ -1,4 +1,33 @@
 # Go Hooks
 
-Source of truth: `.cursor/rules/golang-hooks.mdc`.
-Read that file before any edit that touches this rule's scope.
+## PostToolUse Behavior
+
+After any edit to a `.go` file, run these checks in order. Surface
+each step's output. If a required binary is missing, skip that step
+with a one-time warning and continue — the hook does not fail on
+missing tools.
+
+1. `gofmt -w` — mandatory formatting
+2. `goimports -w` — group and prune imports
+3. `golangci-lint run` — supersedes `go vet` and `staticcheck`; catches errcheck, ineffassign, unused, revive. Do not run vet or staticcheck separately.
+  `--fix` is a manual command, not a hook, because rewriting files re-triggers the hook.
+4. `go test -race ./{pkg-of-edited-file}/...` — scoped to the modified
+     package.
+     - **Linux / macOS:** run with `-race` unconditionally.
+     - **Windows:** run `gcc -dumpmachine` first.
+       - If it prints `x86_64-w64-mingw32`: run with `-race`.
+       - Otherwise: run without `-race` and print one line —
+         "Skipping -race on Windows (no 64-bit gcc). CI runs it on Linux."
+     Full-tree `./...` runs on pre-commit, not post-edit.
+
+Do not run `go build`. The language server already catches compile errors.
+
+### Prerequisites
+
+See `DEVELOPMENT.md` for tool installation.
+
+### Wire to agent runtime
+
+- Claude Code → `~/.claude/settings.json` (PostToolUse)
+- Cursor → `.cursor/hooks/` (project-local)
+- Other → agent-specific configuration

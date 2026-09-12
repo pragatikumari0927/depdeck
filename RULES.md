@@ -37,3 +37,26 @@ See `SKILLS.md` for the curated skill list and divergence pins. The rules here a
 ## Cross-tool contract
 
 `AGENTS.md` is the tool-agnostic contract read by Claude Code, Codex, Cursor, and Grok. `.cursor/rules/*.mdc` are Cursor-specific. When the two overlap, `AGENTS.md` is the human-facing summary and the `.mdc` files are the mechanically-enforced version.
+
+## Rule sync
+
+`.cursor/rules/*.mdc` is the source of truth. `.grok/rules/*.md` is
+generated from it, because Grok Build does not read `.mdc` and every
+`.md` in `.grok/rules/` loads unconditionally.
+
+After editing any `.mdc`:
+
+    pwsh -File scripts/sync-rules.ps1
+
+Do not hand-edit `.grok/rules/*.md`. Do not create a `.md` in
+`.grok/rules/` without a matching `.mdc` source.
+
+### Shell search
+
+`.cursor/rules/shell-search.mdc` (and its `.grok/rules/shell-search.md`
+copy) directs the agent to use `rg` for all content search. The rule
+is intentionally strict: `Select-String`, `findstr`, and
+`Get-ChildItem -Recurse | Select-String` are blocked. Always pass an
+explicit path to `rg` — bare `rg PATTERN` can hang on stdin.
+
+This applies to both Cursor and Grok Build.

@@ -1,4 +1,11 @@
 # Architecture
 
-Source of truth: `.cursor/rules/architecture.mdc`.
-Read that file before any edit that touches this rule's scope.
+Source of truth: `SPEC.md` (package map) and `DECISIONS.md` (why).
+
+- `pkg/types/` is FROZEN. Never modify without explicit user approval.
+- Import direction is enforced by `SPEC.md`. Never add an import that
+  crosses those lines.
+- No circular imports. If one appears, stop and ask.
+- No new external dependencies without approval.
+- No Cobra. No Viper. No logrus. `flag`, `slog`, `net/http` only.
+- When a rule here and `SPEC.md` disagree, `SPEC.md` wins. Fix the rule.

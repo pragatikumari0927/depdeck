@@ -1,4 +1,24 @@
 # Go Coding Style
 
-Source of truth: `.cursor/rules/golang-coding-style.mdc`.
-Read that file before any edit that touches this rule's scope.
+## Formatting
+
+- **gofmt** and **goimports** are mandatory -- no style debates
+
+## Design Principles
+
+- Accept interfaces, return structs
+- Keep interfaces small (1-3 methods)
+
+## Error Handling
+
+Always wrap errors with context:
+
+```go
+if err != nil {
+    return fmt.Errorf("failed to create user: %w", err)
+}
+```
+
+## Reference
+
+See skill: `golang-patterns` for comprehensive Go idioms and patterns.
