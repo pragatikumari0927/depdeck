@@ -15,7 +15,6 @@ It renders the deck as a single self-contained `deck.html`, gates CI with `depde
 [![Status](https://img.shields.io/badge/status-WIP%20%C2%B7%20v1%207%2F13%20tickets-orange)](PHASES.md)
 [![Tests](https://github.com/pragatikumari0927/depdeck/actions/workflows/test.yml/badge.svg)](.github/workflows/test.yml)
 [![Ecosystem](https://img.shields.io/badge/ecosystem-npm-CB3837?logo=npm&logoColor=white)](SPEC.md)
-[![MCP](https://img.shields.io/badge/MCP-3%20tools-6E56CF)](docs/adr/0007-mcp-three-tools.md)
 [![License](https://img.shields.io/badge/license-TBD-lightgrey)](#-license)
 
 <img src="https://skillicons.dev/icons?i=go,npm,html,githubactions" alt="Go, npm, HTML, GitHub Actions" />
@@ -62,28 +61,28 @@ Each direct dependency becomes a card: **Rarity**, **Chaos**, license, last publ
 <tr>
 <td valign="top">
 
-### ✅ CI gate
-`depdeck check` runs the same pipeline and exits `1` when a dependency breaks policy. The default policy is chaos ≤ 0.5 and a license is required ([ADR-0010](docs/adr/0010-check-policy-v1.md)).
+### ✅ CI gate · 🚧 planned
+`depdeck check` will run the same pipeline and exit `1` when a dependency breaks policy. The default policy is chaos ≤ 0.5 and a license is required ([ADR-0010](docs/adr/0010-check-policy-v1.md)).
 
 </td>
 <td valign="top">
 
-### 🤖 MCP server
-There are three tools, `list_deck`, `get_card` and `check_deck`, with explicit input schemas ([ADR-0007](docs/adr/0007-mcp-three-tools.md)).
+### 🤖 MCP server · 🚧 planned
+There will be three tools, `list_deck`, `get_card` and `check_deck`, with explicit input schemas ([ADR-0007](docs/adr/0007-mcp-three-tools.md)).
 
 </td>
 </tr>
 <tr>
 <td valign="top">
 
-### 🧱 Degrades gracefully
-npm 404, 429 or timeout responses become **degraded cards** with typed `errors`. They never crash the run ([ADR-0003](docs/adr/0003-degraded-cards-and-fetch.md)).
+### 🧱 Degrades gracefully · 🚧 planned
+npm 404, 429 or timeout responses will become **degraded cards** with typed `errors` instead of crashing the run ([ADR-0003](docs/adr/0003-degraded-cards-and-fetch.md)).
 
 </td>
 <td valign="top">
 
-### ⚡ Cached and bounded
-An on-disk HTTP cache plus 8 concurrent registry fetches ([ADR-0004](docs/adr/0004-on-disk-http-cache.md)). Tests never touch the live registry.
+### ⚡ Cached and bounded · 🚧 planned
+The on-disk HTTP cache (`pkg/cache`) is built; the 8 concurrent registry fetches are planned ([ADR-0004](docs/adr/0004-on-disk-http-cache.md)). Tests never touch the live registry.
 
 </td>
 </tr>
@@ -93,7 +92,7 @@ An on-disk HTTP cache plus 8 concurrent registry fetches ([ADR-0004](docs/adr/00
 
 ## 🏗️ Architecture
 
-One core pipeline serves both faces: the CLI and MCP ([ADR-0001](docs/adr/0001-two-faces-same-core.md)). `internal/pipeline` never writes to stdout, parses flags or exits.
+One core pipeline is planned to serve both faces: the CLI and MCP ([ADR-0001](docs/adr/0001-two-faces-same-core.md)). By design, the planned `internal/pipeline` will never write to stdout, parse flags or exit.
 
 <p align="center"><img src="docs/assets/architecture.png" alt="depdeck architecture: CLI and MCP entry points feeding the scanner, registry clients, scoring and deck renderer; built parts in cyan, planned parts dashed amber" width="100%"></p>
 
@@ -286,7 +285,7 @@ stateDiagram-v2
 - [x] `pkg/types`, `pkg/cache`, `pkg/parser`, `pkg/stats`, `pkg/flavor`, `pkg/render`
 - [ ] `pkg/registry`: npm fetch, cache-aware, 8 concurrent
 - [ ] `internal/pipeline`, `internal/cli`, `internal/mcp`
-- [ ] `cmd/depdeck` and fixture testdata
+- [ ] `cmd/depdeck` and fixture testdata (partly done: `testdata/verify` and `testdata/workspace` exist)
 
 **v1.0.0 release gate**
 - [ ] Module path renamed to `github.com/pragatikumari0927/depdeck`
