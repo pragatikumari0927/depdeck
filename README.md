@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/assets/banner.png" alt="depdeck banner" width="100%"></p>
+
 <a id="readme-top"></a>
 
 <div align="center">
@@ -93,6 +95,10 @@ An on-disk HTTP cache plus 8 concurrent registry fetches ([ADR-0004](docs/adr/00
 
 One core pipeline serves both faces: the CLI and MCP ([ADR-0001](docs/adr/0001-two-faces-same-core.md)). `internal/pipeline` never writes to stdout, parses flags or exits.
 
+<p align="center"><img src="docs/assets/architecture.png" alt="depdeck architecture: CLI and MCP entry points feeding the scanner, registry clients, scoring and deck renderer; built parts in cyan, planned parts dashed amber" width="100%"></p>
+
+<details><summary>Mermaid source</summary>
+
 ```mermaid
 flowchart LR
     PJ[package.json] --> P[pkg/parser<br/>roster]
@@ -114,9 +120,16 @@ flowchart LR
     class P,C,S,F,H done
     class R,CLI,MCP,J todo
 ```
+
+</details>
+
 <sub>🟩 implemented and tested · 🟧 planned (v1 tickets still open)</sub>
 
 ### How a deck gets dealt (`depdeck scan`, planned)
+
+<p align="center"><img src="docs/assets/scan-sequence.png" alt="Sequence diagram: how depdeck scan reads the manifest and lockfile, queries registries, scores packages, and renders the HTML deck" width="100%"></p>
+
+<details><summary>Mermaid source</summary>
 
 ```mermaid
 sequenceDiagram
@@ -148,6 +161,8 @@ sequenceDiagram
         Render-->>Dev: Wrote deck.html (N cards)
     end
 ```
+
+</details>
 
 ### `depdeck check` decision (planned)
 
