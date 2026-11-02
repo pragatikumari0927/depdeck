@@ -206,7 +206,7 @@ Values come straight from `pkg/stats` and `pkg/types`.
 
 ## 🚀 Getting started
 
-**Prerequisite:** Go 1.22 or later.
+**Prerequisite:** Go 1.26.9 or later.
 
 ```bash
 git clone https://github.com/pragatikumari0927/depdeck.git
