@@ -11,7 +11,7 @@
 depdeck turns each direct npm dependency into a card showing rarity, chaos, license and flavor text.<br/>
 It renders the deck as a single self-contained `deck.html`, gates CI with `depdeck check`, and serves the same data to AI agents over MCP.
 
-[![Go](https://img.shields.io/badge/Go-1.22+-00ADD8?logo=go&logoColor=white)](go.mod)
+[![Go](https://img.shields.io/badge/Go-1.26.9+-00ADD8?logo=go&logoColor=white)](go.mod)
 [![Status](https://img.shields.io/badge/status-WIP%20%C2%B7%20v1%207%2F13%20tickets-orange)](PHASES.md)
 [![Tests](https://github.com/pragatikumari0927/depdeck/actions/workflows/test.yml/badge.svg)](.github/workflows/test.yml)
 [![Ecosystem](https://img.shields.io/badge/ecosystem-npm-CB3837?logo=npm&logoColor=white)](SPEC.md)
