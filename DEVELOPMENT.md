@@ -1,4 +1,4 @@
-Go 1.22+ (see go.mod).
+Go 1.26.9+ (see go.mod).
 go install golang.org/x/tools/cmd/goimports@latest
 go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
 Post-edit hooks skip `goimports` and `golangci-lint` when missing,
