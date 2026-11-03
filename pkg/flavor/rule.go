@@ -11,7 +11,7 @@ import (
 func Apply(dep *types.Dependency) {
 	h := fnv.New64a()
 	_, _ = h.Write([]byte(dep.Name))
-	r := rand.New(rand.NewSource(int64(h.Sum64())))
+	r := rand.New(rand.NewSource(int64(h.Sum64()))) // #nosec G115 G404 -- deterministic flavor-text seed; wraparound is fine and nothing security-sensitive uses it
 
 	if len(dep.Errors) > 0 {
 		moves := []string{"Name Echo", "Fog Recall", "Bare Label"}

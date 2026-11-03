@@ -15,7 +15,7 @@ type manifest struct {
 }
 
 func ParseFile(path string) ([]types.Dependency, error) {
-	raw, err := os.ReadFile(path)
+	raw, err := os.ReadFile(path) // #nosec G304 -- reading the user-supplied manifest path is the CLI's purpose
 	if err != nil {
 		return nil, fmt.Errorf("parse %s: %w", path, err)
 	}

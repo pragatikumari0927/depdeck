@@ -63,7 +63,7 @@ func (s *Store) Get(source, name string, class Class, now time.Time) (Entry, boo
 		return zero, false, nil
 	}
 	p := s.path(source, name, class)
-	raw, err := os.ReadFile(p)
+	raw, err := os.ReadFile(p) // #nosec G304 -- filename is a SHA-256 hex key inside s.Root
 	if err != nil {
 		if os.IsNotExist(err) {
 			return zero, false, nil
@@ -91,7 +91,7 @@ func (s *Store) Put(source, name string, class Class, e Entry) error {
 	if s.Disabled || !cacheable(e.Status) {
 		return nil
 	}
-	if err := os.MkdirAll(s.Root, 0o755); err != nil {
+	if err := os.MkdirAll(s.Root, 0o700); err != nil {
 		return fmt.Errorf("mkdir %s: %w", s.Root, err)
 	}
 	dest := s.path(source, name, class)
@@ -105,16 +105,16 @@ func (s *Store) Put(source, name string, class Class, e Entry) error {
 	}
 	tmpName := tmp.Name()
 	if _, err := tmp.Write(raw); err != nil {
-		tmp.Close()
-		os.Remove(tmpName)
+		_ = tmp.Close()
+		_ = os.Remove(tmpName)
 		return fmt.Errorf("write %s: %w", tmpName, err)
 	}
 	if err := tmp.Close(); err != nil {
-		os.Remove(tmpName)
+		_ = os.Remove(tmpName)
 		return fmt.Errorf("write %s: %w", tmpName, err)
 	}
 	if err := os.Rename(tmpName, dest); err != nil {
-		os.Remove(tmpName) // best effort
+		_ = os.Remove(tmpName) // best effort
 		return fmt.Errorf("rename cache %s: %w", dest, err)
 	}
 	return nil
