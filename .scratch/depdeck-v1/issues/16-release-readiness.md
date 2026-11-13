@@ -51,4 +51,22 @@ c138cd5699219b83d59aa1619b86db166f3b3696b8fc2497a7799270491a0e36  depdeck_1.0.0-
 
 - On 2026-11-13, created the public [Homebrew tap](https://github.com/pragatikumari0927/homebrew-tap) with default branch `main`. GitHub reported `permissions.push: true` for the authenticated owner account, and a [README-only commit](https://github.com/pragatikumari0927/homebrew-tap/commit/b4fbfeed9ea03937fd74c3dd75973a44327ac236) verified an actual write.
 - Verified that the tap tree contained only `README.md` and had zero tags. Depdeck had no `v1.0.0` tag or GitHub release. The staged formula remains in the candidate workflow.
-- The release operator must use a separately scoped tap credential when publication is authorized. The public Homebrew and versioned Go installation checks follow publication. The candidate remains on its own branch.
+- At preflight, the candidate was on a separate branch and public installation checks were pending.
+
+## Publication and public install evidence
+
+- Published [Depdeck v1.0.0](https://github.com/pragatikumari0927/depdeck/releases/tag/v1.0.0) on 2026-11-13. [PR #22](https://github.com/pragatikumari0927/depdeck/pull/22) merged the packaging changes after [PR #21](https://github.com/pragatikumari0927/depdeck/pull/21) merged the product candidate. The remote annotated `v1.0.0` tag resolves to `07e909b3c939cc7b94cf44d5eeeba33a88f5d627` on `main`. The tagged tree matched the verified candidate. [Tagged-commit CI](https://github.com/pragatikumari0927/depdeck/actions/runs/43353581447) passed all seven jobs.
+- GoReleaser 2.19.0 and Go 1.27.4 built all six release archives from a clean tagged worktree. Verified the draft downloads before publication. Downloaded all six public archives and the [checksum manifest](https://github.com/pragatikumari0927/depdeck/releases/download/v1.0.0/checksums.txt) without authentication afterward. Each SHA-256 matched the local build and the expected archive contents. The extracted Windows amd64 binary passed CLI and MCP smoke tests. The manifest SHA-256 is `da6f325da4eb041edf54ed925466fb8575ca9a2d2b8abee6271afacde7e3716b`.
+- Published the [source-built Homebrew formula](https://github.com/pragatikumari0927/homebrew-tap/commit/6c63c9fb0fedefb8cccd81eeac89d64550e8912c) with tagged-source SHA-256 `975d5738f435c43dee6ec3e483b737ba3f0c20bce1a0ab422f0f0255cd87715a`. On a clean [hosted macOS runner](https://github.com/pragatikumari0927/depdeck/actions/runs/43390569678/job/131769192183), `brew install pragatikumari0927/tap/depdeck` and `brew test` passed, followed by CLI and MCP smoke tests at version `1.0.0`.
+- `go install github.com/pragatikumari0927/depdeck/cmd/depdeck@v1.0.0` passed on Windows and [hosted Linux](https://github.com/pragatikumari0927/depdeck/actions/runs/43390569678/job/131769192297) using a fresh module cache, the public Go proxy, and the checksum database. The installed command and stdio MCP server reported `v1.0.0` and passed the CLI and MCP smoke checks. The installed module sum was `h1:bWv6MeQA2/OIG5leSjz6Xj+f6z//RQVAC1e6lBTJX5Y=`.
+
+### Published archive SHA-256
+
+```text
+bcb7526f295565b0f1bc1923b515bfda6267ec2a6f0515428d03cb2be283fd41  depdeck_1.0.0_darwin_amd64.tar.gz
+11bb38449f09632a4b031aa2b3e8a081b12f54332f9f5bb274420552273984bd  depdeck_1.0.0_darwin_arm64.tar.gz
+9e2fdd04e0ba3361a4fcdb12af8d26b84985a2ec15579c3f076efa3eb95ab3d2  depdeck_1.0.0_linux_amd64.tar.gz
+468369ecc53a33b99686bbbb5ea7e6aacd407f661bc0d3789cfe940bc3b65a96  depdeck_1.0.0_linux_arm64.tar.gz
+541408c39505e271da42e0fa39209cb0627f67b41c0077ff809a444c7a5cb27b  depdeck_1.0.0_windows_amd64.zip
+a9f57fca486120e5b746385a502d451a01635ff9b2465e6b547d18d9ecf6ca56  depdeck_1.0.0_windows_arm64.zip
+```

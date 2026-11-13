@@ -20,7 +20,7 @@ go install ./cmd/depdeck
 depdeck --version
 ```
 
-Once v1.0.0 is published, download the archive for your OS and architecture from
+Download the archive for your OS and architecture from
 [GitHub Releases](https://github.com/pragatikumari0927/depdeck/releases), verify
 its SHA-256 against `checksums.txt`, and put the extracted executable on your
 `PATH`. Archives cover Windows, macOS, and Linux on amd64 and arm64.
@@ -29,7 +29,7 @@ its SHA-256 against `checksums.txt`, and put the extracted executable on your
 go install github.com/pragatikumari0927/depdeck/cmd/depdeck@v1.0.0
 ```
 
-Once the Homebrew tap is published, macOS users can build the tagged source with
+On macOS, build the tagged source from the Homebrew tap with
 `brew install pragatikumari0927/tap/depdeck`.
 
 ## Scan and check
