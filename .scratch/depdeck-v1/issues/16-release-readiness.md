@@ -1,4 +1,4 @@
-Status: ready-for-human
+Status: resolved
 
 # 16 — Release readiness
 
@@ -22,7 +22,7 @@ Prepare a release-ready v1. Publishing remains a separate final action.
 - [x] Homebrew builds from source and installs the CLI.
 - [x] License, third-party notices, changelog, release notes, and demo are ready.
 - [x] Ticket 15 security and acceptance evidence is complete.
-- [ ] Confirm access to the production Homebrew tap before authorizing release.
+- [x] Confirm access to the production Homebrew tap before authorizing release.
 - [x] This ticket does not publish artifacts. Publishing needs a separate final instruction.
 
 ## Preflight evidence
@@ -49,4 +49,6 @@ c138cd5699219b83d59aa1619b86db166f3b3696b8fc2497a7799270491a0e36  depdeck_1.0.0-
 
 ### Publication preflight
 
-GitHub returned HTTP 404 for `pragatikumari0927/homebrew-tap` with the current authenticated account. The release owner needs to provision the intended tap or confirm the correct repository and verify its separately scoped write credential before release. The `v1.0.0` tag did not exist during preflight. The public Homebrew and versioned Go install checks follow publication approval. The candidate is on its own branch and has not been merged, tagged, or published.
+- On 2026-11-13, created the public [Homebrew tap](https://github.com/pragatikumari0927/homebrew-tap) with default branch `main`. GitHub reported `permissions.push: true` for the authenticated owner account, and a [README-only commit](https://github.com/pragatikumari0927/homebrew-tap/commit/b4fbfeed9ea03937fd74c3dd75973a44327ac236) verified an actual write.
+- Verified that the tap tree contained only `README.md` and had zero tags. Depdeck had no `v1.0.0` tag or GitHub release. The staged formula remains in the candidate workflow.
+- The release operator must use a separately scoped tap credential when publication is authorized. The public Homebrew and versioned Go installation checks follow publication. The candidate remains on its own branch.
