@@ -63,6 +63,9 @@
       flex-direction: column;
       gap: 6px;
     }
+    .card[hidden] {
+      display: none;
+    }
     .card--no-data {
       border-color: var(--muted);
     }
@@ -138,7 +141,7 @@
       <p class="resolved">{{ .ResolvedVersion }}</p>
       {{ end }}
       <p class="stats">
-        <span>{{ .WeeklyDownloads }}</span>
+        {{ with .WeeklyDownloads }}<span>{{ . }}</span>{{ end }}
         <span>{{ .LastPublish }}</span>
         {{ with .Chaos }}<span>{{ . }}</span>{{ end }}
         <span>{{ .License }}</span>

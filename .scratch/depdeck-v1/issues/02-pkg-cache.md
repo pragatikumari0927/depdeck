@@ -53,3 +53,9 @@ Put is not called for 429, 5xx, or transport errors (callers must not Put those)
 ## ADRs
 
 0004, 0003 (cache hits do not take the fetch semaphore — enforced in registry ticket)
+
+## V1 contract amendment
+
+This amendment adds the v1 security bounds. It does not replace the cache behavior above.
+
+Follow [docs/SECURITY.md](../../../docs/SECURITY.md) and [docs/THREAT_MODEL.md](../../../docs/THREAT_MODEL.md). Bound cache reads before JSON or base64 decoding. Reject an encoded metadata entry over 48 MiB and an encoded downloads entry over 384 KiB. Do not treat malformed or oversized entries as valid cache hits. Add tests for both limits and corrupted entries. Preserve the rule that cache hits do not use the registry HTTP semaphore.

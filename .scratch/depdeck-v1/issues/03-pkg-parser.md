@@ -42,3 +42,9 @@ Tag precedence if the same name appears in more than one object: `dependencies`,
 ## ADRs
 
 0002, 0011
+
+## V1 contract amendment
+
+This amendment overrides the earlier directory-accepting `ParseFile` signature.
+
+`ParseFile` accepts a path to a `package.json` file only. The CLI and pipeline resolve a directory to its `package.json`. Add a file-size limit and tests for a missing file, invalid JSON, and oversized input. Follow [docs/SPEC.md](../../../docs/SPEC.md) and [docs/THREAT_MODEL.md](../../../docs/THREAT_MODEL.md).

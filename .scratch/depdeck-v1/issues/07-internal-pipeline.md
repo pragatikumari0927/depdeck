@@ -54,3 +54,9 @@ If the Face receives a directory, join `package.json` before `ParseFile`. `parse
 ## ADRs
 
 0001, 0002, 0003, 0005, 0011
+
+## V1 contract amendment
+
+This amendment overrides earlier conflicting pipeline signatures and behavior.
+
+Use a single shared pipeline for CLI and MCP. Resolve a directory to `package.json`; pass only a file path to `parser.ParseFile`. Inject time and registry dependencies for deterministic tests. Add `GetCard(ctx, name, flavor)` for standalone npm lookup. Preserve fetch errors in the result. Check JSON includes all assessed Dependencies, and an all-fetch-failed check remains a successful result with errors. Follow [ADR-0018](../../../docs/adr/0018-assessment-and-envelope-shapes.md) and [docs/SPEC.md](../../../docs/SPEC.md).

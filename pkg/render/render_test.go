@@ -2,10 +2,11 @@ package render
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"testing"
 
-	"depdeck/pkg/types"
+	"github.com/pragatikumari0927/depdeck/pkg/types"
 )
 
 func render(t *testing.T, deps []types.Dependency) []byte {
@@ -162,6 +163,21 @@ func TestDegraded(t *testing.T) {
 	}
 }
 
+func TestDownloadsShowsKnownZeroAndOmitsUnknown(t *testing.T) {
+	t.Parallel()
+	zero := 0
+	known := render(t, []types.Dependency{{
+		Name: "zero", Version: "1.0.0", Tag: types.TagDependencies, WeeklyDownloads: &zero,
+	}})
+	if !bytes.Contains(known, []byte("<span>0</span>")) {
+		t.Fatalf("known zero downloads are not shown: %s", known)
+	}
+	unknown := render(t, []types.Dependency{{Name: "unknown", Version: "1.0.0", Tag: types.TagDependencies}})
+	if bytes.Contains(unknown, []byte("&lt;nil&gt;")) {
+		t.Fatalf("unknown downloads must be omitted, got: %s", unknown)
+	}
+}
+
 func TestWriteError(t *testing.T) {
 	t.Parallel()
 	err := Render([]types.Dependency{{Name: "x", Version: "1", Tag: types.TagDependencies}}, errWriter{err: io.ErrClosedPipe})
@@ -184,4 +200,18 @@ type errWriter struct {
 
 func (w errWriter) Write([]byte) (int, error) {
 	return 0, w.err
+}
+
+func TestDeckSizeFor47Cards(t *testing.T) {
+	deps := make([]types.Dependency, 47)
+	for i := range deps {
+		deps[i] = types.Dependency{Name: fmt.Sprintf("package-%d", i), Version: "^1.0.0", Tag: types.TagDependencies}
+	}
+	var out bytes.Buffer
+	if err := Render(deps, &out); err != nil {
+		t.Fatal(err)
+	}
+	if out.Len() >= 150_000 {
+		t.Fatalf("47-card Deck is %d bytes", out.Len())
+	}
 }

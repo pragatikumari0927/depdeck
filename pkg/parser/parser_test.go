@@ -1,11 +1,13 @@
 package parser
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 
-	"depdeck/pkg/types"
+	"github.com/pragatikumari0927/depdeck/pkg/types"
 )
 
 func writePkg(t *testing.T, dir, body string) string {
@@ -158,9 +160,55 @@ func TestEmptyJSONObject(t *testing.T) {
 	}
 }
 
+func TestParseOrderStableByTagThenName(t *testing.T) {
+	t.Parallel()
+	p := writePkg(t, t.TempDir(), `{
+		"dependencies": {"zeta":"1", "alpha":"2"},
+		"devDependencies": {"test-z":"3", "test-a":"4"},
+		"optionalDependencies": {"opt-z":"5", "opt-a":"6"}
+	}`)
+	for i := 0; i < 20; i++ {
+		got, err := ParseFile(p)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var names []string
+		for _, dep := range got {
+			names = append(names, dep.Name)
+		}
+		want := []string{"alpha", "zeta", "test-a", "test-z", "opt-a", "opt-z"}
+		if !reflect.DeepEqual(names, want) {
+			t.Fatalf("ParseFile order = %v, want %v", names, want)
+		}
+	}
+}
+
 func TestDirectoryIsError(t *testing.T) {
 	t.Parallel()
 	if _, err := ParseFile(t.TempDir()); err == nil {
 		t.Fatal("directory path must error")
+	}
+}
+
+func TestOversizedManifestIsRejected(t *testing.T) {
+	t.Parallel()
+	p := filepath.Join(t.TempDir(), "package.json")
+	f, err := os.Create(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.Write([]byte(`{}`)); err != nil {
+		_ = f.Close()
+		t.Fatal(err)
+	}
+	if _, err := f.Write(bytes.Repeat([]byte(" "), 4<<20)); err != nil {
+		_ = f.Close()
+		t.Fatal(err)
+	}
+	if err := f.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := ParseFile(p); err == nil {
+		t.Fatal("oversized manifest must be rejected")
 	}
 }

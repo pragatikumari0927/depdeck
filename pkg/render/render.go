@@ -1,3 +1,4 @@
+// Package render builds the self-contained HTML dependency Deck.
 package render
 
 import (
@@ -6,7 +7,7 @@ import (
 	"io"
 	"sort"
 
-	"depdeck/pkg/types"
+	"github.com/pragatikumari0927/depdeck/pkg/types"
 )
 
 //go:embed templates/deck.html
@@ -14,6 +15,7 @@ var deckHTML string
 
 var deckTpl = template.Must(template.New("deck").Parse(deckHTML))
 
+// Render writes deterministic, escaped Deck HTML to w.
 func Render(deps []types.Dependency, w io.Writer) error {
 	ordered := make([]types.Dependency, len(deps))
 	copy(ordered, deps)

@@ -42,6 +42,32 @@ func TestFetchErrorRoundTrip(t *testing.T) {
 	}
 }
 
+func TestWeeklyDownloadsDistinguishesUnknownFromZero(t *testing.T) {
+	t.Parallel()
+	unknown, err := json.Marshal(Dependency{Name: "pkg"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(unknown), `"weekly_downloads"`) {
+		t.Fatalf("unknown downloads must be omitted: %s", unknown)
+	}
+	zero := 0
+	known, err := json.Marshal(Dependency{Name: "pkg", WeeklyDownloads: &zero})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(known), `"weekly_downloads":0`) {
+		t.Fatalf("known zero downloads must be present: %s", known)
+	}
+}
+
+func TestSchemaVersionUsesFirstSupportedBaseline(t *testing.T) {
+	t.Parallel()
+	if SchemaVersion != "1.1" {
+		t.Fatalf("SchemaVersion = %q, want %q", SchemaVersion, "1.1")
+	}
+}
+
 func TestEnvelopeMarshal(t *testing.T) {
 	t.Parallel()
 	b, err := json.Marshal(Envelope{

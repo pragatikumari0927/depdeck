@@ -90,3 +90,9 @@ None - can start immediately
 ## ADRs
 
 0001, 0002, 0003, 0005, 0007, 0008, 0009, 0010, 0011
+
+## V1 contract amendment
+
+This amendment overrides earlier conflicting interface and acceptance text in this ticket.
+
+Follow [ADR-0018](../../../docs/adr/0018-assessment-and-envelope-shapes.md) and [docs/SPEC.md](../../../docs/SPEC.md). Set `SchemaVersion` to `1.1`. Add `Dependencies []Dependency` with `json:"dependencies"` to `CheckData`; preserve `pass`, `flagged`, `reason`, and `policy`. Add a standalone Card projection for MCP. It contains npm facts and errors. It omits project-only `version`, `tag`, and `resolved_version`. Keep every existing `Dependency` field and JSON tag. Test projection fact parity and the new Check JSON shape.
