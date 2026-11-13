@@ -53,3 +53,6 @@ desktop.ini
 # Local AI agent config (not project code)
 .cursor/
 .agents/
+
+# Release snapshots
+/dist/
