@@ -1,4 +1,4 @@
-Status: ready-for-human
+Status: resolved
 
 # 15 — Security and acceptance
 
@@ -16,7 +16,7 @@ Complete v1 security controls and acceptance evidence after the product interfac
 
 ## Acceptance criteria
 
-- [ ] Required checks pass, or a platform limitation explains each unavailable check.
+- [x] Required checks pass, or a platform limitation explains each unavailable check.
 - [x] No unresolved critical or high security findings remain.
 - [x] Review evidence names tools, versions, and date. It does not claim a scan that did not run.
 - [x] Threat-model mitigations link to tests or controls.
@@ -34,10 +34,20 @@ Reviewed 2026-11-13 on local base `64eaac5bf5e4ccb3ac2696145460a71eec98e688` plu
 - govulncheck 1.7.0 initially reported standard-library findings with Go 1.27.0, plus Windows advisory GO-2026-5024 in the indirect `golang.org/x/sys` module. Updated the module to 0.44.0 without raising the earlier Go 1.25.0 test baseline. The normal gating scan with Go 1.27.4 exited 0 with no vulnerabilities found. Database `https://vuln.go.dev`, last updated 2026-11-11 02:51:11 UTC. Release builds must use a patched Go toolchain.
 - Gitleaks 8.30.1, built from the checksum-verified Go module, initially flagged the same synthetic API-key example in two skill files. The local checkout replaced the current copies with a placeholder. The candidate preserves the removal of those tracked agent skills from upstream. The [history exceptions](../../../.gitleaksignore) name only the two exact historical fingerprints. Redacted history (44 commits from HEAD) and working-tree source reruns exited 0 with no leaks found.
 - Independent reviewers separate from the implementation agent covered filesystem authority and input handling, npm/cache/HTML/MCP boundaries, dependency manifests, hooks, CI permissions, and MCP configuration. No confirmed High or Critical finding remained in that review. Official Codex Security local and Cloud scans were unavailable in this session. The independent source review, regression suite, and scanner evidence are the documented fallback.
-- [CI](../../../.github/workflows/test.yml) now has Windows, Linux, and macOS jobs on the minimum and stable Go toolchains, Linux race tests, lint, and scanner gates. The action SHAs were checked against GitHub, permissions are read-only, and checkout credentials are not persisted. Actionlint 1.7.12 passed locally. The hosted runs visible during review cover an earlier commit and do not establish a pass for these working-tree changes.
+- [CI](../../../.github/workflows/test.yml) now has Windows, Linux, and macOS jobs on the minimum and stable Go toolchains, Linux race tests, lint, and scanner gates. The action SHAs were checked against GitHub, permissions are read-only, and checkout credentials are not persisted. Actionlint 1.7.12 passed locally.
 
-### Remaining evidence and residual risks
+### Hosted acceptance
 
-- Maintainer/release owner: run the updated hosted CI on the committed candidate and attach the run links before resolving this ticket. The macOS job and hosted scanner gates remain unverified here.
+GitHub Actions passed all seven jobs on 2026-11-13 for candidate commit `f8b485e4f6cece17b29c680f636ebfe97f805d2f` on `codex/depdeck-v1-rc`. The branch uses the upstream Go 1.26.9 security minimum and tests it alongside stable. [Workflow run](https://github.com/pragatikumari0927/depdeck/actions/runs/43349998881)
+
+| Gate | Successful jobs |
+|---|---|
+| Linux race suite | [Go 1.26.9](https://github.com/pragatikumari0927/depdeck/actions/runs/43349998881/job/131638470762), [stable](https://github.com/pragatikumari0927/depdeck/actions/runs/43349998881/job/131638470864) |
+| Windows offline suite | [Go 1.26.9](https://github.com/pragatikumari0927/depdeck/actions/runs/43349998881/job/131638471144), [stable](https://github.com/pragatikumari0927/depdeck/actions/runs/43349998881/job/131638470884) |
+| macOS offline suite | [Go 1.26.9](https://github.com/pragatikumari0927/depdeck/actions/runs/43349998881/job/131638471095), [stable](https://github.com/pragatikumari0927/depdeck/actions/runs/43349998881/job/131638471078) |
+| Security | [Lint, Node checks, govulncheck, and redacted Gitleaks](https://github.com/pragatikumari0927/depdeck/actions/runs/43349998881/job/131638470859) |
+
+### Residual risks
+
 - Project/MCP host operator: OS permissions and mounts govern access to paths, including remote mounts. The static alias guard does not protect against an actor who can rename paths concurrently. Manifest declarations are preserved in output and must not contain credentials.
 - Agent configuration owner: optional Cursor and Grok MCP configurations contain floating package versions. The shipped Go CLI and MCP server do not use them. Review the agent-side pins separately before relying on those configurations in a shared environment.
