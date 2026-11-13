@@ -45,3 +45,9 @@ Exit: 0 ok; 1 check failed (flagged); 2 usage / `--flavor=ai`; 3 every fetch fai
 ## ADRs
 
 0001, 0005, 0006, 0008, 0010
+
+## V1 contract amendment
+
+This amendment overrides earlier conflicting path defaults and acceptance criteria.
+
+Follow [ADR-0019](../../../docs/adr/0019-cli-path-and-output-contract.md) and [docs/SPEC.md](../../../docs/SPEC.md). With no path, use the current directory. Read its `package.json`; return exit 2 if it is missing or invalid. Accept a manifest path or a directory. Keep errors on stderr and JSON or HTML on stdout or the selected file. Preserve the agreed exit codes, including exit 3 when every fetch fails during `check`. Add process tests for cwd defaults, streams, output failures, and exit codes.

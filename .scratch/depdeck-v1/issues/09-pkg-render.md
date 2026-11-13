@@ -38,3 +38,9 @@ func Deck(deps []types.Dependency) ([]byte, error)
 ## ADRs
 
 0006, 0003
+
+## V1 contract amendment
+
+This amendment confirms the existing writer-based renderer as the v1 interface.
+
+The existing public shape is `Render(deps, io.Writer) error`; keep it unless implementation review finds a concrete issue. Embed the canonical template at `pkg/render/templates/deck.html`, as owned by ticket 10. Use `html/template` and never mark package data as trusted HTML or JavaScript. Follow [docs/SECURITY.md](../../../docs/SECURITY.md).

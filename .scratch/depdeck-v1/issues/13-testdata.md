@@ -33,8 +33,14 @@ Registry tests load these files. Do not invent a second fixture layout in pkg/re
 
 ## Blocked by
 
-- `.scratch/depdeck-v1/issues/04-pkg-registry.md`
+- `.scratch/depdeck-v1/issues/01-pkg-types.md`
 
 ## ADRs
 
 0003, 0004, 0009, 0010
+
+## V1 contract amendment
+
+This amendment replaces the earlier blocker and fixture sequencing.
+
+Remove the dependency on ticket 04. Complete and review these fixture contracts before implementation of ticket 04. Include representative npm ranges and registry cases for successful metadata, no matching version, malformed JSON, 404, 429, 500, timeout, redirect, oversized body, missing license, old publish date, and high download count. Tests must use local files or an HTTP test server. Never call the live registry.

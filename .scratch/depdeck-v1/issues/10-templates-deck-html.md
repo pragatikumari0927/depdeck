@@ -32,3 +32,9 @@ None - can start immediately (keep field names aligned with 01-pkg-types)
 ## ADRs
 
 0006
+
+## V1 contract amendment
+
+This amendment corrects the template location used by the renderer.
+
+The template path is `pkg/render/templates/deck.html`. The renderer embeds it. Preserve the existing self-contained output contract and add hostile-value rendering checks. Follow [docs/THREAT_MODEL.md](../../../docs/THREAT_MODEL.md).
