@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="248" viewBox="0 0 1120 248" role="img" aria-labelledby="title">
+  <title id="title">depdeck — Pixel Archive</title>
+  <defs>
+    <pattern id="grid" width="16" height="16" patternUnits="userSpaceOnUse">
+      <path d="M16 0H0v16" fill="none" stroke="#9BB3D5" stroke-opacity=".15"/>
+    </pattern>
+    <symbol id="card" viewBox="0 0 100 132">
+      <rect x="2" y="2" width="96" height="128" fill="#16263B" stroke="currentColor" stroke-width="4"/>
+      <path d="M4 4h92v15H4z" fill="currentColor"/>
+      <path d="M4 19h92v77H4z" fill="#101D31"/>
+      <path d="M4 19h92v77H4z" fill="url(#grid)"/>
+      <path d="m50 28 27 29-27 29-27-29z" fill="none" stroke="currentColor" stroke-width="3" opacity=".5"/>
+      <path d="M12 105h50v5H12zM12 116h31v4H12z" fill="currentColor" opacity=".72"/>
+    </symbol>
+  </defs>
+  <rect width="1120" height="248" fill="#0B1423"/>
+  <rect x="16" y="16" width="1088" height="216" fill="#16263B" stroke="#6A83A4" stroke-width="3"/>
+  <path d="M18 18h1084v30H18z" fill="#273F73"/>
+  <path d="M34 24h12v4h4v12h-4v4H34v-4h-4V28h4z" fill="#FFDF79"/>
+  <g fill="#D9E5F2" stroke="#6A83A4">
+    <path d="M1028 25h18v16h-18zM1050 25h18v16h-18zM1072 25h18v16h-18z"/>
+  </g>
+  <path d="M1032 36h10m12-7h10v8h-10zm22 0 10 8m0-8-10 8" fill="none" stroke="#16263B" stroke-width="2"/>
+  <path d="M18 48h1084v182H18z" fill="url(#grid)"/>
+  <rect x="59" y="85" width="96" height="96" fill="#0B1423"/>
+  <rect x="54" y="80" width="96" height="96" fill="#FFDF79" stroke="#FFF1BC" stroke-width="4"/>
+  <rect x="62" y="88" width="80" height="80" fill="none" stroke="#926021" stroke-width="3"/>
+  <path d="M79 104h33v8h9v32h-9v8H79zm12 12v24h16v-24z" fill="#16263B" fill-rule="evenodd"/>
+  <g font-family="monospace" font-weight="bold">
+    <text x="180" y="136" fill="#F1F5FB" font-size="72" letter-spacing="-4">depdeck<tspan fill="#FFDF79">_</tspan></text>
+    <text x="185" y="174" fill="#B9CADF" font-size="19" letter-spacing="5">PIXEL ARCHIVE</text>
+  </g>
+  <g transform="translate(739 91) rotate(-13 50 66)" color="#87F2FF">
+    <use href="#card" width="100" height="132"/>
+    <path d="m50 37 19 20-19 20-19-20z" fill="currentColor"/>
+    <path d="m50 43 7 14-7 13-7-13z" fill="#F1F5FB"/>
+  </g>
+  <g transform="translate(938 91) rotate(13 50 66)" color="#E0A6FF">
+    <use href="#card" width="100" height="132"/>
+    <path d="M47 37h6v14l12-9 4 5-13 10 13 10-4 5-12-9v14h-6V63l-12 9-4-5 13-10-13-10 4-5 12 9z" fill="currentColor"/>
+  </g>
+  <g transform="translate(838 66)" color="#FFDF79">
+    <use href="#card" width="100" height="132"/>
+    <path d="M28 50h8l7 10 7-9 7 9 7-10h8l-6 22H34zm7 25h30v4H35z" fill="currentColor"/>
+    <path d="M48 35h4v5h5v4h-5v5h-4v-5h-5v-4h5z" fill="#FFF1BC"/>
+  </g>
+</svg>
