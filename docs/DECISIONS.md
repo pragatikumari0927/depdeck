@@ -26,6 +26,7 @@ Index only. Reasoning lives in `docs/adr/`.
 | D-018 | Assessment, standalone Card, and schema 1.1 | [0018](adr/0018-assessment-and-envelope-shapes.md) |
 | D-019 | CLI current-directory defaults and output contract | [0019](adr/0019-cli-path-and-output-contract.md) |
 | D-020 | Keep the upstream Go security minimum | [0020](adr/0020-go-security-minimum.md) |
+| D-021 | Explain CLI Check results and MCP tool purpose | [0021](adr/0021-cli-and-mcp-wording.md) |
 
 ## Standing conventions
 

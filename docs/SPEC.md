@@ -1,6 +1,6 @@
 # SPEC — depdeck v1
 
-Frozen v1 technical contract. Claims are checkable against code. Index of why: [DECISIONS.md](DECISIONS.md). Successor ADRs 0016–0019 update the original decisions for v1. Changing a marked claim requires changing the cited ADR first.
+Frozen v1 technical contract. Claims are checkable against code. Index of why: [DECISIONS.md](DECISIONS.md). Successor ADRs 0016–0021 update the original decisions for v1. Changing a marked claim requires changing the cited ADR first.
 
 ## Non-goals
 
@@ -93,12 +93,13 @@ Flags: `--json`, `--flavor` (default `rule`), `--no-cache`, `--out` (default `de
 
 - `--json`: envelope on stdout; no HTML file.
 - Default `scan`: write HTML; one line on stderr `Wrote deck.html (N cards)`.
+- Plain `check` writes one human-readable verdict line to stdout. `--json` carries the stable reason codes. Fetch warnings go to stderr.
 - No `--both`.
 - `--flavor=ai`: exit `2`; stderr contains `ai` and `v1.1`; no rule Flavor; no HTML.
 
 Exit codes: `0` success / check pass; `1` check flagged; `2` usage or `--flavor=ai`; `3` check when every Dependency has fetch Errors.
 
-Requires ADR-0001, ADR-0005, ADR-0006, ADR-0010.
+Requires ADR-0001, ADR-0005, ADR-0006, ADR-0010, ADR-0019, ADR-0021.
 
 ## MCP surface
 
@@ -114,11 +115,11 @@ The CLI and MCP use the same pipeline. MCP project paths follow the caller's wor
 
 Descriptions:
 
-- `list_deck`: List every direct dependency of a project as Cards. Use for project-wide questions.
-- `get_card`: Fetch a single package's Card from npm. Use for package-specific questions.
-- `check_deck`: Return which dependencies are flagged as risky, and an overall pass/fail. Use before shipping or for CI gating.
+- `list_deck`: List assessment data for direct dependencies in a project's root package.json. Use path for the project directory or manifest, tag to select one dependency group, and flavor to choose rule or none. Results include Fetch errors when npm data is unavailable.
+- `get_card`: Look up facts for one public npm package by name, such as react or @scope/package. Use flavor to choose rule or none. Call list_deck to check project membership. If npm data is unavailable, the Card includes a Fetch error.
+- `check_deck`: Evaluate direct dependencies against the default publish-age and license-declaration policy. Returns the verdict, policy, flagged dependencies, and assessed dependencies with any Fetch errors. Chaos reflects publish age, and Rarity reflects weekly downloads. Use a vulnerability scanner for security findings.
 
-Requires ADR-0007, ADR-0003, ADR-0005.
+Requires ADR-0007, ADR-0003, ADR-0005, ADR-0021.
 
 ## Check policy
 

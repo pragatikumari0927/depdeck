@@ -19,6 +19,15 @@ import (
 	"github.com/pragatikumari0927/depdeck/pkg/types"
 )
 
+const usage = `Usage:
+  depdeck scan [flags] [path]   Build an HTML Deck or write JSON.
+  depdeck check [flags] [path]  Check direct dependencies against the default policy.
+  depdeck mcp                   Start the MCP server over standard input and output.
+
+If you omit path, depdeck reads package.json in the current directory.
+Run depdeck scan --help or depdeck check --help for flags.
+`
+
 // Main runs a human-facing command and returns its process exit code.
 func Main(args []string, _ io.Reader, stdout, stderr io.Writer) int {
 	return Run(context.Background(), args, pipeline.Options{}, stdout, stderr)
@@ -27,11 +36,11 @@ func Main(args []string, _ io.Reader, stdout, stderr io.Writer) int {
 // Run executes scan or check with the caller's context and assessment options.
 func Run(ctx context.Context, args []string, opt pipeline.Options, stdout, stderr io.Writer) int {
 	if len(args) == 0 {
-		_, _ = fmt.Fprintln(stderr, "usage: depdeck scan|check [flags] [path] or depdeck mcp")
+		_, _ = fmt.Fprint(stderr, usage)
 		return 2
 	}
 	if args[0] == "--help" || args[0] == "-h" || args[0] == "help" {
-		_, _ = fmt.Fprintln(stdout, "usage: depdeck scan|check [flags] [path] or depdeck mcp")
+		_, _ = fmt.Fprint(stdout, usage)
 		return 0
 	}
 	if args[0] == "--version" || args[0] == "version" {
@@ -40,18 +49,25 @@ func Run(ctx context.Context, args []string, opt pipeline.Options, stdout, stder
 	}
 	command := args[0]
 	if command != "scan" && command != "check" {
-		_, _ = fmt.Fprintf(stderr, "unknown command %q\n", command)
+		_, _ = fmt.Fprintf(stderr, "Unknown command %q. Run depdeck --help for available commands.\n", command)
 		return 2
 	}
 	fs := flag.NewFlagSet(command, flag.ContinueOnError)
 	fs.SetOutput(stderr)
-	jsonMode := fs.Bool("json", false, "write JSON envelope")
-	mode := fs.String("flavor", "rule", "rule or none")
-	noCache := fs.Bool("no-cache", false, "bypass response cache")
+	fs.Usage = func() {
+		_, _ = fmt.Fprintf(fs.Output(), "Usage: depdeck %s [flags] [path]\n", command)
+		_, _ = fmt.Fprintln(fs.Output(), "Use a project directory or the path to package.json. Put flags before the path.")
+		fs.PrintDefaults()
+	}
+	jsonHelp := "Write assessment JSON to standard output."
 	var output *string
 	if command == "scan" {
-		output = fs.String("out", "", "HTML output path, or - for stdout")
+		jsonHelp += " This mode skips the HTML Deck."
+		output = fs.String("out", "", "Write the Deck to this file. The default is deck.html beside package.json. Use - for standard output.")
 	}
+	jsonMode := fs.Bool("json", false, jsonHelp)
+	mode := fs.String("flavor", "rule", "Use rule for fixed Card text and Special Moves, or none to omit both.")
+	noCache := fs.Bool("no-cache", false, "Skip reading and writing the local npm cache.")
 	if err := fs.Parse(args[1:]); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
 			return 0
@@ -59,7 +75,7 @@ func Run(ctx context.Context, args []string, opt pipeline.Options, stdout, stder
 		return 2
 	}
 	if fs.NArg() > 1 {
-		_, _ = fmt.Fprintln(stderr, "expected at most one path")
+		_, _ = fmt.Fprintln(stderr, "Use one project directory or package.json path. Put flags before the path.")
 		return 2
 	}
 	if command == "scan" && *jsonMode {
@@ -109,7 +125,7 @@ func Run(ctx context.Context, args []string, opt pipeline.Options, stdout, stder
 				return 2
 			}
 		} else {
-			_, _ = fmt.Fprintf(stdout, "%s: %s (%d flagged)\n", verdict(result.Pass), result.Reason, len(result.Flagged))
+			_, _ = fmt.Fprintln(stdout, checkSummary(result))
 		}
 		if result.Reason == "all_fetches_failed" {
 			return 3
@@ -169,17 +185,33 @@ func Run(ctx context.Context, args []string, opt pipeline.Options, stdout, stder
 	return 0
 }
 
-func verdict(pass bool) string {
-	if pass {
-		return "pass"
+func checkSummary(result types.CheckData) string {
+	switch result.Reason {
+	case "pass":
+		return "Check passed. No dependencies met the policy's flagging criteria."
+	case "empty_roster":
+		return "Check passed. No direct dependencies to assess."
+	case "partial_fetch_errors":
+		return "Check passed for assessed dependencies. npm data was unavailable for some dependencies."
+	case "policy_failed":
+		if len(result.Flagged) == 1 {
+			return "Check failed. The policy flagged 1 dependency."
+		}
+		return fmt.Sprintf("Check failed. The policy flagged %d dependencies.", len(result.Flagged))
+	case "all_fetches_failed":
+		return "Check failed. npm data was unavailable for every dependency."
 	}
-	return "fail"
+	verdict := "failed"
+	if result.Pass {
+		verdict = "passed"
+	}
+	return fmt.Sprintf("Check %s. Flagged dependencies: %d.", verdict, len(result.Flagged))
 }
 
 func warnings(deps []types.Dependency, stderr io.Writer) {
 	for _, d := range deps {
 		if len(d.Errors) > 0 {
-			_, _ = fmt.Fprintf(stderr, "Warning: npm facts unavailable for %q\n", d.Name)
+			_, _ = fmt.Fprintf(stderr, "Warning: Could not assess %q using npm data. Its Card has a Fetch error.\n", d.Name)
 		}
 	}
 }

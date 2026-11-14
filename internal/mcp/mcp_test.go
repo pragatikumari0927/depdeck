@@ -39,8 +39,39 @@ func TestSDKToolsAndStandaloneCard(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(listed.Tools) != 3 {
+	wantDescriptions := map[string]string{
+		"list_deck":  "List assessment data for direct dependencies in a project's root package.json. Use path for the project directory or manifest, tag to select one dependency group, and flavor to choose rule or none. Results include Fetch errors when npm data is unavailable.",
+		"get_card":   "Look up facts for one public npm package by name, such as react or @scope/package. Use flavor to choose rule or none. Call list_deck to check project membership. If npm data is unavailable, the Card includes a Fetch error.",
+		"check_deck": "Evaluate direct dependencies against the default publish-age and license-declaration policy. Returns the verdict, policy, flagged dependencies, and assessed dependencies with any Fetch errors. Chaos reflects publish age, and Rarity reflects weekly downloads. Use a vulnerability scanner for security findings.",
+	}
+	if len(listed.Tools) != len(wantDescriptions) {
 		t.Fatalf("tools = %+v", listed.Tools)
+	}
+	for _, tool := range listed.Tools {
+		if want := wantDescriptions[tool.Name]; want == "" || tool.Description != want {
+			t.Errorf("%s description = %q, want %q", tool.Name, tool.Description, want)
+		}
+	}
+	for _, tc := range []struct {
+		tool string
+		args map[string]any
+		want string
+	}{
+		{"list_deck", map[string]any{"path": " "}, "set path to a project directory or a package.json file"},
+		{"check_deck", map[string]any{"path": " "}, "set path to a project directory or a package.json file"},
+		{"get_card", map[string]any{"name": "../private"}, "use an npm package name such as react or @scope/package"},
+		{"list_deck", map[string]any{"path": t.TempDir()}, "could not assess the project, check that path points to a readable package.json"},
+		{"check_deck", map[string]any{"path": t.TempDir()}, "could not assess the project, check that path points to a readable package.json"},
+	} {
+		t.Run(tc.tool, func(t *testing.T) {
+			result, err := clientSession.CallTool(ctx, &mcp.CallToolParams{Name: tc.tool, Arguments: tc.args})
+			if err != nil || !result.IsError || len(result.Content) != 1 {
+				t.Fatalf("%s = %+v, error = %v", tc.tool, result, err)
+			}
+			if text, ok := result.Content[0].(*mcp.TextContent); !ok || text.Text != tc.want {
+				t.Errorf("%s returned %+v, want %q", tc.tool, result.Content, tc.want)
+			}
+		})
 	}
 	result, err := clientSession.CallTool(ctx, &mcp.CallToolParams{Name: "get_card", Arguments: map[string]any{"name": "missing"}})
 	if err != nil {

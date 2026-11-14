@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/pragatikumari0927/depdeck/internal/pipeline"
@@ -66,13 +67,53 @@ func TestCLIRejectsAIAndConflictingOutputs(t *testing.T) {
 	}
 }
 
+func TestHelpAndUsageStreams(t *testing.T) {
+	for _, tc := range []struct {
+		name   string
+		args   []string
+		code   int
+		useErr bool
+		want   []string
+		omit   string
+	}{
+		{"help", []string{"--help"}, 0, false, []string{"depdeck scan [flags] [path]", "package.json in the current directory"}, ""},
+		{"no_args", nil, 2, true, []string{"depdeck scan [flags] [path]", "depdeck mcp"}, ""},
+		{"scan_help", []string{"scan", "--help"}, 0, true, []string{"Usage: depdeck scan [flags] [path]", "Put flags before the path.", "This mode skips the HTML Deck.", "deck.html beside package.json", "Special Moves", "Skip reading and writing the local npm cache."}, ""},
+		{"check_help", []string{"check", "-h"}, 0, true, []string{"Usage: depdeck check [flags] [path]", "Write assessment JSON to standard output."}, "-out"},
+		{"bad_flag", []string{"scan", "--unknown"}, 2, true, []string{"flag provided but not defined", "Usage: depdeck scan [flags] [path]"}, ""},
+		{"flag_after_path", []string{"scan", ".", "--json"}, 2, true, []string{"Put flags before the path."}, ""},
+		{"bad_command", []string{"scan\nother"}, 2, true, []string{`Unknown command "scan\nother". Run depdeck --help`}, ""},
+		{"bad_flavor", []string{"scan", "--flavor=other"}, 2, true, []string{`invalid Flavor mode "other", use rule or none`}, ""},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var stdout, stderr bytes.Buffer
+			code := Run(t.Context(), tc.args, pipeline.Options{Registry: missingRegistry{}}, &stdout, &stderr)
+			output, other := stdout.String(), stderr.String()
+			if tc.useErr {
+				output, other = other, output
+			}
+			if code != tc.code || other != "" {
+				t.Fatalf("exit = %d, stdout = %q, stderr = %q", code, &stdout, &stderr)
+			}
+			for _, snippet := range tc.want {
+				if !strings.Contains(output, snippet) {
+					t.Errorf("output missing %q: %q", snippet, output)
+				}
+			}
+			if tc.omit != "" && strings.Contains(output, tc.omit) {
+				t.Errorf("output contains %q: %q", tc.omit, output)
+			}
+		})
+	}
+}
+
 func TestWarningsQuoteControlCharacters(t *testing.T) {
 	var stderr bytes.Buffer
 	warnings([]types.Dependency{{
 		Name:   "pkg\x1b[2J\nforged",
 		Errors: []types.FetchError{{Source: "npm", Kind: "parse"}},
 	}}, &stderr)
-	if got := stderr.String(); got != "Warning: npm facts unavailable for \"pkg\\x1b[2J\\nforged\"\n" {
+	if got := stderr.String(); got != "Warning: Could not assess \"pkg\\x1b[2J\\nforged\" using npm data. Its Card has a Fetch error.\n" {
 		t.Fatalf("warning = %q", got)
 	}
 }
