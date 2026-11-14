@@ -53,7 +53,14 @@ v1 dist-tags.latest vs range matching can live here or in stats; keep Fetch retu
 
 - `.scratch/depdeck-v1/issues/01-pkg-types.md`
 - `.scratch/depdeck-v1/issues/02-pkg-cache.md`
+- `.scratch/depdeck-v1/issues/13-testdata.md` (fixture contract must be ready first)
 
 ## ADRs
 
 0003, 0004
+
+## V1 contract amendment
+
+This amendment overrides the earlier `Fetch` signature and version-selection text.
+
+Follow [ADR-0017](../../../docs/adr/0017-go-runtime-and-npm-version-ranges.md) and [docs/THREAT_MODEL.md](../../../docs/THREAT_MODEL.md). `Fetch` accepts the declared dependency version range and returns the enriched dependency facts plus typed fetch errors. Select the best npm version that satisfies the declaration, using the pinned semver library. Add compatibility tests for common npm range forms. Keep package fetch failures as dependency data; do not fail the whole scan. Bound response bodies, use timeouts, cap HTTP concurrency at eight, and reject unsafe redirects. Cache reads happen before taking an HTTP slot. Ticket 13 fixtures must be ready before this ticket is implemented.

@@ -52,3 +52,9 @@ Flag when Chaos > max (if Chaos non-nil), or require_license and License empty o
 ## ADRs
 
 0003, 0009, 0010
+
+## V1 contract amendment
+
+This amendment adds to the existing stats contract.
+
+Keep this package pure. Use an injected clock in the pipeline for time-based checks. Check results must include the full assessed `Dependencies` list, including fetch errors. Follow [ADR-0018](../../../docs/adr/0018-assessment-and-envelope-shapes.md).

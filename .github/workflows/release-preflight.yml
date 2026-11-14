@@ -1,0 +1,77 @@
+name: release preflight
+
+on:
+  push:
+    branches: ['codex/depdeck-v1-rc']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  archives:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version: '1.27.4'
+      - name: Verify offline snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/goreleaser.tar.gz"
+          curl -fsSL https://github.com/goreleaser/goreleaser/releases/download/v2.19.0/goreleaser_Linux_x86_64.tar.gz -o "$archive"
+          echo "ebc3194ad1d1b1787614405285a0039665cd4c5bd3305215a1b201600f90630b  $archive" | sha256sum -c
+          tar -xzf "$archive" -C "$RUNNER_TEMP" goreleaser
+          go mod download
+          "$RUNNER_TEMP/goreleaser" check
+          GOPROXY=off "$RUNNER_TEMP/goreleaser" release --snapshot --skip=publish
+          python3 scripts/verify-release.py dist
+      - name: Verify isolated Go install
+        shell: bash
+        run: |
+          set -euo pipefail
+          install_dir="$(mktemp -d "$RUNNER_TEMP/go-install.XXXXXX")"
+          GOBIN="$install_dir" GOPROXY=off go install ./cmd/depdeck
+          python3 scripts/verify-release.py --binary "$install_dir/depdeck" --version dev
+
+  homebrew:
+    runs-on: macos-latest
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: '1'
+      HOMEBREW_NO_ANALYTICS: '1'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+      - name: Install and test the staged source formula
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_dir="$(mktemp -d "$RUNNER_TEMP/depdeck-source.XXXXXX")"
+          git archive --format=tar.gz --prefix=depdeck-1.0.0/ HEAD > "$source_dir/depdeck-1.0.0.tar.gz"
+          cd "$source_dir"
+          python3 -u -m http.server 0 --bind 127.0.0.1 > server.log 2>&1 &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          port=""
+          for _ in {1..50}; do
+            port="$(sed -nE 's/.*port ([0-9]+).*/\1/p' server.log)"
+            if [[ -n "$port" ]]; then break; fi
+            sleep 0.2
+          done
+          test -n "$port"
+          tap="$(brew --repository)/Library/Taps/depdeck/homebrew-preflight"
+          git init "$tap"
+          cd "$GITHUB_WORKSPACE"
+          node scripts/release-formula.mjs v1.0.0 "$source_dir/depdeck-1.0.0.tar.gz" "$tap/Formula/depdeck.rb" "http://127.0.0.1:$port/depdeck-1.0.0.tar.gz"
+          brew install --build-from-source depdeck/preflight/depdeck
+          brew test depdeck/preflight/depdeck
+          python3 scripts/verify-release.py --binary "$(brew --prefix depdeck/preflight/depdeck)/bin/depdeck" --version 1.0.0

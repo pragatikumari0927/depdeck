@@ -51,6 +51,34 @@ func TestPutThenGetHit(t *testing.T) {
 	}
 }
 
+func TestLoadStaleReturnsETag(t *testing.T) {
+	t.Parallel()
+	s := testStore(t)
+	fetched := time.Date(2026, 9, 11, 0, 0, 0, 0, time.UTC)
+	want := Entry{ETag: `"abc"`, Status: 200, FetchedAt: fetched, Body: []byte(`{"name":"react"}`)}
+	if err := s.Put("npm", "react", ClassOK, want); err != nil {
+		t.Fatal(err)
+	}
+	staleAt := fetched.Add(24*time.Hour + time.Second)
+	_, hit, err := s.Get("npm", "react", ClassOK, staleAt)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if hit {
+		t.Fatal("Get must miss after 24h")
+	}
+	got, ok, err := s.Load("npm", "react", ClassOK)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !ok {
+		t.Fatal("Load must return stale entry")
+	}
+	if got.ETag != want.ETag || string(got.Body) != string(want.Body) {
+		t.Fatalf("Load = %+v want %+v", got, want)
+	}
+}
+
 func TestGetOKAfter24hMiss(t *testing.T) {
 	t.Parallel()
 	s := testStore(t)
@@ -217,8 +245,63 @@ func TestGetCorruptJSON(t *testing.T) {
 		t.Fatal(err)
 	}
 	now := time.Date(2026, 9, 11, 0, 0, 0, 0, time.UTC)
-	if _, _, err := s.Get("npm", "bad", ClassOK, now); err == nil {
-		t.Fatal("expected unmarshal error")
+	if _, hit, err := s.Get("npm", "bad", ClassOK, now); err != nil || hit {
+		t.Fatalf("corrupt cache must be a miss, hit=%v err=%v", hit, err)
+	}
+}
+
+func TestGetOversizedCacheEntryIsMiss(t *testing.T) {
+	t.Parallel()
+	for _, tc := range []struct {
+		name   string
+		source string
+		class  Class
+		limit  int64
+	}{
+		{name: "metadata", source: "npm", class: ClassOK, limit: 48 << 20},
+		{name: "downloads", source: "npm-downloads", class: ClassOK, limit: 384 << 10},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			s := testStore(t)
+			if err := os.MkdirAll(s.Root, 0o755); err != nil {
+				t.Fatal(err)
+			}
+			p := filepath.Join(s.Root, Key(tc.source, "large", tc.class))
+			f, err := os.Create(p)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := f.Truncate(tc.limit + 1); err != nil {
+				_ = f.Close()
+				t.Fatal(err)
+			}
+			if err := f.Close(); err != nil {
+				t.Fatal(err)
+			}
+			_, hit, err := s.Get(tc.source, "large", tc.class, time.Now())
+			if err != nil || hit {
+				t.Fatalf("oversized cache must be a miss, hit=%v err=%v", hit, err)
+			}
+		})
+	}
+}
+
+func TestPutReplacesExistingEntry(t *testing.T) {
+	t.Parallel()
+	s := testStore(t)
+	now := time.Date(2026, 9, 11, 0, 0, 0, 0, time.UTC)
+	first := Entry{Status: 200, FetchedAt: now, Body: []byte("first")}
+	second := Entry{Status: 200, FetchedAt: now.Add(time.Minute), Body: []byte("second")}
+	if err := s.Put("npm", "replace", ClassOK, first); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Put("npm", "replace", ClassOK, second); err != nil {
+		t.Fatal(err)
+	}
+	got, hit, err := s.Get("npm", "replace", ClassOK, second.FetchedAt)
+	if err != nil || !hit || string(got.Body) != "second" {
+		t.Fatalf("replacement = %+v hit=%v err=%v", got, hit, err)
 	}
 }
 
@@ -231,5 +314,31 @@ func TestPut5xxNotWritten(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(s.Root, Key("npm", "boom", ClassOK))); !os.IsNotExist(err) {
 		t.Fatalf("5xx created file: %v", err)
+	}
+}
+
+func TestOversizedDecodedDownloadsCacheIsMiss(t *testing.T) {
+	store := testStore(t)
+	now := time.Now()
+	entry := Entry{Status: 200, FetchedAt: now, Body: make([]byte, maxDownloadsBodySize+1)}
+	if err := store.Put("npm-downloads", "pkg", ClassOK, entry); err != nil {
+		t.Fatal(err)
+	}
+	info, err := os.Stat(store.path("npm-downloads", "pkg", ClassOK))
+	if err != nil || info.Size() > maxDownloadsEntrySize {
+		t.Fatalf("expected fixture within encoded limit: %v, %v", info, err)
+	}
+	if _, hit, err := store.Load("npm-downloads", "pkg", ClassOK); err != nil || hit {
+		t.Fatalf("oversized decoded cache entry: hit=%v, error=%v", hit, err)
+	}
+}
+
+func TestFutureCacheEntryIsNotFresh(t *testing.T) {
+	now := time.Now()
+	entry := Entry{FetchedAt: now.Add(time.Hour)}
+	for _, class := range []Class{ClassOK, ClassNotFound} {
+		if Fresh(entry, class, now) {
+			t.Errorf("future entry is fresh for %s", class)
+		}
 	}
 }

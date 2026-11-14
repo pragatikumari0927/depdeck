@@ -1,3 +1,4 @@
+// Package flavor assigns deterministic text to dependency Cards.
 package flavor
 
 import (
@@ -5,9 +6,10 @@ import (
 	"math/rand"
 	"strings"
 
-	"depdeck/pkg/types"
+	"github.com/pragatikumari0927/depdeck/pkg/types"
 )
 
+// Apply fills the dependency Flavor fields from its known facts.
 func Apply(dep *types.Dependency) {
 	h := fnv.New64a()
 	_, _ = h.Write([]byte(dep.Name))
@@ -27,7 +29,7 @@ func Apply(dep *types.Dependency) {
 	}
 
 	dep.FlavorSource = types.FlavorRuleFull
-	if dep.Rarity == types.RarityLegendary || dep.WeeklyDownloads >= 10000 {
+	if dep.Rarity == types.RarityLegendary || (dep.WeeklyDownloads != nil && *dep.WeeklyDownloads >= 10000) {
 		moves := []string{"Crowd Surge", "Legendary Draw", "Wide Pull"}
 		texts := []string{
 			"Legendary {name} still draws a crowd.",

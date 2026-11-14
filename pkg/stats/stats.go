@@ -1,13 +1,15 @@
+// Package stats derives npm risk facts and applies the v1 Check policy.
 package stats
 
 import (
 	"time"
 
-	"depdeck/pkg/types"
+	"github.com/pragatikumari0927/depdeck/pkg/types"
 )
 
 const year = 365.25 * 24 * time.Hour
 
+// Rarity maps weekly downloads to the v1 popularity tier.
 func Rarity(weeklyDownloads int) types.Rarity {
 	switch {
 	case weeklyDownloads >= 10000:
@@ -21,6 +23,7 @@ func Rarity(weeklyDownloads int) types.Rarity {
 	}
 }
 
+// Chaos maps publish age to the v1 maintenance score.
 func Chaos(lastPublish time.Time, now time.Time) float64 {
 	if lastPublish.IsZero() {
 		return 1.0
@@ -35,27 +38,33 @@ func Chaos(lastPublish time.Time, now time.Time) float64 {
 	return 1.0
 }
 
+// DefaultPolicy returns the v1 Check thresholds.
 func DefaultPolicy() types.CheckPolicy {
-	max := 0.5
+	maxChaos := 0.5
 	return types.CheckPolicy{
-		ChaosScoreMax:     &max,
+		ChaosScoreMax:     &maxChaos,
 		RequireLicense:    true,
 		FailOnFetchErrors: false,
 	}
 }
 
+// Apply clears stale facts and adds the latest successful enrichment or errors.
 func Apply(dep types.Dependency, weekly int, lastPublish, now time.Time, license string, fetchErrs []types.FetchError) types.Dependency {
 	out := dep
 	if len(fetchErrs) > 0 {
 		out.Errors = fetchErrs
 		out.Rarity = ""
 		out.Chaos = nil
-		out.WeeklyDownloads = 0
+		out.WeeklyDownloads = nil
 		out.License = ""
 		out.LastPublish = ""
+		out.FlavorText = ""
+		out.SpecialMove = ""
+		out.FlavorSource = ""
 		return out
 	}
-	out.WeeklyDownloads = weekly
+	out.Errors = nil
+	out.WeeklyDownloads = &weekly
 	out.Rarity = Rarity(weekly)
 	c := Chaos(lastPublish, now)
 	out.Chaos = &c
@@ -68,6 +77,7 @@ func Apply(dep types.Dependency, weekly int, lastPublish, now time.Time, license
 	return out
 }
 
+// Flagged returns dependencies that fail a known v1 policy check.
 func Flagged(deps []types.Dependency, p types.CheckPolicy) (bool, []types.Dependency, string) {
 	var flagged []types.Dependency
 	for _, d := range deps {

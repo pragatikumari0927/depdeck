@@ -4,8 +4,10 @@ import (
 	"strings"
 	"testing"
 
-	"depdeck/pkg/types"
+	"github.com/pragatikumari0927/depdeck/pkg/types"
 )
+
+func intPtr(n int) *int { return &n }
 
 func forbidIssues(t *testing.T, s string) {
 	t.Helper()
@@ -19,7 +21,7 @@ func TestApplyTwiceIdentical(t *testing.T) {
 	t.Parallel()
 	in := types.Dependency{
 		Name:            "react",
-		WeeklyDownloads: 10000,
+		WeeklyDownloads: intPtr(10000),
 		Rarity:          types.RarityLegendary,
 		Chaos:           ptr(0.0),
 	}
@@ -57,7 +59,7 @@ func TestApplyLegendary(t *testing.T) {
 	t.Parallel()
 	dep := types.Dependency{
 		Name:            "lodash",
-		WeeklyDownloads: 10000,
+		WeeklyDownloads: intPtr(10000),
 		Rarity:          types.RarityLegendary,
 		Chaos:           ptr(0.0),
 	}
@@ -79,7 +81,7 @@ func TestApplyHundredSameName(t *testing.T) {
 	for i := 0; i < 100; i++ {
 		dep := types.Dependency{
 			Name:            "express",
-			WeeklyDownloads: 5000,
+			WeeklyDownloads: intPtr(5000),
 			Rarity:          types.RarityEpic,
 			Chaos:           ptr(0.6),
 		}
@@ -96,7 +98,7 @@ func TestApplyHundredSameName(t *testing.T) {
 
 func TestApplyZeroDownloadsStillFull(t *testing.T) {
 	t.Parallel()
-	dep := types.Dependency{Name: "tiny-pkg", WeeklyDownloads: 0}
+	dep := types.Dependency{Name: "tiny-pkg", WeeklyDownloads: intPtr(0)}
 	Apply(&dep)
 	if dep.FlavorSource != types.FlavorRuleFull {
 		t.Fatalf("FlavorSource = %q, want %q", dep.FlavorSource, types.FlavorRuleFull)

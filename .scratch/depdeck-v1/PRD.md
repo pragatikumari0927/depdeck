@@ -12,8 +12,8 @@ depdeck is two Faces over one pipeline: parse the root Roster, fetch npm with a 
 
 ## User Stories
 
-1. As a developer, I want `depdeck scan` on a project path so that I get `deck.html` beside that project's `package.json`.
-2. As a developer who ran scan from `$HOME`, I want the file in the project, not in my home directory, so that I can gitignore or commit it in the right repo.
+1. As a developer, I want `depdeck scan [path]` to use the current directory when I omit `path`, so that I can scan the project I am in.
+2. As a developer who runs scan from `$HOME`, I want to pass the project path so that `deck.html` is written beside that project's `package.json`.
 3. As a developer, I want a one-line stderr confirmation of how many Cards were written so that I know it worked without dumping HTML in the terminal.
 4. As a developer, I want `--out -` so that I can redirect HTML in a pipeline.
 5. As a developer, I want `--json` to skip HTML and print the envelope on stdout so that scripts can consume Cards.
@@ -43,7 +43,7 @@ depdeck is two Faces over one pipeline: parse the root Roster, fetch npm with a 
 29. As a git user, I accept JSON is not byte-identical because `generated_at` is on the envelope.
 30. As a jq user, I want documented recipes for Legendary Cards and flagged count so that `.data` nesting is bearable.
 31. As a workspace user, I want v1 to read only the root `package.json` so that I do not get a 400-card monorepo dump.
-32. As a lockfile user, I want `resolved_version` when a lockfile exists so that the Card shows what is installed.
+32. Lockfile resolution is out of v1. `resolved_version` stays empty; the declared range drives npm version selection.
 33. As a no-lockfile user, I want `version` as the declared range and fetch via dist-tags.latest (then highest matching) so that Cards still enrich.
 34. As a Roster author, I want optionalDependencies on the Deck, tagged, so that fsevents-like Cards exist.
 35. As a Roster author, I do not want peer or bundled dependencies on the Deck.
@@ -58,9 +58,11 @@ depdeck is two Faces over one pipeline: parse the root Roster, fetch npm with a 
 ## Implementation Decisions
 
 - One pipeline, two thin Faces (CLI, MCP). Pipeline is a library: no stdout, flags, or process exit. CLI maps errors to exit codes; MCP maps to `isError` vs data `errors`.
-- Shared Dependency contract for CLI `--json` and MCP `data`. Envelope `{schema_version, generated_at, generated_by, tool, data}`. CLI `tool` is `scan`|`check`; MCP is `list_deck`|`get_card`|`check_deck`.
+- Shared Dependency contract for CLI `--json` and MCP `data`. Envelope `{schema_version, generated_at, generated_by, tool, data}` with schema `1.1`. CLI `tool` is `scan`|`check`; MCP is `list_deck`|`get_card`|`check_deck`. Check data includes all assessed dependencies and preserves the existing four policy fields.
 - Deck = root Roster directs only. Tags: one enum. Lockfile pins resolved version only. Transitives, peers, bundled: out. Workspaces: root-only.
-- npm Source, URL reserved as config, v1 hardcoded registry.npmjs.org. Concurrency 8 per Source around network only. Keep Card + `FetchError` array on failure.
+- npm Source, URL reserved as config, v1 hardcoded registry.npmjs.org. Concurrency 8 per Source around network only. Keep Card + `FetchError` array on failure. Select a version with the declared npm range using the pinned semver library and compatibility tests.
+- Use Go 1.25.0 and the official MCP Go SDK v1.8.0. Keep project Dependency fields and JSON tags. Standalone `get_card` omits project-only version and tag fields.
+- `scan` and `check` use the current directory when the path is omitted. Missing or invalid `package.json` returns exit 2.
 - User cache dir, per-package files, TTL 24h/304-refresh/404-1h, no cache of 429/5xx/timeout. `--no-cache` skips read and write. CI check uses cache.
 - Flavor v1: `rule`|`none`; `ai` errors. Template tier from `len(errors)>0`, not zero stars. `flavor_source` on the contract.
 - HTML: one file next to package.json, html/template, static filter JS, <150KB target, no serve, no `--both`.
@@ -76,11 +78,12 @@ depdeck is two Faces over one pipeline: parse the root Roster, fetch npm with a 
 - CLI tests: `--json` skips HTML; default writes beside package.json; `--flavor ai` exit 2; check exit 0/1/3.
 - MCP tests: envelope, get_card without path, schema enum reject ai, 404 is success with errors.
 - No live npm in tests (`--no-cache` + fixture server).
-- No prior test suite in-repo yet; this PRD is the first feature.
+- No live npm calls in tests. Use local fixtures and HTTP test servers.
 
 ## Out of Scope
 
-- Transitive / lockfile-as-deck, peer/bundled, `--workspaces`, GitHub Source, `ai` Flavor, `depdeck serve`, `--both`, `--refresh`, private registry auth, `render_html`/`search_deck`/`compare_decks` MCP tools, identicons/logos, full semver library (v1 latest-then-highest heuristic only).
+- Transitive and lockfile resolution, peer/bundled, `--workspaces`, GitHub Source, `ai` Flavor, `depdeck serve`, `--both`, `--refresh`, private registry auth, `render_html`/`search_deck`/`compare_decks` MCP tools, identicons/logos.
+- Package release includes MIT license, GitHub binary archives, and a source-built Homebrew formula. Publishing is a separate final action.
 
 ## Further Notes
 

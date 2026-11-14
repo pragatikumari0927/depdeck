@@ -1,315 +1,138 @@
-<p align="center"><img src="docs/assets/banner.png" alt="depdeck banner" width="100%"></p>
+<img src="docs/assets/pixel-archive-hero.svg" alt="Depdeck Pixel Archive, with three pixel-art trading cards" width="1120">
 
-<a id="readme-top"></a>
+# depdeck
 
-<div align="center">
+**Give your dependencies a card catalog.** Depdeck turns the packages your project declares for npm, the JavaScript package registry into a retro trading-card Deck. Browse the cards offline, check a few project rules in automated builds, or let your coding agent read the same assessment.
 
-# 🃏 depdeck
+[![Latest GitHub release](https://img.shields.io/github/v/release/pragatikumari0927/depdeck)](https://github.com/pragatikumari0927/depdeck/releases) [![Tests on main](https://github.com/pragatikumari0927/depdeck/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/pragatikumari0927/depdeck/actions/workflows/test.yml?query=branch%3Amain) [![MIT license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-**Your `package.json`, dealt as a deck of trading cards.**
+![Pixel Archive Deck with a Rarity Atlas, dependency filters, and Cards for chalk, fsevents, and a missing package](docs/assets/pixel-archive-desktop.png)
 
-depdeck turns each direct npm dependency into a card showing rarity, chaos, license and flavor text.<br/>
-It renders the deck as a single self-contained `deck.html`, gates CI with `depdeck check`, and serves the same data to AI agents over MCP.
+The screenshot comes from the Go CLI and a seeded offline fixture. Its download counts and dates are sample data. [Mobile screenshot and verification results](docs/TESTING.md#pixel-archive-verification)
 
-[![Go](https://img.shields.io/badge/Go-1.26.9+-00ADD8?logo=go&logoColor=white)](go.mod)
-[![Status](https://img.shields.io/badge/status-WIP%20%C2%B7%20v1%207%2F13%20tickets-orange)](PHASES.md)
-[![Tests](https://github.com/pragatikumari0927/depdeck/actions/workflows/test.yml/badge.svg)](.github/workflows/test.yml)
-[![Ecosystem](https://img.shields.io/badge/ecosystem-npm-CB3837?logo=npm&logoColor=white)](SPEC.md)
-[![License](https://img.shields.io/badge/license-TBD-lightgrey)](#-license)
+## What goes into a Deck?
 
-<img src="https://skillicons.dev/icons?i=go,npm,html,githubactions" alt="Go, npm, HTML, GitHub Actions" />
+`package.json` is the file where a JavaScript project declares its name, scripts, and dependencies. Each dependency entry names a package and usually specifies a version range. Depdeck reads the runtime, development, and optional entries in the root file. A package listed there is a *direct dependency*.
 
-[**Spec**](SPEC.md) · [**Roadmap**](PHASES.md) · [**Decisions**](DECISIONS.md) · [**Design tokens**](DESIGN.md) · [**ADRs**](docs/adr/)
+## Quickstart
 
-</div>
+Build from this checkout to try the Pixel Archive shown above. Use Go 1.26.9 or later and add Go’s binary directory to `PATH`, the list of places your shell looks for commands. Use the directory from `go env GOBIN` if set. Otherwise, use the `bin` folder under `go env GOPATH`.
 
-> [!WARNING]
-> **depdeck is not runnable yet.** v1 is in progress: 7 of 13 tickets are merged. The core packages (`types`, `cache`, `parser`, `stats`, `flavor`, `render`) are built and tested. The npm registry client, pipeline, CLI, MCP server and the `cmd/depdeck` entrypoint have not been written. Commands below marked 🚧 are **planned** and come from [SPEC.md](SPEC.md).
-
-<details>
-<summary><b>📑 Table of contents</b></summary>
-
-- [✨ Features](#-features)
-- [🏗️ Architecture](#️-architecture)
-- [🎴 Anatomy of a card](#-anatomy-of-a-card)
-- [🚀 Getting started](#-getting-started)
-- [🧭 Usage](#-usage)
-- [📂 Project structure](#-project-structure)
-- [🗺️ Roadmap](#️-roadmap)
-- [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
-
-</details>
-
-## ✨ Features
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
-### 🃏 Deck, not a report
-Each direct dependency becomes a card: **Rarity**, **Chaos**, license, last publish and a **Special Move**. All of it fits on one page.
-
-</td>
-<td width="50%" valign="top">
-
-### 📦 One self-contained file
-`deck.html` embeds its template with `go:embed`. The output is **byte-deterministic** and needs no CDN or JS bundle ([ADR-0006](docs/adr/0006-self-contained-deck-html.md)).
-
-</td>
-</tr>
-<tr>
-<td valign="top">
-
-### ✅ CI gate · 🚧 planned
-`depdeck check` will run the same pipeline and exit `1` when a dependency breaks policy. The default policy is chaos ≤ 0.5 and a license is required ([ADR-0010](docs/adr/0010-check-policy-v1.md)).
-
-</td>
-<td valign="top">
-
-### 🤖 MCP server · 🚧 planned
-There will be three tools, `list_deck`, `get_card` and `check_deck`, with explicit input schemas ([ADR-0007](docs/adr/0007-mcp-three-tools.md)).
-
-</td>
-</tr>
-<tr>
-<td valign="top">
-
-### 🧱 Degrades gracefully · 🚧 planned
-npm 404, 429 or timeout responses will become **degraded cards** with typed `errors` instead of crashing the run ([ADR-0003](docs/adr/0003-degraded-cards-and-fetch.md)).
-
-</td>
-<td valign="top">
-
-### ⚡ Cached and bounded · 🚧 planned
-The on-disk HTTP cache (`pkg/cache`) is built; the 8 concurrent registry fetches are planned ([ADR-0004](docs/adr/0004-on-disk-http-cache.md)). Tests never touch the live registry.
-
-</td>
-</tr>
-</table>
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## 🏗️ Architecture
-
-One core pipeline is planned to serve both faces: the CLI and MCP ([ADR-0001](docs/adr/0001-two-faces-same-core.md)). By design, the planned `internal/pipeline` will never write to stdout, parse flags or exit.
-
-<p align="center"><img src="docs/assets/architecture.png" alt="depdeck architecture: CLI and MCP entry points feeding the scanner, registry clients, scoring and deck renderer; built parts in cyan, planned parts dashed amber" width="100%"></p>
-
-<details><summary>Mermaid source</summary>
-
-```mermaid
-flowchart LR
-    PJ[package.json] --> P[pkg/parser<br/>roster]
-    subgraph pipeline [internal/pipeline]
-        P --> C{pkg/cache<br/>hit?}
-        C -- miss --> R[pkg/registry<br/>npm, 8 concurrent]
-        C -- hit --> S
-        R --> S[pkg/stats<br/>rarity and chaos]
-        S --> F[pkg/flavor<br/>rule or none]
-    end
-    F --> CLI[internal/cli<br/>scan and check]
-    F --> MCP[internal/mcp<br/>list_deck, get_card, check_deck]
-    CLI --> H[pkg/render<br/>deck.html]
-    CLI --> J[JSON envelope]
-    MCP --> J
-
-    classDef done fill:#d1fadf,stroke:#12b76a,color:#054f31
-    classDef todo fill:#fef0c7,stroke:#f79009,color:#7a2e0e
-    class P,C,S,F,H done
-    class R,CLI,MCP,J todo
+```sh
+go install ./cmd/depdeck
+depdeck --version
 ```
 
-</details>
+In a project directory that contains `package.json`, run:
 
-<sub>🟩 implemented and tested · 🟧 planned (v1 tickets still open)</sub>
-
-### How a deck gets dealt (`depdeck scan`, planned)
-
-<p align="center"><img src="docs/assets/scan-sequence.png" alt="Sequence diagram: how depdeck scan reads the manifest and lockfile, queries registries, scores packages, and renders the HTML deck" width="100%"></p>
-
-<details><summary>Mermaid source</summary>
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Dev
-    participant CLI as internal/cli
-    participant Pipe as internal/pipeline
-    participant Cache as pkg/cache
-    participant NPM as npm registry
-    participant Render as pkg/render
-
-    Dev->>CLI: depdeck scan ./my-app
-    CLI->>Pipe: Run(path)
-    Pipe->>Pipe: parse package.json roster
-    loop each direct dependency
-        Pipe->>Cache: lookup
-        alt cache miss
-            Pipe->>NPM: fetch metadata and downloads
-            NPM-->>Pipe: JSON, or 404/429/timeout
-            Pipe->>Cache: store
-        end
-        Pipe->>Pipe: stats.Apply, then flavor.Apply
-    end
-    Pipe-->>CLI: Dependency list
-    alt --json
-        CLI-->>Dev: envelope on stdout
-    else default
-        CLI->>Render: Render(deps)
-        Render-->>Dev: Wrote deck.html (N cards)
-    end
+```sh
+depdeck scan
 ```
 
-</details>
+Open `deck.html` beside `package.json` in your browser. The scan reads public npm facts as needed. The generated file has everything it needs to open offline.
 
-### `depdeck check` decision (planned)
+### Install the published version
 
-```mermaid
-flowchart TD
-    A[Run pipeline] --> B{Every dependency<br/>has fetch errors?}
-    B -- yes --> X3([exit 3])
-    B -- no --> C{Any card chaos above 0.5<br/>or missing license?}
-    C -- yes --> X1([exit 1: flagged])
-    C -- no --> X0([exit 0: pass])
+The release and Homebrew commands below install the published build. The screenshots above show the Pixel Archive feature branch.
+
+- Download the archive for Windows, macOS, or Linux and your CPU architecture (`amd64` or `arm64`). Compare its SHA-256 checksum with the matching entry in `checksums.txt`, then put the extracted executable on `PATH`. [GitHub Releases](https://github.com/pragatikumari0927/depdeck/releases)
+- On macOS, use `brew install pragatikumari0927/tap/depdeck`. [Homebrew tap](https://github.com/pragatikumari0927/homebrew-tap)
+- With Go, run `go install github.com/pragatikumari0927/depdeck/cmd/depdeck@v1.0.0`.
+
+## Read the Cards
+
+Each Card shows the declared version, dependency group, weekly npm downloads, publish date, Chaos, and license when those facts are available. **Chaos** summarizes publish recency. The **Field Journal** puts the facts into plain English. Rule-based **Flavor** and **Special Move** add a little personality.
+
+The Rarity seal comes from the assessed weekly download count.
+
+| Seal | Weekly npm downloads |
+| --- | ---: |
+| Legendary | 10,000 or more |
+| Epic | 5,000–9,999 |
+| Rare | 1,000–4,999 |
+| Common | 0–999, with a known count |
+| Unknown | No verified rank |
+
+The Rarity Atlas counts the whole Deck. Tag filters change the Cards in view. A failed lookup keeps its Card in the Deck with an Archive Notice and unavailable fields.
+
+## CLI examples
+
+Run these in your project directory. An optional path can point to a project directory or its `package.json`. Put flags before the path.
+
+```sh
+depdeck scan --out ./dependencies.html .
+depdeck scan --flavor none .
+depdeck scan --json .
+depdeck check --json .
 ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+`--flavor none` skips Flavor and Special Move. `--json` writes the assessment to standard output. Both commands support `--no-cache` to skip the local cache. With `jq` installed, you can list Legendary packages from the JSON.
 
-## 🎴 Anatomy of a card
+```sh
+depdeck scan --json . | jq '.data.dependencies[] | select(.rarity == "Legendary") | .name'
+```
 
-Values come straight from `pkg/stats` and `pkg/types`.
+By default, `check` flags assessed dependencies when Chaos exceeds 0.5 or the license is missing. Degraded Cards carry fetch errors for review. In CI (continuous integration), run `depdeck check` directly to use its exit status.
 
-| Stat | Rule |
-|---|---|
-| ⭐ **Rarity** | ≥ 10,000 weekly downloads: **Legendary** · ≥ 5,000: **Epic** · ≥ 1,000: **Rare** · otherwise: **Common** ([ADR-0009](docs/adr/0009-rarity-thresholds.md)) |
-| 🌀 **Chaos** | last publish under 2 years ago: `0.0` · 2–5 years: `0.6` · over 5 years or unknown: `1.0` |
-| 🏷️ **Tag** | `dependencies`, `devDependencies` or `optionalDependencies` (direct dependencies only, [ADR-0002](docs/adr/0002-directs-only-deck.md)) |
-| ✨ **Special Move** | deterministic, rule-based caption ([ADR-0013](docs/adr/0013-add-special-move.md)) |
-| ⚠️ **Errors** | `not_found`, `timeout`, `rate_limit`, `network` or `parse`. These blank out the stats instead of guessing them. |
+| Exit | Meaning |
+| --- | --- |
+| `0` | Scan succeeded or Check passed |
+| `1` | Check flagged at least one dependency |
+| `2` | Invalid input, usage, or a local error |
+| `3` | Every fetch failed in a nonempty Check |
 
-<details>
-<summary>JSON envelope (<code>--json</code> / MCP)</summary>
+## Connect a coding agent
+
+MCP stands for Model Context Protocol. It lets a compatible coding agent call Depdeck as a local tool. For clients that use an `mcpServers` configuration, add:
 
 ```json
 {
-  "schema_version": "1.0",
-  "generated_at": "<RFC3339 UTC>",
-  "generated_by": "depdeck x.y.z",
-  "tool": "scan",
-  "data": { "dependencies": [ /* Dependency, ... */ ] }
+  "mcpServers": {
+    "depdeck": {
+      "command": "depdeck",
+      "args": ["mcp"]
+    }
+  }
 }
 ```
-</details>
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+Use the absolute executable path if the client cannot find `depdeck`. Use an absolute project path when the client starts the server in a different directory. MCP communicates over standard input and output.
 
-## 🚀 Getting started
+| Tool | Arguments | Result |
+| --- | --- | --- |
+| `list_deck` | `path`, optional `tag` and `flavor` | Cards for a project |
+| `get_card` | npm package `name`, optional `flavor` | One registry Card |
+| `check_deck` | `path` | Policy verdict and assessed dependencies |
 
-**Prerequisite:** Go 1.26.9 or later.
+The CLI and MCP share the JSON envelope with schema `1.1`. Consumers check the major version and read `data` according to the operation. [Output contract](docs/SPEC.md#envelope)
 
-```bash
-git clone https://github.com/pragatikumari0927/depdeck.git
-cd depdeck
-go vet ./...
-go test -race ./...     # ✅ works today, runs on fixtures with no network
-```
+### Prompts to try
 
-🚧 *Planned*, once `cmd/depdeck` lands and the module path is renamed:
+- “Use `list_deck` on this project with `tag: devDependencies`. Summarize the publish dates and point out missing registry facts.”
+- “Use `get_card` for `react`. Give me its weekly downloads, Rarity, publish date, and license.”
+- “Run `check_deck` for this project. Explain which policy rules fired and list any fetch errors separately.”
 
-```bash
-go build -o depdeck ./cmd/depdeck
-go install github.com/pragatikumari0927/depdeck/cmd/depdeck@latest
-```
-
-## 🧭 Usage
-
-> 🚧 Every command in this section is planned (SPEC.md v1 contract). None runs yet.
-
-```bash
-depdeck scan ./my-app              # writes ./my-app/deck.html
-depdeck scan ./my-app --json       # JSON envelope on stdout, no HTML
-depdeck scan . --out -             # HTML to stdout
-depdeck scan . --flavor none       # no flavor text
-depdeck check . --no-cache         # CI gate
-depdeck mcp                        # MCP server for agents
-```
-
-| Exit code | Meaning |
-|:---:|---|
-| `0` | success / check passed |
-| `1` | check flagged a dependency |
-| `2` | usage error, or `--flavor=ai` (reserved for v1.1) |
-| `3` | check: every dependency failed to fetch |
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## 📂 Project structure
-
-```text
-depdeck/
-├── pkg/
-│   ├── types/       ✅ Dependency, FetchError, Envelope, CheckPolicy
-│   ├── cache/       ✅ on-disk HTTP cache
-│   ├── parser/      ✅ root package.json roster
-│   ├── stats/       ✅ rarity, chaos, check flagging
-│   ├── flavor/      ✅ rule / none flavor and special moves
-│   ├── render/      ✅ deck.html (templates/deck.html via go:embed)
-│   └── registry/    🚧 npm client
-├── internal/        🚧 pipeline, cli, mcp
-├── cmd/depdeck/     🚧 entrypoint (wiring only)
-├── testdata/        fixture package.json projects
-├── docs/adr/        15 architecture decision records
-├── SPEC.md          frozen v1 technical contract
-├── DESIGN.md        card and deck design tokens
-├── PHASES.md        roadmap and git workflow
-└── DECISIONS.md · CONTEXT.md · RULES.md · DEVELOPMENT.md · SECURITY.md
-```
-
-## 🗺️ Roadmap
+## How it works
 
 ```mermaid
-stateDiagram-v2
-    direction LR
-    [*] --> v1
-    v1: v1, in progress (7 of 13)
-    v11: v1.1, next
-    v2: v2, deferred
-    v1 --> Release: all 13 tickets merged
-    Release: v1.0.0 release gate
-    Release --> v11
-    v11 --> v2
+flowchart LR
+  Manifest["package.json"] --> Assess["Shared Go assessment"]
+  Registry["Public npm and local cache"] --> Assess
+  Assess --> Scan["CLI scan"]
+  Assess --> Check["CLI check"]
+  Assess --> MCP["MCP tools"]
+  Scan --> Output["Offline HTML Deck or JSON"]
+  Check --> Verdict["Policy verdict"]
 ```
 
-**v1 (current)**
-- [x] `pkg/types`, `pkg/cache`, `pkg/parser`, `pkg/stats`, `pkg/flavor`, `pkg/render`
-- [ ] `pkg/registry`: npm fetch, cache-aware, 8 concurrent
-- [ ] `internal/pipeline`, `internal/cli`, `internal/mcp`
-- [ ] `cmd/depdeck` and fixture testdata (partly done: `testdata/verify` and `testdata/workspace` exist)
+`get_card` uses npm facts for one package and needs no project manifest.
 
-**v1.0.0 release gate**
-- [ ] Module path renamed to `github.com/pragatikumari0927/depdeck`
-- [ ] README demo GIF · GoReleaser (GitHub Release + Homebrew tap) · `CHANGELOG.md` via git-cliff
+## Scope
 
-**v1.1 (next)**
-- [ ] `--flavor=ai` via Ollama · PNG card export (chromedp) · `install_size` stat · `depdeck doctor`
+- Depdeck reads direct dependencies from the root manifest. Lockfile resolution, nested workspaces, transitive dependencies, and private registry authentication are outside its scope.
+- Rarity describes downloads and Chaos describes publish recency. Vulnerability scanning and license compliance review are separate jobs.
+- A scan may need access to public npm. The HTML Deck can be opened and filtered offline.
 
-**v2 (deferred)**
-- [ ] GitHub enrichment · go.mod / Cargo.toml / pyproject parsers · `depdeck battle` · monorepo CI check
+[Contributing and development](docs/DEVELOPMENT.md) · [Specification](docs/SPEC.md) · [Testing](docs/TESTING.md) · [Security and reporting](docs/SECURITY.md) · [Changelog](CHANGELOG.md)
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## 🤝 Contributing
-
-1. Read [SPEC.md](SPEC.md) and [DEVELOPMENT.md](DEVELOPMENT.md). Changing a frozen claim means changing its ADR first.
-2. Work trunk-based on a branch: `git worktree add ../depdeck-<variant> -b <branch>`
-3. Use Conventional Commits, one commit per ticket, and keep PRs under 400 lines.
-4. Run `go vet ./... && go test -race ./...` before pushing. CI runs the same checks.
-
-Security reports: see [SECURITY.md](SECURITY.md).
-
-## 📄 License
-
-**TBD.** No license has been chosen yet, so all rights are reserved until one is added.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+[MIT license](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.txt)
