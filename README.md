@@ -118,7 +118,7 @@ The server uses standard input and output. If your client cannot find `depdeck`,
 | `get_card` | npm package `name`, optional `flavor` | One registry Card |
 | `check_deck` | `path` | Policy verdict and assessed dependencies |
 
-Use `rule` or `none` for `flavor`. Valid Tag values are `dependencies`, `devDependencies`, and `optionalDependencies`. CLI and MCP results use the same JSON envelope at schema `1.1`. Check the major version and read `data` according to the operation. For an empty Check, the current implementation omits `data.dependencies`. See the [output contract](docs/SPEC.md#envelope).
+Use `rule` or `none` for `flavor`. Valid Tag values are `dependencies`, `devDependencies`, and `optionalDependencies`. CLI and MCP results use the same JSON envelope at schema `1.1`. Check the major version and read `data` according to the operation. For an empty Check, builds from `main` return `data.dependencies: []`. The published `v1.0.0` release omits that field for empty Checks. See the [output contract](docs/SPEC.md#envelope).
 
 ### Prompts to try
 

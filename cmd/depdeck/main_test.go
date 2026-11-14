@@ -82,6 +82,7 @@ func TestReleaseBinaryOffline(t *testing.T) {
 	put("npm", "missing", cache.ClassNotFound, 404, "")
 
 	project := manifest(t, "project with spaces", mixedRoster)
+	emptyProject := manifest(t, "empty", "{}")
 	command := func(ctx context.Context, args ...string) *exec.Cmd {
 		cmd := exec.CommandContext(ctx, binary, args...)
 		cmd.Dir = project
@@ -106,7 +107,6 @@ func TestReleaseBinaryOffline(t *testing.T) {
 			{"null_manifest", []string{"check", manifest(t, "null", "null")}, 2, ""},
 			{"ai", []string{"scan", "--flavor=ai"}, 2, ""},
 			{"stdout_html", []string{"scan", "--out", "-"}, 0, "<!DOCTYPE html>"},
-			{"empty", []string{"check", "--json", manifest(t, "empty", "{}")}, 0, "empty_roster"},
 			{"flagged", []string{"check", "--json", manifest(t, "flagged", `{"dependencies":{"unlicensed":"*"}}`)}, 1, "policy_failed"},
 			{"degraded", []string{"check", "--json", manifest(t, "degraded", `{"dependencies":{"missing":"*"}}`)}, 3, "all_fetches_failed"},
 		}
@@ -121,6 +121,13 @@ func TestReleaseBinaryOffline(t *testing.T) {
 				}
 			})
 		}
+		t.Run("empty_check", func(t *testing.T) {
+			stdout, _ := cliResult(t, command, 0, "check", "--json", emptyProject)
+			check := decodeData[types.CheckData](t, []byte(stdout), "check", "1.0.0-test")
+			if !check.Pass || check.Reason != "empty_roster" || check.Dependencies == nil || len(check.Dependencies) != 0 {
+				t.Fatalf("empty CLI Check must include dependencies: []; got %s", stdout)
+			}
+		})
 		scan, stderr := cliResult(t, command, 0, "scan", "--json")
 		if !strings.Contains(stderr, "missing") {
 			t.Fatalf("missing npm warning: %q", stderr)
@@ -205,6 +212,13 @@ func TestReleaseBinaryOffline(t *testing.T) {
 		if !check.Pass || check.Reason != "partial_fetch_errors" || len(check.Dependencies) != 2 {
 			t.Fatalf("MCP Check = %+v", check)
 		}
+		t.Run("empty_check", func(t *testing.T) {
+			data := callData(ctx, t, session, "check_deck", map[string]any{"path": emptyProject})
+			check := decodeData[types.CheckData](t, data, "check_deck", "1.0.0-test")
+			if !check.Pass || check.Reason != "empty_roster" || check.Dependencies == nil || len(check.Dependencies) != 0 {
+				t.Fatalf("empty MCP Check must include dependencies: []; got %s", data)
+			}
+		})
 	})
 }
 
