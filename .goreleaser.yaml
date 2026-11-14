@@ -1,0 +1,53 @@
+version: 2
+project_name: depdeck
+
+builds:
+  - main: ./cmd/depdeck
+    binary: depdeck
+    env: [CGO_ENABLED=0]
+    goos: [windows, linux, darwin]
+    goarch: [amd64, arm64]
+    flags: [-trimpath, -buildvcs=false]
+    ldflags:
+      - -s -w -X github.com/pragatikumari0927/depdeck/pkg/types.BuildVersion={{ .Version }}
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+archives:
+  - name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    builds_info:
+      owner: root
+      group: root
+      mtime: "{{ .CommitDate }}"
+    files:
+      - src: LICENSE
+        info: &archive_file
+          owner: root
+          group: root
+          mode: 0644
+          mtime: "{{ .CommitDate }}"
+      - src: THIRD_PARTY_NOTICES.txt
+        info: *archive_file
+      - src: README.md
+        info: *archive_file
+      - src: CHANGELOG.md
+        info: *archive_file
+
+checksum:
+  name_template: checksums.txt
+  algorithm: sha256
+
+snapshot:
+  version_template: "1.0.0-rc-{{ .ShortCommit }}"
+
+changelog:
+  disable: true
+
+release:
+  github:
+    owner: pragatikumari0927
+    name: depdeck
+  draft: true

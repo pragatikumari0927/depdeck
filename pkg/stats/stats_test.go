@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"depdeck/pkg/types"
+	"github.com/pragatikumari0927/depdeck/pkg/types"
 )
 
 func TestRarity(t *testing.T) {
@@ -88,8 +88,8 @@ func TestApplyDegradedOmitsStats(t *testing.T) {
 	if got.Chaos != nil {
 		t.Errorf("Chaos = %v, want nil", got.Chaos)
 	}
-	if got.WeeklyDownloads != 0 {
-		t.Errorf("WeeklyDownloads = %d, want 0", got.WeeklyDownloads)
+	if got.WeeklyDownloads != nil {
+		t.Errorf("WeeklyDownloads = %v, want unknown", got.WeeklyDownloads)
 	}
 	if got.License != "" {
 		t.Errorf("License = %q, want empty", got.License)
@@ -116,8 +116,8 @@ func TestApplySuccessSetsStats(t *testing.T) {
 	pub := now.Add(-year)
 	in := types.Dependency{Name: "react", Version: "^18.2.0", Tag: types.TagDependencies}
 	got := Apply(in, 10000, pub, now, "MIT", nil)
-	if got.WeeklyDownloads != 10000 {
-		t.Errorf("WeeklyDownloads = %d, want 10000", got.WeeklyDownloads)
+	if got.WeeklyDownloads == nil || *got.WeeklyDownloads != 10000 {
+		t.Errorf("WeeklyDownloads = %v, want 10000", got.WeeklyDownloads)
 	}
 	if got.Rarity != types.RarityLegendary {
 		t.Errorf("Rarity = %q, want Legendary", got.Rarity)
@@ -142,6 +142,49 @@ func TestApplySuccessSetsStats(t *testing.T) {
 		t.Errorf("zero downloads Rarity = %q, want Common", zeroPub.Rarity)
 	}
 }
+
+func TestApplyClearsStaleErrorsAndEnrichment(t *testing.T) {
+	t.Parallel()
+	now := time.Date(2026, 9, 11, 0, 0, 0, 0, time.UTC)
+	oldChaos := 0.6
+	in := types.Dependency{
+		Name: "pkg", Version: "^1", Tag: types.TagDependencies,
+		WeeklyDownloads: intPtr(42), Rarity: types.RarityRare, Chaos: &oldChaos,
+		LastPublish: "2020-01-01T00:00:00Z", License: "OLD",
+		FlavorText: "stale", SpecialMove: "stale move", FlavorSource: types.FlavorRuleFull,
+		Errors: []types.FetchError{{Source: "npm", Kind: string(types.FetchTimeout)}},
+	}
+	got := Apply(in, 0, now.Add(-year), now, "MIT", nil)
+	if len(got.Errors) != 0 {
+		t.Errorf("Errors = %+v, want cleared", got.Errors)
+	}
+	if got.WeeklyDownloads == nil || *got.WeeklyDownloads != 0 || got.Rarity != types.RarityCommon || got.Chaos == nil || *got.Chaos != 0 || got.License != "MIT" {
+		t.Errorf("fresh zero-download enrichment = %+v", got)
+	}
+	if got.LastPublish != now.Add(-year).UTC().Format(time.RFC3339) {
+		t.Errorf("LastPublish = %q", got.LastPublish)
+	}
+}
+
+func TestApplyDegradedClearsPreviousFacts(t *testing.T) {
+	t.Parallel()
+	oldChaos := 0.6
+	dep := types.Dependency{
+		Name: "pkg", Version: "^1", Tag: types.TagDependencies,
+		WeeklyDownloads: intPtr(12), Rarity: types.RarityRare, Chaos: &oldChaos,
+		LastPublish: "2020-01-01T00:00:00Z", License: "MIT",
+		FlavorText: "stale", SpecialMove: "stale move", FlavorSource: types.FlavorRuleFull,
+	}
+	got := Apply(dep, 0, time.Time{}, time.Now(), "", []types.FetchError{{Source: "npm", Kind: string(types.FetchNetwork)}})
+	if got.WeeklyDownloads != nil || got.Rarity != "" || got.Chaos != nil || got.LastPublish != "" || got.License != "" {
+		t.Errorf("degraded result retained old facts: %+v", got)
+	}
+	if got.FlavorText != "" || got.SpecialMove != "" || got.FlavorSource != "" {
+		t.Errorf("degraded result retained old flavor: %+v", got)
+	}
+}
+
+func intPtr(n int) *int { return &n }
 
 func TestFlagged(t *testing.T) {
 	t.Parallel()

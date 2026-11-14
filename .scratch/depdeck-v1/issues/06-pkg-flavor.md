@@ -48,3 +48,9 @@ Same Dependency in → same FlavorText out (table tests).
 ## ADRs
 
 0005, 0003
+
+## V1 contract amendment
+
+This amendment clarifies the existing v1 Flavor behavior.
+
+Keep the accepted v1 modes `rule` and `none`. `none` clears both `FlavorText` and `FlavorSource`. Reject `ai` before any registry request. Return the typed `ErrAINotInV1` error. Do not edit accepted ADR-0005; follow [docs/SPEC.md](../../../docs/SPEC.md) for the settled v1 behavior.

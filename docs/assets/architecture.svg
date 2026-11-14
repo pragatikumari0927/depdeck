@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1900" height="900" viewBox="0 0 1900 900"><defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d1117"/><stop offset="1" stop-color="#161b22"/></linearGradient>
+<linearGradient id="pc" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7c3aed"/><stop offset="1" stop-color="#06b6d4"/></linearGradient>
+<linearGradient id="card" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c2230"/><stop offset="1" stop-color="#141925"/></linearGradient>
+<filter id="sh" x="-20%" y="-20%" width="140%" height="160%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000" flood-opacity=".55"/></filter>
+<filter id="glow"><feGaussianBlur stdDeviation="60"/></filter>
+<marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#9aa4b2"/></marker>
+<marker id="ac" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#06b6d4"/></marker>
+<marker id="aa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#f59e0b"/></marker>
+</defs>
+<rect width="1900" height="900" fill="url(#bg)"/>
+<circle cx="1750" cy="80" r="220" fill="#7c3aed" opacity=".18" filter="url(#glow)"/>
+<circle cx="120" cy="840" r="220" fill="#06b6d4" opacity=".12" filter="url(#glow)"/>
+<rect x="60" y="56" width="8" height="58" rx="4" fill="url(#pc)"/>
+<text x="86" y="92" font-family="Inter, DejaVu Sans, sans-serif" font-size="38" font-weight="700" fill="#f0f6fc">depdeck architecture</text>
+<text x="86" y="124" font-family="Inter, DejaVu Sans, sans-serif" font-size="19" fill="#8b949e">How package.json becomes cards: parser → cache / registry → stats → flavor → CLI, MCP and renderer</text><g font-family="Inter, DejaVu Sans, sans-serif" font-size="17" fill="#c9d1d9">
+<rect x="1600" y="80" width="18" height="18" rx="5" fill="#06b6d4"/><text x="1628" y="95">built</text>
+<rect x="1700" y="80" width="18" height="18" rx="5" fill="#f59e0b"/><text x="1728" y="95">planned</text></g><rect x="330" y="190" width="900" height="640" rx="24" fill="#7c3aed" fill-opacity=".06" stroke="#7c3aed" stroke-width="2" stroke-dasharray="10 8"/><text x="356" y="226" font-family="DejaVu Sans Mono, monospace" font-size="18" font-weight="700" fill="#a78bfa">internal/pipeline</text><g filter="url(#sh)"><rect x="60" y="440" width="230" height="110" rx="16" fill="#1c2230" stroke="#c9d1d9" stroke-width="2"/></g>
+<circle cx="94" cy="478" r="8" fill="#c9d1d9"/><text x="118" y="484" font-family="DejaVu Sans Mono, monospace" font-size="19" font-weight="700" fill="#f0f6fc">package.json</text>
+<text x="82" y="518" font-family="Inter, DejaVu Sans, sans-serif" font-size="16" fill="#9aa4b2">input: direct deps</text><g filter="url(#sh)"><rect x="370" y="440" width="250" height="110" rx="16" fill="url(#card)" stroke="#06b6d4" stroke-width="2" /></g>
+<rect x="370" y="440" width="6" height="110" rx="3" fill="#06b6d4"/>
+<circle cx="404" cy="472" r="8" fill="#06b6d4"/>
+<text x="426" y="478" font-family="DejaVu Sans Mono, monospace" font-size="18" font-weight="700" fill="#f0f6fc">pkg/parser</text>
+<text x="392" y="510" font-family="Inter, DejaVu Sans, sans-serif" font-size="16" fill="#9aa4b2">builds the roster</text>
+<rect x="532" y="520" width="76" height="20" rx="10" fill="#06b6d4" opacity=".18"/>
+<text x="570" y="535" text-anchor="middle" font-family="Inter, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#06b6d4">BUILT</text><g filter="url(#sh)"><rect x="680" y="440" width="250" height="110" rx="16" fill="url(#card)" stroke="#06b6d4" stroke-width="2" /></g>
+<rect x="680" y="440" width="6" height="110" rx="3" fill="#06b6d4"/>
+<circle cx="714" cy="472" r="8" fill="#06b6d4"/>
+<text x="736" y="478" font-family="DejaVu Sans Mono, monospace" font-size="18" font-weight="700" fill="#f0f6fc">pkg/cache</text>
+<text x="702" y="510" font-family="Inter, DejaVu Sans, sans-serif" font-size="16" fill="#9aa4b2">hit?</text>
+<rect x="842" y="520" width="76" height="20" rx="10" fill="#06b6d4" opacity=".18"/>
+<text x="880" y="535" text-anchor="middle" font-family="Inter, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#06b6d4">BUILT</text><g filter="url(#sh)"><rect x="680" y="260" width="250" height="110" rx="16" fill="url(#card)" stroke="#f59e0b" stroke-width="2" stroke-dasharray="8 6"/></g>
+<rect x="680" y="260" width="6" height="110" rx="3" fill="#f59e0b"/>
+<circle cx="714" cy="292" r="8" fill="#f59e0b"/>
+<text x="736" y="298" font-family="DejaVu Sans Mono, monospace" font-size="18" font-weight="700" fill="#f0f6fc">pkg/registry</text>
+<text x="702" y="330" font-family="Inter, DejaVu Sans, sans-serif" font-size="16" fill="#9aa4b2">npm, 8 concurrent</text>
+<rect x="842" y="340" width="76" height="20" rx="10" fill="#f59e0b" opacity=".18"/>
+<text x="880" y="355" text-anchor="middle" font-family="Inter, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#f59e0b">PLANNED</text><g filter="url(#sh)"><rect x="960" y="440" width="250" height="110" rx="16" fill="url(#card)" stroke="#06b6d4" stroke-width="2" /></g>
+<rect x="960" y="440" width="6" height="110" rx="3" fill="#06b6d4"/>
+<circle cx="994" cy="472" r="8" fill="#06b6d4"/>
+<text x="1016" y="478" font-family="DejaVu Sans Mono, monospace" font-size="18" font-weight="700" fill="#f0f6fc">pkg/stats</text>
+<text x="982" y="510" font-family="Inter, DejaVu Sans, sans-serif" font-size="16" fill="#9aa4b2">rarity and chaos</text>
+<rect x="1122" y="520" width="76" height="20" rx="10" fill="#06b6d4" opacity=".18"/>
+<text x="1160" y="535" text-anchor="middle" font-family="Inter, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#06b6d4">BUILT</text><g filter="url(#sh)"><rect x="960" y="660" width="250" height="110" rx="16" fill="url(#card)" stroke="#06b6d4" stroke-width="2" /></g>
+<rect x="960" y="660" width="6" height="110" rx="3" fill="#06b6d4"/>
+<circle cx="994" cy="692" r="8" fill="#06b6d4"/>
+<text x="1016" y="698" font-family="DejaVu Sans Mono, monospace" font-size="18" font-weight="700" fill="#f0f6fc">pkg/flavor</text>
+<text x="982" y="730" font-family="Inter, DejaVu Sans, sans-serif" font-size="16" fill="#9aa4b2">rule or none</text>
+<rect x="1122" y="740" width="76" height="20" rx="10" fill="#06b6d4" opacity=".18"/>
+<text x="1160" y="755" text-anchor="middle" font-family="Inter, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#06b6d4">BUILT</text><g filter="url(#sh)"><rect x="1310" y="330" width="250" height="110" rx="16" fill="url(#card)" stroke="#f59e0b" stroke-width="2" stroke-dasharray="8 6"/></g>
+<rect x="1310" y="330" width="6" height="110" rx="3" fill="#f59e0b"/>
+<circle cx="1344" cy="362" r="8" fill="#f59e0b"/>
+<text x="1366" y="368" font-family="DejaVu Sans Mono, monospace" font-size="18" font-weight="700" fill="#f0f6fc">internal/cli</text>
+<text x="1332" y="400" font-family="Inter, DejaVu Sans, sans-serif" font-size="16" fill="#9aa4b2">scan and check</text>
+<rect x="1472" y="410" width="76" height="20" rx="10" fill="#f59e0b" opacity=".18"/>
+<text x="1510" y="425" text-anchor="middle" font-family="Inter, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#f59e0b">PLANNED</text><g filter="url(#sh)"><rect x="1310" y="640" width="250" height="140" rx="16" fill="url(#card)" stroke="#f59e0b" stroke-width="2" stroke-dasharray="8 6"/></g>
+<rect x="1310" y="640" width="6" height="140" rx="3" fill="#f59e0b"/>
+<circle cx="1344" cy="672" r="8" fill="#f59e0b"/>
+<text x="1366" y="678" font-family="DejaVu Sans Mono, monospace" font-size="18" font-weight="700" fill="#f0f6fc">internal/mcp</text>
+<text x="1332" y="710" font-family="Inter, DejaVu Sans, sans-serif" font-size="16" fill="#9aa4b2">list_deck, get_card,</text>
+<rect x="1472" y="750" width="76" height="20" rx="10" fill="#f59e0b" opacity=".18"/>
+<text x="1510" y="765" text-anchor="middle" font-family="Inter, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#f59e0b">PLANNED</text><text x="1332" y="732" font-family="Inter, DejaVu Sans, sans-serif" font-size="16" fill="#9aa4b2">check_deck</text><g filter="url(#sh)"><rect x="1610" y="210" width="250" height="110" rx="16" fill="url(#card)" stroke="#06b6d4" stroke-width="2" /></g>
+<rect x="1610" y="210" width="6" height="110" rx="3" fill="#06b6d4"/>
+<circle cx="1644" cy="242" r="8" fill="#06b6d4"/>
+<text x="1666" y="248" font-family="DejaVu Sans Mono, monospace" font-size="18" font-weight="700" fill="#f0f6fc">pkg/render</text>
+<text x="1632" y="280" font-family="Inter, DejaVu Sans, sans-serif" font-size="16" fill="#9aa4b2">deck.html</text>
+<rect x="1772" y="290" width="76" height="20" rx="10" fill="#06b6d4" opacity=".18"/>
+<text x="1810" y="305" text-anchor="middle" font-family="Inter, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#06b6d4">BUILT</text><g filter="url(#sh)"><rect x="1610" y="480" width="250" height="110" rx="16" fill="url(#card)" stroke="#f59e0b" stroke-width="2" stroke-dasharray="8 6"/></g>
+<rect x="1610" y="480" width="6" height="110" rx="3" fill="#f59e0b"/>
+<circle cx="1644" cy="512" r="8" fill="#f59e0b"/>
+<text x="1666" y="518" font-family="DejaVu Sans Mono, monospace" font-size="18" font-weight="700" fill="#f0f6fc">JSON envelope</text>
+<text x="1632" y="550" font-family="Inter, DejaVu Sans, sans-serif" font-size="16" fill="#9aa4b2">machine-readable</text>
+<rect x="1772" y="560" width="76" height="20" rx="10" fill="#f59e0b" opacity=".18"/>
+<text x="1810" y="575" text-anchor="middle" font-family="Inter, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#f59e0b">PLANNED</text><path d="M290,495.0 L364,495.0" fill="none" stroke="#9aa4b2" stroke-width="2.5" marker-end="url(#a)" /><path d="M620,495.0 L674,495.0" fill="none" stroke="#9aa4b2" stroke-width="2.5" marker-end="url(#a)" /><path d="M805.0,440 L805.0,376" fill="none" stroke="#f59e0b" stroke-width="2.5" marker-end="url(#aa)" /><rect x="777.0" y="390" width="56" height="26" rx="13" fill="#0d1117" stroke="#f59e0b" stroke-width="1.2"/><text x="805.0" y="408" text-anchor="middle" font-family="Inter, DejaVu Sans, sans-serif" font-size="14" font-weight="600" fill="#f59e0b">miss</text><path d="M930,495.0 L954,495.0" fill="none" stroke="#06b6d4" stroke-width="2.5" marker-end="url(#ac)" /><rect x="946.5" y="452.0" width="47" height="26" rx="13" fill="#0d1117" stroke="#06b6d4" stroke-width="1.2"/><text x="970" y="470.0" text-anchor="middle" font-family="Inter, DejaVu Sans, sans-serif" font-size="14" font-weight="600" fill="#06b6d4">hit</text><path d="M930,315.0 C1000,315.0 1085.0,300 1085.0,434" fill="none" stroke="#9aa4b2" stroke-width="2.5" marker-end="url(#a)" /><path d="M1085.0,550 L1085.0,654" fill="none" stroke="#9aa4b2" stroke-width="2.5" marker-end="url(#a)" /><path d="M1210,695.0 C1270,695.0 1200,385.0 1304,385.0" fill="none" stroke="#9aa4b2" stroke-width="2.5" marker-end="url(#a)" /><path d="M1210,725.0 C1270,725.0 1260,710.0 1304,710.0" fill="none" stroke="#9aa4b2" stroke-width="2.5" marker-end="url(#a)" /><path d="M1560,365.0 C1590,365.0 1540,265.0 1604,265.0" fill="none" stroke="#9aa4b2" stroke-width="2.5" marker-end="url(#a)" /><path d="M1560,405.0 C1590,405.0 1540,535.0 1604,535.0" fill="none" stroke="#9aa4b2" stroke-width="2.5" marker-end="url(#a)" /><path d="M1560,710.0 C1590,710.0 1600,575.0 1735.0,596" fill="none" stroke="#9aa4b2" stroke-width="2.5" marker-end="url(#a)" /><text x="60" y="866" font-family="Inter, DejaVu Sans, sans-serif" font-size="15" fill="#6e7681">Dashed amber = planned, not runnable yet. Source: Mermaid architecture diagram in README.md</text></svg>
