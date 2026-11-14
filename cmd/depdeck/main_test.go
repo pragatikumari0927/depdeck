@@ -339,6 +339,16 @@ func TestFixtureHTTPProcesses(t *testing.T) {
 			_, _ = fmt.Fprint(w, packument("fresh", "MIT", time.Now()))
 		case "/downloads/fresh":
 			_, _ = fmt.Fprint(w, `{"downloads":10000}`)
+		case "/missing-downloads", "/failed-downloads", "/future-publish":
+			name := strings.TrimPrefix(r.URL.Path, "/")
+			published := time.Date(2099, time.March, 13, 0, 0, 0, 0, time.UTC)
+			_, _ = fmt.Fprint(w, packument(name, "MIT", published))
+		case "/downloads/missing-downloads":
+			http.NotFound(w, r)
+		case "/downloads/failed-downloads":
+			http.Error(w, "internal fixture detail", http.StatusInternalServerError)
+		case "/downloads/future-publish":
+			_, _ = fmt.Fprint(w, `{"downloads":10000}`)
 		case "/rate":
 			http.Error(w, "rate limited", http.StatusTooManyRequests)
 		case "/broken":
@@ -372,6 +382,40 @@ func TestFixtureHTTPProcesses(t *testing.T) {
 		len(deck.Dependencies[1].Errors) != 1 || deck.Dependencies[1].Errors[0].Kind != "not_found" {
 		t.Fatalf("unexpected fixture scan: %s", raw)
 	}
+	t.Run("pixel_archive_notices_and_publish_date", func(t *testing.T) {
+		path := manifest(t, "pixel archive", `{"dependencies":{"missing-downloads":"*","failed-downloads":"*","future-publish":"*"}}`)
+		raw, _ := cliResult(t, command, 0, "scan", "--json", "--no-cache", path)
+		result := decodeData[types.DeckData](t, []byte(raw), "scan", "dev")
+		if len(result.Dependencies) != 3 {
+			t.Fatalf("unexpected assessment: %s", raw)
+		}
+		failed, future, missing := result.Dependencies[0], result.Dependencies[1], result.Dependencies[2]
+		if len(failed.Errors) != 1 || failed.Errors[0].Kind != string(types.FetchNetwork) ||
+			len(missing.Errors) != 1 || missing.Errors[0].Kind != string(types.FetchNotFound) ||
+			future.LastPublish != "2099-03-13T00:00:00Z" || future.Chaos == nil || *future.Chaos != 0 {
+			t.Fatalf("unexpected registry facts: %s", raw)
+		}
+		html, _ := cliResult(t, command, 0, "scan", "--out", "-", "--no-cache", path)
+		for _, text := range []string{
+			"Registry data not found", "or its download count may be missing",
+			"The npm request failed", "Depdeck could not complete the request to npm.",
+			"The assessed version has a recorded publish date of 13 Mar 2099.",
+			"This date falls in the most recent publish-age band.",
+		} {
+			if !strings.Contains(html, text) {
+				t.Errorf("HTML missing %q", text)
+			}
+		}
+		for _, text := range []string{
+			"npm found no matching package or version", "could not connect", "before assessment",
+			"npm downloads returned 404", "npm downloads returned 500", "internal fixture detail",
+		} {
+			if strings.Contains(html, text) {
+				t.Errorf("HTML exposes or misstates %q", text)
+			}
+		}
+	})
+
 	ctx, session := connectMCP(t, command)
 	failed := manifest(t, "all unavailable", `{"dependencies":{"missing":"*","rate":"*","broken":"*"}}`)
 	rawDeck := callData(ctx, t, session, "list_deck", map[string]any{"path": failed})

@@ -1,3 +1,6 @@
+{{ define "seal" -}}
+<svg class="rarity-seal" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><use href="#{{ . }}"></use></svg>
+{{- end -}}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,173 +9,543 @@
   <title>depdeck</title>
   <style>
     :root {
-      --rarity-common: #64748B;
-      --rarity-rare: #2563EB;
-      --rarity-epic: #7C3AED;
-      --rarity-legendary: #B45309;
-      --error-ink: #B91C1C;
-      --font-html: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      --card-width: 220px;
-      --card-gap: 12px;
-      --paper: #F1F5F9;
-      --ink: #0F172A;
-      --muted: #475569;
-      --card-face: #FFFFFF;
-      --card-line: #CBD5E1;
+      color-scheme: dark;
+      --page: #0B1423;
+      --archive-surface: #16263B;
+      --archive-panel: #101D31;
+      --archive-raised: #213650;
+      --archive-line: #6A83A4;
+      --archive-ink: #F1F5FB;
+      --archive-muted: #B9CADF;
+      --archive-focus: #FFDF79;
+      --rarity-legendary: #FFDF79;
+      --rarity-epic: #E0A6FF;
+      --rarity-rare: #87F2FF;
+      --rarity-common: #D9E5F2;
+      --rarity-unknown: #FFD8B4;
+      --font-html: system-ui, "Segoe UI", sans-serif;
+      --font-display: ui-monospace, "Cascadia Mono", Consolas, monospace;
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --notice-panel: #432F36;
+      --notice-ink: #FFE7D4;
+      --notice-crest: #FFD783;
+      --notice-crest-ink: #3A231A;
+      --seal-size: 24px;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      background: var(--paper);
-      color: var(--ink);
-      font-family: var(--font-html);
+      padding: clamp(5px, 2vw, 28px);
+      background: radial-gradient(ellipse at top, #213450, var(--page) 66%);
+      color: var(--archive-ink);
+      font: 0.9375rem/1.5 var(--font-html);
     }
-    .filters {
+    h1, h2, h3, h4, p, dl, dd { margin: 0; }
+    .window {
+      max-width: 100rem;
+      margin-inline: auto;
+      border: 2px solid var(--archive-line);
+      background: linear-gradient(140deg, #121C30, var(--archive-surface));
+      box-shadow: 5px 6px #060D18;
+    }
+    .title-bar {
       display: flex;
-      flex-wrap: wrap;
-      gap: var(--card-gap);
-      padding: var(--card-gap);
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2);
+      background: linear-gradient(90deg, #233B75, #265477);
+      border-bottom: 2px solid #080F22;
+      font: 700 0.75rem/1.3 var(--font-display);
     }
-    .filters button {
-      background: var(--card-face);
-      color: var(--ink);
-      border: 1px solid var(--card-line);
-      font: inherit;
-      cursor: pointer;
-      padding: 4px 10px;
+    .title-icon {
+      flex: none;
+      width: 14px;
+      height: 14px;
+      background: var(--archive-focus);
+      clip-path: polygon(0 20%, 20% 20%, 20% 0, 80% 0, 80% 20%, 100% 20%, 100% 80%, 80% 80%, 80% 100%, 20% 100%, 20% 80%, 0 80%);
     }
-    .filters button[aria-pressed="true"] {
-      border-color: var(--ink);
+    .window-controls { display: flex; gap: 3px; margin-inline-start: auto; }
+    .window-controls span {
+      width: 16px;
+      height: 16px;
+      background: #AABBD3;
+      color: #182740;
+      border: 1px solid #D9E5F2;
+      box-shadow: inset -2px -2px #617798;
+      text-align: center;
+      line-height: 12px;
     }
-    .deck {
+    .window-content { padding: clamp(12px, 2vw, 24px); }
+    .masthead {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      padding-block: var(--space-2) var(--space-4);
+      border-bottom: 1px dashed var(--archive-line);
+    }
+    .brand-mark {
       display: grid;
-      gap: var(--card-gap);
-      padding: var(--card-gap);
-      grid-template-columns: repeat(auto-fill, minmax(var(--card-width), 1fr));
+      flex: none;
+      place-items: center;
+      width: clamp(42px, 6vw, 68px);
+      aspect-ratio: 1;
+      border: 3px solid #FFF1BC;
+      background: #EAB745;
+      color: #16263B;
+      box-shadow: inset 0 0 0 3px #926021, 3px 3px #0A1020;
+      font: 900 clamp(1.4rem, 4vw, 2.4rem)/1 var(--font-display);
     }
-    .card {
-      width: 100%;
-      max-width: 100%;
+    .masthead > div { min-width: 0; overflow-wrap: anywhere; }
+    .masthead h1 {
+      font: 900 clamp(2rem, 5vw, 3.6rem)/1 var(--font-display);
+      letter-spacing: -0.08em;
+    }
+    .masthead h1 span { color: var(--archive-focus); }
+    .masthead p { margin-top: var(--space-1); color: var(--archive-muted); }
+    .status-line {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      margin-block: var(--space-3) var(--space-4);
+      padding: var(--space-2) var(--space-3);
+      background: #102D31;
+      border: 1px solid #507B75;
+      color: #B8F5DB;
+      font: 600 0.8125rem/1.45 var(--font-display);
+    }
+    .status-line::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      flex: none;
+      background: #75EFAD;
+      box-shadow: 0 0 0 2px #2B6152;
+    }
+    .workspace, .collection, .sidebar { min-width: 0; }
+    .workspace { display: grid; gap: var(--space-4); }
+    .sidebar { display: grid; gap: var(--space-3); align-content: start; }
+    .panel { border: 1px solid var(--archive-line); background: var(--archive-surface); }
+    .panel h2 {
+      padding: var(--space-2) var(--space-3);
+      border-bottom: 1px solid var(--archive-line);
+      background: #304666;
+      font: 700 0.875rem/1.3 var(--font-display);
+    }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-2);
+      padding: var(--space-3);
+    }
+    .summary div {
+      display: flex;
+      flex-direction: column-reverse;
+      align-items: center;
+      gap: var(--space-1);
       min-width: 0;
+      padding: var(--space-2) var(--space-1);
+      border: 1px solid var(--archive-line);
+      background: var(--archive-panel);
+      text-align: center;
+    }
+    .summary dt, .stats dt, .card h4 {
+      font: 700 0.75rem/1.35 var(--font-display);
+      color: var(--archive-muted);
+    }
+    .summary dt { max-width: 100%; overflow-wrap: anywhere; }
+    .summary dd { font: 700 1.2rem/1.2 var(--font-display); color: var(--archive-focus); }
+    [data-rarity="Common"] { --tier-ink: var(--rarity-common); }
+    [data-rarity="Rare"] { --tier-ink: var(--rarity-rare); }
+    [data-rarity="Epic"] { --tier-ink: var(--rarity-epic); }
+    [data-rarity="Legendary"] { --tier-ink: var(--rarity-legendary); }
+    [data-rarity="Unknown"] { --tier-ink: var(--rarity-unknown); }
+    .seal-library { position: absolute; overflow: hidden; }
+    .rarity-seal {
+      display: block;
+      width: var(--seal-size);
+      height: var(--seal-size);
+      flex: none;
+      shape-rendering: crispEdges;
+      color: var(--tier-ink);
+    }
+    .atlas-description {
+      padding: var(--space-2) var(--space-3) 0;
+      color: var(--archive-muted);
+      font-size: 0.875rem;
+    }
+    .atlas-list {
+      display: grid;
+      gap: var(--space-1);
       margin: 0;
-      padding: var(--card-gap);
-      background: var(--card-face);
-      color: var(--ink);
-      border: 2px solid var(--card-line);
+      padding: var(--space-2) var(--space-3) var(--space-3);
+      list-style: none;
+    }
+    .atlas-row {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 0 var(--space-2);
+      padding: var(--space-1) var(--space-2);
+      border: 1px solid var(--archive-line);
+      border-inline-start: 3px solid var(--tier-ink);
+      background: var(--archive-panel);
+    }
+    .atlas-label, .atlas-count {
+      color: var(--tier-ink);
+      font: 700 0.8125rem/1.35 var(--font-display);
+    }
+    .atlas-label { overflow-wrap: anywhere; }
+    .atlas-count { white-space: nowrap; }
+    .atlas-details {
+      grid-column: 2 / -1;
+      color: var(--archive-muted);
+      font-size: 0.8125rem;
+      line-height: 1.4;
+    }
+    .atlas-range { display: block; color: var(--archive-ink); }
+    .collection-jump {
+      margin-inline-start: auto;
+      color: var(--archive-focus);
+      font: 700 0.8125rem/1.4 var(--font-display);
+      text-underline-offset: 0.2em;
+    }
+    .collection-title { font: 700 1rem/1.35 var(--font-display); }
+    .collection-toolbar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: var(--space-2);
+      padding-block: var(--space-2) var(--space-3);
+      margin-bottom: var(--space-3);
+      border-bottom: 1px solid var(--archive-line);
+    }
+    .filters { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+    .filters button {
+      min-width: 0;
+      min-height: 44px;
+      padding: var(--space-1) var(--space-2);
+      overflow-wrap: anywhere;
+      border: 1px solid var(--archive-line);
+      background: var(--archive-raised);
+      box-shadow: inset 1px 1px #8AA0BE, inset -2px -2px #0A1323;
+      color: var(--archive-ink);
+      font: 700 0.8125rem/1.25 var(--font-display);
+      cursor: pointer;
+    }
+    .filters button:hover { background: #304969; }
+    .filters button[aria-pressed="true"] {
+      color: #191604;
+      background: var(--archive-focus);
+      border-color: #BF902C;
+      box-shadow: inset 2px 2px #C28E34, inset -1px -1px #FFF0B7;
+    }
+    .filters button[aria-pressed="true"]:hover { background: #FFF0B7; }
+    .filters button:active {
+      box-shadow: inset 2px 2px #080F22, inset -1px -1px #A6B6CE;
+    }
+    .filters button:focus-visible, .collection-jump:focus-visible, .collection-title:focus {
+      outline: 2px solid var(--archive-focus);
+      outline-offset: 2px;
+    }
+    @media (forced-colors: active) {
+      .filters button[aria-pressed="true"] { border: 3px double ButtonText; }
+      .filters button:focus-visible, .collection-jump:focus-visible, .collection-title:focus {
+        outline-color: Highlight;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+    .view-count, .footer { font: 600 0.8125rem/1.4 var(--font-display); color: var(--archive-muted); }
+    .deck { display: grid; gap: var(--space-3); }
+    .card {
+      min-width: 0;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      overflow-wrap: anywhere;
+      border: 2px solid var(--tier-ink);
+      background: var(--archive-surface);
+      box-shadow: 3px 3px #0A1323;
     }
-    .card[hidden] {
-      display: none;
-    }
-    .card--no-data {
-      border-color: var(--muted);
-    }
-    .card[data-rarity="Common"] { border-color: var(--rarity-common); }
-    .card[data-rarity="Rare"] { border-color: var(--rarity-rare); }
-    .card[data-rarity="Epic"] { border-color: var(--rarity-epic); }
-    .card[data-rarity="Legendary"] { border-color: var(--rarity-legendary); }
+    .card[hidden] { display: none; }
     .rarity {
       display: flex;
       align-items: center;
-      gap: 6px;
-      margin: 0;
-      font-size: 0.8rem;
+      justify-content: space-between;
+      gap: var(--space-2);
+      padding: var(--space-1) var(--space-2);
+      background: var(--tier-ink);
+      color: #182033;
+      font: 800 0.8125rem/1.35 var(--font-display);
     }
-    .card[data-rarity="Common"] .rarity { color: var(--rarity-common); }
-    .card[data-rarity="Rare"] .rarity { color: var(--rarity-rare); }
-    .card[data-rarity="Epic"] .rarity { color: var(--rarity-epic); }
-    .card[data-rarity="Legendary"] .rarity { color: var(--rarity-legendary); }
-    .rarity-swatch {
-      width: 0.75em;
-      height: 0.75em;
-      background: currentColor;
-      flex: none;
+    .rarity .rarity-seal { --seal-size: 20px; color: #26324A; }
+    .card-art {
+      position: relative;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      aspect-ratio: 2 / 1;
+      background:
+        repeating-linear-gradient(0deg, #ffffff13 0 1px, transparent 1px 12px),
+        repeating-linear-gradient(90deg, #ffffff13 0 1px, transparent 1px 12px),
+        linear-gradient(135deg, #263A55, #12182D 80%);
+      border-block: 2px solid #0B1423;
     }
-    .name {
-      margin: 0;
-      font-size: 1rem;
-      line-height: 1.2;
-      overflow-wrap: anywhere;
+    .card-art::before, .card-art::after {
+      content: "";
+      position: absolute;
+      pointer-events: none;
     }
-    .version, .resolved, .stats, .flavor, .move, .errors {
-      margin: 0;
-      font-size: 0.8rem;
+    .card-art::before { inset: var(--space-2); border: 1px dashed var(--archive-line); }
+    .card-art::after {
+      width: 32%;
+      aspect-ratio: 1;
+      border: 6px solid var(--tier-ink);
+      opacity: 0.25;
+      transform: rotate(45deg);
     }
-    .resolved, .flavor {
-      color: var(--muted);
+    .card-art .rarity-seal {
+      z-index: 1;
+      --seal-size: clamp(48px, 22%, 84px);
+      height: auto;
+      aspect-ratio: 1;
+      filter: drop-shadow(4px 4px #101525);
     }
-    .stats {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
+    .card-body { display: flex; flex: 1; flex-direction: column; gap: var(--space-2); padding: var(--space-3); }
+    .name { font: 800 clamp(1rem, 1.6vw, 1.2rem)/1.25 var(--font-display); }
+    .version, .resolved { margin-top: var(--space-1); font: 0.8125rem/1.35 var(--font-display); }
+    .version span, .resolved span { color: var(--archive-muted); }
+    .tag {
+      display: inline-block;
+      margin-top: var(--space-1);
+      padding-inline: var(--space-1);
+      background: var(--archive-raised);
+      color: var(--archive-ink);
+      font: 700 0.75rem/1.5 var(--font-display);
     }
-    .errors {
-      color: var(--error-ink);
+    .stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-1); }
+    .stats div { padding: var(--space-2); border: 1px solid var(--archive-line); background: var(--archive-panel); }
+    .stats dd { margin-top: var(--space-1); font: 700 0.875rem/1.3 var(--font-display); }
+    .stats .unavailable { color: var(--archive-muted); font-weight: 400; }
+    .journal {
+      padding: var(--space-2);
+      border-inline-start: 3px solid var(--tier-ink);
+      background: var(--archive-raised);
+      font-size: 0.875rem;
     }
-    .error-kind + .error-kind::before {
-      content: " ";
+    .journal h4, .move h4 { color: var(--tier-ink); }
+    .journal p { margin-top: var(--space-1); }
+    .journal .flavor { color: var(--archive-muted); }
+    .move {
+      margin-top: auto;
+      padding-top: var(--space-2);
+      border-top: 1px dashed var(--archive-line);
+      font: 700 0.875rem/1.4 var(--font-display);
     }
-    @media (max-width: 640px) {
-      .deck { grid-template-columns: 1fr; }
+    .notice {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: start;
+      gap: var(--space-2);
+      padding: var(--space-2);
+      border: 2px solid #D18C71;
+      box-shadow: inset 0 0 0 2px #65444A;
+      background: var(--notice-panel);
+      color: var(--notice-ink);
+      font-size: 0.875rem;
+    }
+    .notice-crest {
+      display: grid;
+      place-items: center;
+      width: 1.5rem;
+      aspect-ratio: 1;
+      border: 1px solid #946B42;
+      background: var(--notice-crest);
+      color: var(--notice-crest-ink);
+      font: 900 1rem/1 var(--font-display);
+    }
+    .notice-label { color: var(--notice-ink); font: 700 0.75rem/1.4 var(--font-display); }
+    .notice h4 { margin-top: var(--space-1); color: inherit; font: 750 0.9375rem/1.35 var(--font-html); }
+    .notice p { margin-top: var(--space-1); }
+    .empty-deck, .filter-empty { color: var(--archive-muted); }
+    .footer {
+      margin-top: var(--space-4);
+      padding-top: var(--space-3);
+      border-top: 1px dashed var(--archive-line);
+    }
+    @media (max-width: 639px) {
+      .filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
+    }
+    @media (min-width: 375px) and (max-width: 1023px) {
+      .summary { grid-template-columns: repeat(auto-fit, minmax(min(100%, 4rem), 1fr)); }
+    }
+    @media (min-width: 640px) {
+      .deck { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (min-width: 1024px) {
+      .workspace { grid-template-columns: 15rem minmax(0, 1fr); }
     }
     @media (min-width: 1280px) {
-      .deck { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+      .workspace { grid-template-columns: 16rem minmax(0, 1fr); }
+      .deck { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     }
   </style>
 </head>
 <body>
-  <nav class="filters" aria-label="Tag filter">
-    <button type="button" data-filter="" aria-pressed="true">All</button>
-    <button type="button" data-filter="dependencies">dependencies</button>
-    <button type="button" data-filter="devDependencies">devDependencies</button>
-    <button type="button" data-filter="optionalDependencies">optionalDependencies</button>
-  </nav>
-  <main class="deck">
-    {{ range .Dependencies }}
-    <article class="card{{ if or (not .Rarity) .Errors }} card--no-data{{ end }}" data-rarity="{{ .Rarity }}" data-tag="{{ .Tag }}">
-      {{ if .Rarity }}
-      <p class="rarity"><span class="rarity-swatch"></span><span class="rarity-label">{{ .Rarity }}</span></p>
-      {{ end }}
-      <h2 class="name">{{ .Name }}</h2>
-      <p class="version">{{ .Version }}</p>
-      {{ if .ResolvedVersion }}
-      <p class="resolved">{{ .ResolvedVersion }}</p>
-      {{ end }}
-      <p class="stats">
-        {{ with .WeeklyDownloads }}<span>{{ . }}</span>{{ end }}
-        <span>{{ .LastPublish }}</span>
-        {{ with .Chaos }}<span>{{ . }}</span>{{ end }}
-        <span>{{ .License }}</span>
+  <svg class="seal-library" aria-hidden="true" focusable="false" width="0" height="0">
+    <symbol id="seal-legendary" viewBox="0 0 12 12">
+      <path fill="currentColor" d="M0 3h2v1h-2zM10 3h2v1h-2zM0 4h3v1h-3zM5 4h2v2h-2zM5 7h2v1h-2zM9 4h3v1h-3zM1 5h3v1h-3zM8 5h3v1h-3zM1 6h10v1h-10zM2 7h2v1h-2zM8 7h2v1h-2zM2 8h8v2h-8zM2 11h8v1h-8z"/>
+      <path fill="#fffef0" d="M5 0h2v1h-2zM5 2h2v1h-2zM4 1h4v1h-4zM4 7h1v1h-1zM7 7h1v1h-1z"/>
+    </symbol>
+    <symbol id="seal-epic" viewBox="0 0 12 12">
+      <path fill="currentColor" d="M5 0h2v4h-2zM5 8h2v4h-2zM1 2h2v1h-2zM1 9h2v1h-2zM9 2h2v1h-2zM9 9h2v1h-2zM1 3h3v1h-3zM1 8h3v1h-3zM8 3h3v1h-3zM8 8h3v1h-3zM2 4h3v1h-3zM2 7h3v1h-3zM7 4h3v1h-3zM7 7h3v1h-3z"/>
+      <path fill="#fffef0" d="M5 4h2v1h-2zM5 7h2v1h-2zM4 5h4v2h-4z"/>
+    </symbol>
+    <symbol id="seal-rare" viewBox="0 0 12 12">
+      <path fill="currentColor" d="M5 0h2v1h-2zM5 6h2v3h-2zM5 10h2v1h-2zM4 1h1v1h-1zM7 1h1v1h-1zM3 2h1v1h-1zM3 8h1v1h-1zM8 2h1v1h-1zM8 8h1v1h-1zM2 3h2v1h-2zM8 3h2v1h-2zM1 4h3v1h-3zM8 4h3v1h-3zM1 5h1v2h-1zM4 5h4v1h-4zM4 9h4v1h-4zM10 5h1v2h-1zM2 7h1v1h-1zM9 7h1v1h-1z"/>
+      <path fill="#fffef0" d="M5 1h2v1h-2zM4 2h4v3h-4zM2 5h2v1h-2zM8 5h2v1h-2zM2 6h3v1h-3zM7 6h3v1h-3zM3 7h2v1h-2zM7 7h2v1h-2zM4 8h1v1h-1zM7 8h1v1h-1z"/>
+    </symbol>
+    <symbol id="seal-common" viewBox="0 0 12 12">
+      <path fill="currentColor" d="M1 1h10v2h-10zM1 3h2v4h-2zM9 3h2v4h-2zM2 7h2v1h-2zM8 7h2v1h-2zM2 8h3v1h-3zM7 8h3v1h-3zM3 9h6v1h-6zM4 10h4v1h-4zM5 11h2v1h-2z"/>
+      <path fill="#fffef0" d="M5 4h2v2h-2z"/>
+    </symbol>
+    <symbol id="seal-unknown" viewBox="0 0 12 12">
+      <path fill="currentColor" d="M2 0h6v1h-6zM1 1h2v2h-2zM7 1h2v1h-2zM8 2h2v2h-2zM8 10h2v2h-2zM6 4h3v1h-3zM5 5h2v1h-2zM4 6h2v2h-2z"/>
+      <path fill="#fffef0" d="M4 9h2v2h-2z"/>
+    </symbol>
+  </svg>
+  <main class="window">
+    <div class="title-bar">
+      <span class="title-icon" aria-hidden="true"></span>
+      <span>Depdeck — The Package Archive</span>
+      <span class="window-controls" aria-hidden="true"><span>−</span><span>□</span><span>×</span></span>
+    </div>
+    <div class="window-content">
+      <header class="masthead">
+        <span class="brand-mark" aria-hidden="true">D</span>
+        <div><h1>depdeck<span aria-hidden="true">_</span></h1><p>Your project's direct dependencies, collected.</p></div>
+      </header>
+      <p class="status-line">
+        <span>Archive ready{{ if .Unknown }} · {{ .Unknown }} without a verified rank{{ end }}</span>
+        {{ if .Cards }}<a class="collection-jump" href="#collection-heading">Jump to Cards</a>{{ end }}
       </p>
-      <p class="flavor">{{ .FlavorText }}</p>
-      {{ if .SpecialMove }}
-      <p class="move">{{ .SpecialMove }}</p>
-      {{ end }}
-      {{ if .Errors }}
-      <p class="errors">{{ range .Errors }}<span class="error-kind">{{ .Kind }}</span>{{ end }}</p>
-      {{ end }}
-    </article>
-    {{ end }}
+      <div class="workspace">
+        <div class="sidebar">
+          <section class="panel" aria-labelledby="summary-heading">
+            <h2 id="summary-heading">Collection summary</h2>
+            <dl class="summary">
+              <div><dt>Cards</dt><dd>{{ len .Cards }}</dd></div>
+              <div><dt>Legendary</dt><dd>{{ .Legendary }}</dd></div>
+              <div><dt>Unknown</dt><dd>{{ .Unknown }}</dd></div>
+              <div><dt>Tags</dt><dd>{{ .TagCount }}</dd></div>
+            </dl>
+          </section>
+          <section class="rarity-atlas panel" aria-labelledby="rarity-atlas-heading">
+            <h2 id="rarity-atlas-heading">Rarity Atlas</h2>
+            <p class="atlas-description">Thresholds use weekly npm downloads. Counts cover all Cards in the Deck.</p>
+            <ul class="atlas-list" role="list">
+              {{ range .Atlas }}
+              <li class="atlas-row" data-rarity="{{ .Label }}">
+                {{ template "seal" .Seal }}
+                <strong class="atlas-label">{{ .Label }}</strong>
+                <span class="atlas-count">{{ .Count }} {{ if eq .Count 1 }}Card{{ else }}Cards{{ end }}</span>
+                <div class="atlas-details">
+                  <strong class="atlas-range">{{ .Downloads }}</strong>
+                  <span>{{ .Explanation }}</span>
+                </div>
+              </li>
+              {{ end }}
+            </ul>
+          </section>
+        </div>
+        <section class="collection" aria-labelledby="collection-heading">
+          <h2 id="collection-heading" class="collection-title" tabindex="-1">Dependency Cards</h2>
+          <div class="collection-toolbar">
+            <div class="filters" role="group" aria-label="Filter Cards by dependency group">
+              <button type="button" data-filter="" aria-pressed="true">All Cards</button>
+              <button type="button" data-filter="dependencies" aria-pressed="false">Runtime</button>
+              <button type="button" data-filter="devDependencies" aria-pressed="false">Development</button>
+              <button type="button" data-filter="optionalDependencies" aria-pressed="false">Optional</button>
+            </div>
+            <p id="view-count" class="view-count" role="status">{{ len .Cards }} of {{ len .Cards }} in view</p>
+          </div>
+          <div class="deck">
+  {{ range .Cards -}}
+  <article class="card{{ if eq .Tier.Label "Unknown" }} card--no-data{{ end }}" data-rarity="{{ .Tier.Label }}" data-tag="{{ .Tag }}">
+  <div class="rarity"><span class="rarity-label">{{ .Tier.Label }}</span>{{ template "seal" .Tier.Seal }}</div>
+  <div class="card-art" aria-hidden="true">{{ template "seal" .Tier.Seal }}</div>
+  <div class="card-body">
+  <header>
+  <h3 class="name">{{ .Name }}</h3>
+  <p class="version"><span>Declared version</span> {{ .Version }}</p>
+  {{ with .ResolvedVersion }}<p class="resolved"><span>Resolved version</span> {{ . }}</p>{{ end }}
+  {{ with .TagLabel }}<p class="tag">{{ . }}</p>{{ end }}
+  </header>
+  <dl class="stats">
+  <div><dt>Weekly downloads</dt><dd{{ if not .WeeklyDownloads }} class="unavailable"{{ end }}>{{ with .WeeklyDownloads }}{{ . }}{{ else }}Unavailable{{ end }}</dd></div>
+  <div><dt>Assessed version published</dt><dd{{ if not .Published }} class="unavailable"{{ end }}>{{ with .Published }}{{ . }}{{ else }}Unavailable{{ end }}</dd></div>
+  <div><dt>Chaos</dt><dd{{ if not .Chaos }} class="unavailable"{{ end }}>{{ with .Chaos }}{{ . }}{{ else }}Unavailable{{ end }}</dd></div>
+  <div><dt>License</dt><dd{{ if not .License }} class="unavailable"{{ end }}>{{ with .License }}{{ . }}{{ else }}Unavailable{{ end }}</dd></div>
+  </dl>
+  <section class="journal">
+  <h4>Field Journal</h4>
+  {{ with .FlavorText }}<p class="flavor"><strong>Flavor</strong> · {{ . }}</p>{{ end }}
+  {{ range .Journal }}<p>{{ . }}</p>{{ end }}
+  </section>
+  {{- with .SpecialMove }}
+  <section class="move"><h4>Special Move</h4><p>{{ . }}</p></section>
+  {{- end }}
+  {{- range .Notices }}
+  <div class="notice" role="note" aria-label="Archive Notice">
+  <span class="notice-crest" aria-hidden="true">!</span>
+  <div>
+  <p class="notice-label" aria-hidden="true">Archive Notice</p>
+  <h4>{{ .Title }}</h4>
+  <p>{{ .Explanation }}{{ with .NextStep }} {{ . }}{{ end }}</p>
+  </div>
+  </div>
+  {{- end }}
+  </div>
+  </article>
+  {{- else }}
+  <p class="empty-deck">No dependencies in this collection.</p>
+  {{- end }}
+  </div>
+          <p id="filter-empty" class="filter-empty" hidden>No Cards match this filter.</p>
+        </section>
+      </div>
+      <footer class="footer">Offline Deck · Rarity tracks downloads · Chaos tracks publish recency</footer>
+    </div>
   </main>
   <script>
     (function () {
-      var nav = document.querySelector(".filters");
-      if (!nav) return;
+      var filters = document.querySelector(".filters");
+      if (!filters) return;
       var cards = document.querySelectorAll(".card");
-      var buttons = nav.querySelectorAll("[data-filter]");
-      nav.addEventListener("click", function (event) {
+      var active = filters.querySelector('[aria-pressed="true"]');
+      var count = document.getElementById("view-count");
+      var empty = document.getElementById("filter-empty");
+      filters.addEventListener("click", function (event) {
         var btn = event.target.closest("[data-filter]");
-        if (!btn || !nav.contains(btn)) return;
+        if (!btn || !filters.contains(btn) || btn === active) return;
         var tag = btn.getAttribute("data-filter");
-        var i;
-        for (i = 0; i < buttons.length; i++) {
-          buttons[i].setAttribute("aria-pressed", buttons[i] === btn ? "true" : "false");
+        active.setAttribute("aria-pressed", "false");
+        btn.setAttribute("aria-pressed", "true");
+        active = btn;
+        var visible = 0;
+        for (var i = 0; i < cards.length; i++) {
+          var card = cards[i];
+          var show = tag === "" || card.getAttribute("data-tag") === tag;
+          if (card.hidden === show) card.hidden = !show;
+          if (show) visible++;
         }
-        for (i = 0; i < cards.length; i++) {
-          cards[i].hidden = !(tag === "" || cards[i].getAttribute("data-tag") === tag);
-        }
+        var status = visible + " of " + cards.length + " in view";
+        if (count.textContent !== status) count.textContent = status;
+        empty.hidden = visible !== 0 || cards.length === 0;
       });
     })();
   </script>

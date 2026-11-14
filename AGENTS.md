@@ -1,30 +1,11 @@
-## Agent skills
+# Agent entry
 
-### Issue tracker
+Use `task-observer` only for skill or workflow improvement work; it is not a required session-start step.
 
-Issues live as markdown files under `.scratch/<feature>/`. External PRs are not a triage surface. See `docs/agents/issue-tracker.md`.
+Read [the documentation map](docs/README.md), then follow the authority order in that file. The canonical project contract is [docs/SPEC.md](docs/SPEC.md); the decision index is [docs/DECISIONS.md](docs/DECISIONS.md); domain terms are in [docs/CONTEXT.md](docs/CONTEXT.md).
 
-### Triage labels
+Issues are Markdown files in `.scratch/<feature>/`. Follow [the issue workflow](docs/agents/issue-tracker.md) and [triage labels](docs/agents/triage-labels.md). Keep tool configs, hooks, rules, and skills at their discovery paths.
 
-Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+For CLI JSON and MCP, use `{schema_version, generated_at, generated_by, tool, data}`. Parse `data` by shape. Map CLI tools `scan` to `list_deck`, and `check` to `check_deck`; MCP also has `get_card`. Check the major schema version only.
 
-### Domain docs
-
-Single-context: `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
-
-### JSON envelope (CLI `--json` and MCP)
-
-Same wrapper: `{schema_version, generated_at, generated_by, tool, data}`. Parse `data` by shape; map `tool` names:
-
-- `scan` → `list_deck`
-- `check` → `check_deck`
-- MCP-only: `get_card` (no CLI single-card command in v1)
-
-Consumers must check the **major** component of `schema_version` only (e.g. prefix `1.`), not exact `"1.0"`.
-
-## Authorities
-- SPEC.md — the frozen technical contract
-- DECISIONS.md — index of the decision trail
-- CONTEXT.md — glossary
-- docs/adr/ — per-decision reasoning
-
+Use the `grok-bot` MCP tools to coordinate with the `General` bot when they are available. Send questions and handoffs with `gbot_send`; put who you are and what you need on the first line. Read replies with `gbot_thread`. Do not wait for a reply before continuing.
