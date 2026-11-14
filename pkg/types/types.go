@@ -132,5 +132,5 @@ type CheckData struct {
 	Flagged      []Dependency `json:"flagged"`
 	Reason       string       `json:"reason"`
 	Policy       CheckPolicy  `json:"policy"`
-	Dependencies []Dependency `json:"dependencies,omitempty"`
+	Dependencies []Dependency `json:"dependencies"`
 }
