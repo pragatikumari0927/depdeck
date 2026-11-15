@@ -51,11 +51,11 @@ func dispatch(ctx context.Context, args []string, opt pipeline.Options) int {
 		return cli.Run(ctx, args, opt, os.Stdout, os.Stderr)
 	}
 	if len(args) == 2 && (args[1] == "--help" || args[1] == "-h") {
-		_, _ = fmt.Fprintln(os.Stdout, "usage: depdeck mcp")
+		_, _ = fmt.Fprintln(os.Stdout, "Usage: depdeck mcp\nStart the MCP server over standard input and output.")
 		return 0
 	}
 	if len(args) != 1 {
-		_, _ = fmt.Fprintln(os.Stderr, "usage: depdeck mcp")
+		_, _ = fmt.Fprintln(os.Stderr, "depdeck mcp takes no arguments. Run depdeck mcp --help for usage.")
 		return 2
 	}
 	if opt.Registry == nil {

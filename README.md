@@ -86,7 +86,7 @@ depdeck check --json .
 depdeck scan --json . | jq '.data.dependencies[] | select(.rarity == "Legendary") | .name'
 ```
 
-By default, `check` flags a Dependency when its Chaos exceeds 0.5 or its license is missing after a successful fetch. A Card with fetch errors keeps those errors for review. In continuous integration (CI), run `depdeck check` directly to use its exit status.
+After a successful npm fetch, `check` flags a Dependency if its Chaos exceeds 0.5 or its license declaration is missing. A Card with fetch errors keeps those errors for review. In continuous integration (CI), run `depdeck check` directly to use its exit status.
 
 | Exit | Meaning |
 | --- | --- |
@@ -115,7 +115,7 @@ The server uses standard input and output. If your client cannot find `depdeck`,
 | Tool | Arguments | Result |
 | --- | --- | --- |
 | `list_deck` | `path`, optional `tag` and `flavor` | Cards for a project |
-| `get_card` | npm package `name`, optional `flavor` | One registry Card |
+| `get_card` | npm package `name`, optional `flavor` | One registry Card. Use `list_deck` for project membership. |
 | `check_deck` | `path` | Policy verdict and assessed dependencies |
 
 Use `rule` or `none` for `flavor`. Valid Tag values are `dependencies`, `devDependencies`, and `optionalDependencies`. CLI and MCP results use the same JSON envelope at schema `1.1`. Check the major version and read `data` according to the operation. For an empty Check, builds from `main` return `data.dependencies: []`. The published `v1.0.0` release omits that field for empty Checks. See the [output contract](docs/SPEC.md#envelope).
@@ -124,7 +124,7 @@ Use `rule` or `none` for `flavor`. Valid Tag values are `dependencies`, `devDepe
 
 - “Use `list_deck` for this project with the Tag `devDependencies`. Summarize the publish dates and point out missing npm facts.”
 - “Use `get_card` for `react`. Show its weekly downloads, Rarity, publish date, and license.”
-- “Run `check_deck` for this project. Explain what triggered each flag and list fetch errors separately.”
+- “Run `check_deck` for this project. Use the returned policy and Card facts to explain each flag. List Fetch errors separately.”
 
 ## Under the cartridge
 

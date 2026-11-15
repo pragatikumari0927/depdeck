@@ -71,9 +71,9 @@ func TestReleaseBinaryOffline(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	for _, name := range []string{"fresh", "unlicensed"} {
+	for _, name := range []string{"fresh", "unlicensed", "also-unlicensed"} {
 		license := "MIT"
-		if name == "unlicensed" {
+		if name != "fresh" {
 			license = ""
 		}
 		put("npm", name, cache.ClassOK, 200, packument(name, license, now))
@@ -101,14 +101,13 @@ func TestReleaseBinaryOffline(t *testing.T) {
 			{"version", []string{"--version"}, 0, "depdeck 1.0.0-test"},
 			{"usage", nil, 2, ""},
 			{"mcp_usage", []string{"mcp", "extra"}, 2, ""},
+			{"mcp_help", []string{"mcp", "--help"}, 0, "Start the MCP server over standard input and output."},
 			{"write_failure", []string{"scan", "--out", project}, 2, ""},
 			{"invalid_manifest", []string{"scan", manifest(t, "invalid", "{")}, 2, ""},
 			{"missing_manifest", []string{"scan", t.TempDir()}, 2, ""},
 			{"null_manifest", []string{"check", manifest(t, "null", "null")}, 2, ""},
 			{"ai", []string{"scan", "--flavor=ai"}, 2, ""},
 			{"stdout_html", []string{"scan", "--out", "-"}, 0, "<!DOCTYPE html>"},
-			{"flagged", []string{"check", "--json", manifest(t, "flagged", `{"dependencies":{"unlicensed":"*"}}`)}, 1, "policy_failed"},
-			{"degraded", []string{"check", "--json", manifest(t, "degraded", `{"dependencies":{"missing":"*"}}`)}, 3, "all_fetches_failed"},
 		}
 		for _, tc := range cases {
 			t.Run(tc.name, func(t *testing.T) {
@@ -116,16 +115,49 @@ func TestReleaseBinaryOffline(t *testing.T) {
 				if tc.want != "" && !strings.Contains(stdout, tc.want) {
 					t.Fatalf("stdout = %q, want %q", stdout, tc.want)
 				}
+				if tc.code == 0 && tc.name == "mcp_help" && stderr != "" {
+					t.Fatalf("MCP help wrote to stderr: %q", stderr)
+				}
 				if tc.code == 2 && (stdout != "" || stderr == "") {
 					t.Fatalf("stdout = %q, stderr = %q", stdout, stderr)
 				}
 			})
 		}
-		t.Run("empty_check", func(t *testing.T) {
-			stdout, _ := cliResult(t, command, 0, "check", "--json", emptyProject)
-			check := decodeData[types.CheckData](t, []byte(stdout), "check", "1.0.0-test")
-			if !check.Pass || check.Reason != "empty_roster" || check.Dependencies == nil || len(check.Dependencies) != 0 {
-				t.Fatalf("empty CLI Check must include dependencies: []; got %s", stdout)
+		t.Run("check_verdicts", func(t *testing.T) {
+			for _, tc := range []struct {
+				reason string
+				roster string
+				code   int
+				want   string
+				warn   bool
+			}{
+				{"pass", `{"dependencies":{"fresh":"*"}}`, 0, "Check passed. No dependencies met the policy's flagging criteria.", false},
+				{"empty_roster", `{}`, 0, "Check passed. No direct dependencies to assess.", false},
+				{"partial_fetch_errors", mixedRoster, 0, "Check passed for assessed dependencies. npm data was unavailable for some dependencies.", true},
+				{"policy_failed", `{"dependencies":{"unlicensed":"*","missing":"*"}}`, 1, "Check failed. The policy flagged 1 dependency.", true},
+				{"policy_failed", `{"dependencies":{"unlicensed":"*","also-unlicensed":"*"}}`, 1, "Check failed. The policy flagged 2 dependencies.", false},
+				{"all_fetches_failed", `{"dependencies":{"missing":"*"}}`, 3, "Check failed. npm data was unavailable for every dependency.", true},
+			} {
+				t.Run(tc.reason, func(t *testing.T) {
+					path := manifest(t, tc.reason, tc.roster)
+					stdout, stderr := cliResult(t, command, tc.code, "check", path)
+					if stdout != tc.want+"\n" {
+						t.Errorf("plain Check stdout = %q, want %q", stdout, tc.want)
+					}
+					wantWarning := ""
+					if tc.warn {
+						wantWarning = "Warning: Could not assess \"missing\" using npm data. Its Card has a Fetch error.\n"
+					}
+					jsonText, jsonStderr := cliResult(t, command, tc.code, "check", "--json", path)
+					if stderr != wantWarning || jsonStderr != wantWarning {
+						t.Errorf("plain stderr = %q, JSON stderr = %q, want %q", stderr, jsonStderr, wantWarning)
+					}
+					check := decodeData[types.CheckData](t, []byte(jsonText), "check", "1.0.0-test")
+					if check.Reason != tc.reason || check.Pass != (tc.code == 0) || check.Dependencies == nil ||
+						(tc.reason == "empty_roster") != (len(check.Dependencies) == 0) {
+						t.Errorf("unexpected JSON Check: %s", jsonText)
+					}
+				})
 			}
 		})
 		scan, stderr := cliResult(t, command, 0, "scan", "--json")

@@ -1,9 +1,9 @@
 package flavor
 
 import (
-	"github.com/pragatikumari0927/depdeck/pkg/types"
 	"errors"
 	"fmt"
+	"github.com/pragatikumari0927/depdeck/pkg/types"
 )
 
 // Mode selects the v1 Flavor behavior.
@@ -19,7 +19,7 @@ const (
 )
 
 // ErrAINotInV1 reports the reserved AI setting.
-var ErrAINotInV1 = errors.New("ai Flavor is not available in v1.1")
+var ErrAINotInV1 = errors.New("--flavor=ai is reserved for v1.1, use --flavor=rule or --flavor=none")
 
 // Validate checks a requested mode before assessment.
 func (m Mode) Validate() error {
@@ -29,7 +29,7 @@ func (m Mode) Validate() error {
 	case AI:
 		return ErrAINotInV1
 	default:
-		return fmt.Errorf("invalid Flavor mode %q", m)
+		return fmt.Errorf("invalid Flavor mode %q, use rule or none", m)
 	}
 }
 

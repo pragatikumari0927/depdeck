@@ -43,17 +43,17 @@ func New(opt pipeline.Options) *mcp.Server {
 		types.TagDependencies, types.TagDevDependencies, types.TagOptionalDependencies,
 	}}
 
-	register(server, "list_deck", "List every direct dependency of a project as Cards. Use for project-wide questions.",
+	register(server, "list_deck", "List assessment data for direct dependencies in a project's root package.json. Use path for the project directory or manifest, tag to select one dependency group, and flavor to choose rule or none. Results include Fetch errors when npm data is unavailable.",
 		"path", map[string]any{"path": requiredString, "tag": tagEnum, "flavor": flavorEnum},
 		func(ctx context.Context, args listArgs) (any, error) {
 			if strings.TrimSpace(args.Path) == "" {
-				return nil, errors.New("path must name a project directory or manifest")
+				return nil, errors.New("set path to a project directory or a package.json file")
 			}
 			requestOpt := opt
 			requestOpt.Flavor = args.Flavor
 			deps, err := pipeline.Run(ctx, args.Path, requestOpt)
 			if err != nil {
-				return nil, errors.New("could not assess the project manifest")
+				return nil, errors.New("could not assess the project, check that path points to a readable package.json")
 			}
 			if args.Tag != "" {
 				filtered := deps[:0]
@@ -67,32 +67,32 @@ func New(opt pipeline.Options) *mcp.Server {
 			return types.DeckData{Dependencies: deps}, nil
 		})
 
-	register(server, "get_card", "Fetch a single package's Card from npm. Use for package-specific questions.",
+	register(server, "get_card", "Look up facts for one public npm package by name, such as react or @scope/package. Use flavor to choose rule or none. Call list_deck to check project membership. If npm data is unavailable, the Card includes a Fetch error.",
 		"name", map[string]any{"name": requiredString, "flavor": flavorEnum},
 		func(ctx context.Context, args cardArgs) (any, error) {
 			if !registry.ValidPackageName(args.Name) {
-				return nil, errors.New("name must be a supported npm package name")
+				return nil, errors.New("use an npm package name such as react or @scope/package")
 			}
 			requestOpt := opt
 			requestOpt.Flavor = args.Flavor
 			dep, err := pipeline.GetCard(ctx, args.Name, requestOpt)
 			if err != nil {
-				return nil, errors.New("could not assess the npm package")
+				return nil, errors.New("could not complete the assessment for this npm package")
 			}
 			return dep.StandaloneCard(), nil
 		})
 
-	register(server, "check_deck", "Return which dependencies are flagged as risky, and an overall pass/fail. Use before shipping or for CI gating.",
+	register(server, "check_deck", "Evaluate direct dependencies against the default publish-age and license-declaration policy. Returns the verdict, policy, flagged dependencies, and assessed dependencies with any Fetch errors. Chaos reflects publish age, and Rarity reflects weekly downloads. Use a vulnerability scanner for security findings.",
 		"path", map[string]any{"path": requiredString},
 		func(ctx context.Context, args checkArgs) (any, error) {
 			if strings.TrimSpace(args.Path) == "" {
-				return nil, errors.New("path must name a project directory or manifest")
+				return nil, errors.New("set path to a project directory or a package.json file")
 			}
 			requestOpt := opt
 			requestOpt.Flavor = flavor.Rule
 			check, err := pipeline.Check(ctx, args.Path, requestOpt)
 			if err != nil {
-				return nil, errors.New("could not assess the project manifest")
+				return nil, errors.New("could not assess the project, check that path points to a readable package.json")
 			}
 			return check, nil
 		})
@@ -129,7 +129,7 @@ func register[Args any](server *mcp.Server, name, description, required string, 
 		defer func() {
 			if recover() != nil {
 				out = nil
-				err = errors.New("dependency assessment failed")
+				err = errors.New("could not complete the dependency assessment")
 			}
 		}()
 		data, err := handle(ctx, args)
