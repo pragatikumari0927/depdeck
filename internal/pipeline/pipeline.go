@@ -55,6 +55,14 @@ func (o Options) ready() (Options, error) {
 	return o, nil
 }
 
+// ManifestError identifies the input path when locating or parsing a manifest fails.
+type ManifestError struct {
+	Path string
+	error
+}
+
+func (e *ManifestError) Unwrap() error { return e.error }
+
 // ManifestPath resolves a project directory or manifest file.
 func ManifestPath(path string) (string, error) {
 	if path == "" {
@@ -62,7 +70,7 @@ func ManifestPath(path string) (string, error) {
 	}
 	info, err := os.Stat(path)
 	if err != nil {
-		return "", fmt.Errorf("stat project path %s: %w", path, err)
+		return "", &ManifestError{Path: path, error: fmt.Errorf("stat project path %s: %w", path, err)}
 	}
 	if info.IsDir() {
 		return filepath.Join(path, "package.json"), nil
@@ -82,7 +90,7 @@ func Run(ctx context.Context, path string, opt Options) ([]types.Dependency, err
 	}
 	deps, err := parser.ParseFile(manifest)
 	if err != nil {
-		return nil, err
+		return nil, &ManifestError{Path: manifest, error: err}
 	}
 	sort.SliceStable(deps, func(i, j int) bool {
 		if deps[i].Name != deps[j].Name {

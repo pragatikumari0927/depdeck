@@ -76,10 +76,11 @@ func TestHelpAndUsageStreams(t *testing.T) {
 		want   []string
 		omit   string
 	}{
-		{"help", []string{"--help"}, 0, false, []string{"depdeck scan [flags] [path]", "package.json in the current directory"}, ""},
+		{"help", []string{"--help"}, 0, false, []string{"depdeck scan [flags] [path]", "package.json in the current directory", "Try depdeck scan to build your first Deck."}, ""},
 		{"no_args", nil, 2, true, []string{"depdeck scan [flags] [path]", "depdeck mcp"}, ""},
 		{"scan_help", []string{"scan", "--help"}, 0, true, []string{"Usage: depdeck scan [flags] [path]", "Put flags before the path.", "This mode skips the HTML Deck.", "deck.html beside package.json", "Special Moves", "Skip reading and writing the local npm cache."}, ""},
 		{"check_help", []string{"check", "-h"}, 0, true, []string{"Usage: depdeck check [flags] [path]", "Write assessment JSON to standard output."}, "-out"},
+		{"conflicting_outputs", []string{"scan", "--json", "--out", "-"}, 2, true, []string{"--json and --out cannot be used together.", "Use --json for assessment data or --out for HTML."}, ""},
 		{"bad_flag", []string{"scan", "--unknown"}, 2, true, []string{"flag provided but not defined", "Usage: depdeck scan [flags] [path]"}, ""},
 		{"flag_after_path", []string{"scan", ".", "--json"}, 2, true, []string{"Put flags before the path."}, ""},
 		{"bad_command", []string{"scan\nother"}, 2, true, []string{`Unknown command "scan\nother". Run depdeck --help`}, ""},
@@ -113,7 +114,7 @@ func TestWarningsQuoteControlCharacters(t *testing.T) {
 		Name:   "pkg\x1b[2J\nforged",
 		Errors: []types.FetchError{{Source: "npm", Kind: "parse"}},
 	}}, &stderr)
-	if got := stderr.String(); got != "Warning: Could not assess \"pkg\\x1b[2J\\nforged\" using npm data. Its Card has a Fetch error.\n" {
+	if got := stderr.String(); got != "Warning: npm data unavailable for \"pkg\\x1b[2J\\nforged\".\n" {
 		t.Fatalf("warning = %q", got)
 	}
 }
