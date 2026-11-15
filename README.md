@@ -1,12 +1,16 @@
-<img src="docs/assets/pixel-archive-hero.svg" alt="Depdeck Pixel Archive, with three pixel-art trading cards" width="1120">
+<div align="center">
+
+<img src="docs/assets/pixel-archive-hero.svg" alt="Pixel Archive banner with three pixel-art trading cards" width="1120">
 
 # depdeck
 
 **Your `package.json` has a secret card collection.**
 
-*Gotta scan ’em all.* Depdeck deals the packages your project declares into a pixel-art Deck. Look up npm facts, run a policy Check, or ask a coding agent to read the same assessment.
+*Gotta scan ’em all.* Turn the npm packages your project declares into pixel-art Cards. Browse package facts, run a policy Check, or explore the Deck with a coding agent.
 
 [![Latest GitHub release](https://img.shields.io/github/v/release/pragatikumari0927/depdeck)](https://github.com/pragatikumari0927/depdeck/releases) [![Tests on main](https://github.com/pragatikumari0927/depdeck/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/pragatikumari0927/depdeck/actions/workflows/test.yml?query=branch%3Amain) [![MIT license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
+</div>
 
 ## Peek inside the Pixel Archive
 
