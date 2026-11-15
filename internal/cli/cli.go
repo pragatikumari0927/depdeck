@@ -25,6 +25,7 @@ const usage = `Usage:
   depdeck mcp                   Start the MCP server over standard input and output.
 
 If you omit path, depdeck reads package.json in the current directory.
+Try depdeck scan to build your first Deck.
 Run depdeck scan --help or depdeck check --help for flags.
 `
 
@@ -86,7 +87,7 @@ func Run(ctx context.Context, args []string, opt pipeline.Options, stdout, stder
 			}
 		})
 		if conflict {
-			_, _ = fmt.Fprintln(stderr, "--json and --out cannot be used together")
+			_, _ = fmt.Fprintln(stderr, "--json and --out cannot be used together. Use --json for assessment data or --out for HTML.")
 			return 2
 		}
 	}
@@ -115,7 +116,7 @@ func Run(ctx context.Context, args []string, opt pipeline.Options, stdout, stder
 	if command == "check" {
 		result, err := pipeline.Check(ctx, path, opt)
 		if err != nil {
-			_, _ = fmt.Fprintln(stderr, err)
+			reportAssessmentError(stderr, err)
 			return 2
 		}
 		warnings(result.Dependencies, stderr)
@@ -140,12 +141,12 @@ func Run(ctx context.Context, args []string, opt pipeline.Options, stdout, stder
 	if !*jsonMode && target != "-" {
 		manifest, err := pipeline.ManifestPath(path)
 		if err != nil {
-			_, _ = fmt.Fprintln(stderr, err)
+			reportAssessmentError(stderr, err)
 			return 2
 		}
 		manifestInfo, err = os.Stat(manifest)
 		if err != nil {
-			_, _ = fmt.Fprintln(stderr, err)
+			reportManifestError(stderr, manifest, err)
 			return 2
 		}
 		path = manifest
@@ -159,7 +160,7 @@ func Run(ctx context.Context, args []string, opt pipeline.Options, stdout, stder
 	}
 	deps, err := pipeline.Run(ctx, path, opt)
 	if err != nil {
-		_, _ = fmt.Fprintln(stderr, err)
+		reportAssessmentError(stderr, err)
 		return 2
 	}
 	warnings(deps, stderr)
@@ -185,21 +186,51 @@ func Run(ctx context.Context, args []string, opt pipeline.Options, stdout, stder
 	return 0
 }
 
+func reportAssessmentError(stderr io.Writer, err error) {
+	var manifestErr *pipeline.ManifestError
+	if errors.As(err, &manifestErr) {
+		reportManifestError(stderr, manifestErr.Path, manifestErr.Unwrap())
+		return
+	}
+	_, _ = fmt.Fprintln(stderr, err)
+}
+
+func reportManifestError(stderr io.Writer, path string, err error) {
+	var syntaxErr *json.SyntaxError
+	var typeErr *json.UnmarshalTypeError
+	switch {
+	case errors.Is(err, os.ErrNotExist):
+		_, _ = fmt.Fprintf(stderr, "Could not find %q. Run from a project directory or pass the path to package.json.\n", path)
+	case errors.Is(err, os.ErrPermission):
+		_, _ = fmt.Fprintf(stderr, "Could not read %q. Check the file permissions and try again.\n", path)
+	case errors.As(err, &syntaxErr):
+		_, _ = fmt.Fprintf(stderr, "Invalid JSON in %q. Fix the JSON and try again.\n", path)
+	case errors.As(err, &typeErr):
+		_, _ = fmt.Fprintf(stderr, "Invalid manifest %q. Use a JSON object. Check that dependency groups map package names to version strings.\n", path)
+	default:
+		var pathErr *os.PathError
+		if errors.As(err, &pathErr) {
+			err = pathErr.Err
+		}
+		_, _ = fmt.Fprintf(stderr, "Could not use manifest %q. Check the file and try again. (%q)\n", path, err.Error())
+	}
+}
+
 func checkSummary(result types.CheckData) string {
 	switch result.Reason {
 	case "pass":
-		return "Check passed. No dependencies met the policy's flagging criteria."
+		return "Check passed. No dependencies were flagged."
 	case "empty_roster":
-		return "Check passed. No direct dependencies to assess."
+		return "Check passed. No direct dependencies are listed in package.json."
 	case "partial_fetch_errors":
-		return "Check passed for assessed dependencies. npm data was unavailable for some dependencies."
+		return "Check passed for assessed dependencies. See the npm warnings for missing data."
 	case "policy_failed":
 		if len(result.Flagged) == 1 {
-			return "Check failed. The policy flagged 1 dependency."
+			return "Check failed. The policy flagged 1 dependency. Run the same Check with --json for details."
 		}
-		return fmt.Sprintf("Check failed. The policy flagged %d dependencies.", len(result.Flagged))
+		return fmt.Sprintf("Check failed. The policy flagged %d dependencies. Run the same Check with --json for details.", len(result.Flagged))
 	case "all_fetches_failed":
-		return "Check failed. npm data was unavailable for every dependency."
+		return "Check failed. npm data was unavailable for every dependency. Run the same Check with --json for Fetch errors."
 	}
 	verdict := "failed"
 	if result.Pass {
@@ -211,7 +242,7 @@ func checkSummary(result types.CheckData) string {
 func warnings(deps []types.Dependency, stderr io.Writer) {
 	for _, d := range deps {
 		if len(d.Errors) > 0 {
-			_, _ = fmt.Fprintf(stderr, "Warning: Could not assess %q using npm data. Its Card has a Fetch error.\n", d.Name)
+			_, _ = fmt.Fprintf(stderr, "Warning: npm data unavailable for %q.\n", d.Name)
 		}
 	}
 }

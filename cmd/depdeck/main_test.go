@@ -123,6 +123,30 @@ func TestReleaseBinaryOffline(t *testing.T) {
 				}
 			})
 		}
+		t.Run("manifest_guidance", func(t *testing.T) {
+			missingFile := filepath.Join(t.TempDir(), "missing.json")
+			missingManifest := t.TempDir()
+			malformed := manifest(t, "malformed project", "{")
+			wrongType := manifest(t, "wrong declaration", `{"dependencies":{"fresh":1}}`)
+			for _, tc := range []struct {
+				name string
+				args []string
+				want string
+				hint string
+			}{
+				{"missing_path", []string{"check", "--json", missingFile}, fmt.Sprintf("Could not find %q.", missingFile), "Run from a project directory or pass the path to package.json."},
+				{"missing_manifest", []string{"scan", missingManifest}, fmt.Sprintf("Could not find %q.", filepath.Join(missingManifest, "package.json")), "Run from a project directory or pass the path to package.json."},
+				{"malformed_json", []string{"scan", "--out", "-", malformed}, fmt.Sprintf("Invalid JSON in %q.", filepath.Join(malformed, "package.json")), "Fix the JSON and try again."},
+				{"dependency_value", []string{"check", wrongType}, fmt.Sprintf("Invalid manifest %q.", filepath.Join(wrongType, "package.json")), "Check that dependency groups map package names to version strings."},
+			} {
+				t.Run(tc.name, func(t *testing.T) {
+					stdout, stderr := cliResult(t, command, 2, tc.args...)
+					if stdout != "" || !strings.Contains(stderr, tc.want) || !strings.Contains(stderr, tc.hint) {
+						t.Fatalf("stdout = %q, stderr = %q, want %q and %q", stdout, stderr, tc.want, tc.hint)
+					}
+				})
+			}
+		})
 		t.Run("check_verdicts", func(t *testing.T) {
 			for _, tc := range []struct {
 				reason string
@@ -131,12 +155,12 @@ func TestReleaseBinaryOffline(t *testing.T) {
 				want   string
 				warn   bool
 			}{
-				{"pass", `{"dependencies":{"fresh":"*"}}`, 0, "Check passed. No dependencies met the policy's flagging criteria.", false},
-				{"empty_roster", `{}`, 0, "Check passed. No direct dependencies to assess.", false},
-				{"partial_fetch_errors", mixedRoster, 0, "Check passed for assessed dependencies. npm data was unavailable for some dependencies.", true},
-				{"policy_failed", `{"dependencies":{"unlicensed":"*","missing":"*"}}`, 1, "Check failed. The policy flagged 1 dependency.", true},
-				{"policy_failed", `{"dependencies":{"unlicensed":"*","also-unlicensed":"*"}}`, 1, "Check failed. The policy flagged 2 dependencies.", false},
-				{"all_fetches_failed", `{"dependencies":{"missing":"*"}}`, 3, "Check failed. npm data was unavailable for every dependency.", true},
+				{"pass", `{"dependencies":{"fresh":"*"}}`, 0, "Check passed. No dependencies were flagged.", false},
+				{"empty_roster", `{}`, 0, "Check passed. No direct dependencies are listed in package.json.", false},
+				{"partial_fetch_errors", mixedRoster, 0, "Check passed for assessed dependencies. See the npm warnings for missing data.", true},
+				{"policy_failed", `{"dependencies":{"unlicensed":"*","missing":"*"}}`, 1, "Check failed. The policy flagged 1 dependency. Run the same Check with --json for details.", true},
+				{"policy_failed", `{"dependencies":{"unlicensed":"*","also-unlicensed":"*"}}`, 1, "Check failed. The policy flagged 2 dependencies. Run the same Check with --json for details.", false},
+				{"all_fetches_failed", `{"dependencies":{"missing":"*"}}`, 3, "Check failed. npm data was unavailable for every dependency. Run the same Check with --json for Fetch errors.", true},
 			} {
 				t.Run(tc.reason, func(t *testing.T) {
 					path := manifest(t, tc.reason, tc.roster)
@@ -146,7 +170,7 @@ func TestReleaseBinaryOffline(t *testing.T) {
 					}
 					wantWarning := ""
 					if tc.warn {
-						wantWarning = "Warning: Could not assess \"missing\" using npm data. Its Card has a Fetch error.\n"
+						wantWarning = "Warning: npm data unavailable for \"missing\".\n"
 					}
 					jsonText, jsonStderr := cliResult(t, command, tc.code, "check", "--json", path)
 					if stderr != wantWarning || jsonStderr != wantWarning {
@@ -178,10 +202,11 @@ func TestReleaseBinaryOffline(t *testing.T) {
 		if _, err := os.Stat(target); !errors.Is(err, os.ErrNotExist) {
 			t.Fatalf("JSON scan created HTML: %v", err)
 		}
-		_, stderr = cliResult(t, command, 0, "scan")
+		scanOutput, stderr := cliResult(t, command, 0, "scan")
 		html, err := os.ReadFile(target)
-		if err != nil || !strings.Contains(string(html), "fresh") || !strings.Contains(stderr, "Wrote deck.html (2 cards)") {
-			t.Fatalf("default Deck: %v, stderr = %q", err, stderr)
+		wantScanStderr := "Warning: npm data unavailable for \"missing\".\nWrote deck.html (2 cards)\n"
+		if err != nil || !strings.Contains(string(html), "fresh") || scanOutput != "" || stderr != wantScanStderr {
+			t.Fatalf("default Deck: %v, stdout = %q, stderr = %q", err, scanOutput, stderr)
 		}
 	})
 
