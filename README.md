@@ -31,7 +31,7 @@
 
 - **Prebuilt executable.** Choose the archive for Windows, macOS, or Linux and your CPU architecture (`amd64` or `arm64`). Compare its SHA-256 checksum with the matching line in `checksums.txt`. Extract the executable and put it on your `PATH`, the list of directories your terminal searches for programs. [Release archives](https://github.com/pragatikumari0927/depdeck/releases/tag/v1.0.0) · [Checksums](https://github.com/pragatikumari0927/depdeck/releases/download/v1.0.0/checksums.txt)
 - **Homebrew on macOS.** Run `brew install pragatikumari0927/tap/depdeck`. [Homebrew tap](https://github.com/pragatikumari0927/homebrew-tap)
-- **Go 1.26.9 or later.** Run `go install github.com/pragatikumari0927/depdeck/cmd/depdeck@v1.0.0`.
+- **Go install.** Use a current security patch for your Go line, such as Go 1.26.11 or Go 1.27.4. Run `go install github.com/pragatikumari0927/depdeck/cmd/depdeck@v1.0.0`.
 
 For either Go install in this guide, add the directory from `go env GOBIN` to your `PATH`. If that command returns an empty value, use the `bin` directory under `go env GOPATH`. Run `depdeck --version` to check which executable your shell found.
 
@@ -49,7 +49,7 @@ Open `deck.html` beside the manifest. A scan can contact public npm. You can ope
 
 ### Try the Pixel Archive from main
 
-Pixel Archive landed after the `v1.0.0` tag. With Go 1.26.9 or later, build it from the current source.
+Pixel Archive landed after the `v1.0.0` tag. Build from the current source with a patched Go toolchain. The minimum is Go 1.26.11.
 
 ```sh
 git clone https://github.com/pragatikumari0927/depdeck.git
