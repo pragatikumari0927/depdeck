@@ -179,7 +179,7 @@ sequenceDiagram
 - License and publish date describe the published version selected for the declared npm range. They can differ from the version installed on your machine.
 - Depdeck reads package data without installing dependencies or running package scripts. Use `rule` or `none` for Flavor. `ai` returns an error.
 
-[Development and contributing](docs/DEVELOPMENT.md) · [Documentation map](docs/README.md) · [Specification](docs/SPEC.md) · [Architecture decisions](docs/DECISIONS.md) · [Testing](docs/TESTING.md)
+[Contributing](CONTRIBUTING.md) · [Development](docs/DEVELOPMENT.md) · [Documentation map](docs/README.md) · [Specification](docs/SPEC.md) · [Architecture decisions](docs/DECISIONS.md) · [Testing](docs/TESTING.md)
 
 Report suspected vulnerabilities privately through GitHub Security Advisories. [Security reporting guide](docs/SECURITY.md)
 

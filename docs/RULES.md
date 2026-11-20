@@ -44,7 +44,12 @@ See `SKILLS.md` for the curated skill list and divergence pins. The rules here a
 generated from it, because Grok Build does not read `.mdc` and every
 `.md` in `.grok/rules/` loads unconditionally.
 
-After editing any `.mdc`:
+Git ignores the generated Grok copies. Keep them in `.grok/rules/` for tool
+discovery. The [previously tracked copies](https://github.com/pragatikumari0927/depdeck/tree/510113e561b931b1d888b247026322b082d8c30d/.grok/rules)
+are available for an existing setup that needs them.
+
+With local Cursor rule sources installed, regenerate the Grok copies after
+editing any `.mdc`:
 
     pwsh -File scripts/sync-rules.ps1
 

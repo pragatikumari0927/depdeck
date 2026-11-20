@@ -18,4 +18,4 @@ One document map reduces duplicate guidance. Root pointers preserve agent discov
 
 ## Evidence and maintenance
 
-Check local links, pointer targets, rule frontmatter, and rule-sync parity. Update active references when a canonical path changes. Update the docs index with each new document. The approved [completion plan](../../.scratch/depdeck-v1/COMPLETION_PLAN.md) records the scope.
+Check local links, pointer targets, rule frontmatter, and rule-sync parity. Update active references when a canonical path changes. Update the docs index with each new document. The approved [completion plan](https://github.com/pragatikumari0927/depdeck/blob/510113e561b931b1d888b247026322b082d8c30d/.scratch/depdeck-v1/COMPLETION_PLAN.md) records the scope.

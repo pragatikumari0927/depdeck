@@ -1,6 +1,9 @@
 # Issue tracker: Local Markdown
 
-Issues and PRDs for this repo live as markdown files in `.scratch/`.
+Local issues and PRDs for this repo live as Markdown files in `.scratch/`.
+Git ignores that directory. On a fresh checkout, use the ticket supplied for
+the task or create the relevant local directory for new work. The [archived
+v1 tickets](https://github.com/pragatikumari0927/depdeck/tree/510113e561b931b1d888b247026322b082d8c30d/.scratch/depdeck-v1/issues) remain available for reference.
 
 ## Conventions
 
