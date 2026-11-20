@@ -41,7 +41,7 @@ checksum:
   algorithm: sha256
 
 snapshot:
-  version_template: "1.0.0-rc-{{ .ShortCommit }}"
+  version_template: "1.1.0-rc-{{ .ShortCommit }}"
 
 changelog:
   disable: true

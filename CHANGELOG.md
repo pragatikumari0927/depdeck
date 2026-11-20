@@ -5,6 +5,30 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) an
 
 ## [Unreleased]
 
+## [1.1.0] - Release candidate
+
+### Added
+
+- Add the Pixel Archive Deck with pixel-art Rarity seals, the Rarity Atlas,
+  dependency group filters, Field Journals, and readable Archive Notices
+  (#24, #26).
+
+### Changed
+
+- Explain CLI options, manifest errors, and Check verdicts in plain English.
+  Keep the documented Scan success line, exit codes, and JSON schema 1.1
+  (#39, #42).
+- Clarify when to use each MCP tool and what its results measure. Keep the three
+  tool names and their input and output schemas (#39).
+- Revise the README to show the Pixel Archive interface and distinguish the
+  published 1.0.0 binaries from builds of `main` (#36).
+
+### Fixed
+
+- Return `data.dependencies: []` for empty Checks in CLI JSON and MCP (#38).
+
+## [1.0.0] - 2026-11-13
+
 ### Added
 
 - Rarity, Chaos, policy per ADR-0009/0010 (b156a23)

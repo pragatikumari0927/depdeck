@@ -1,15 +1,18 @@
-# Depdeck 1.0.0
+# Depdeck 1.1.0
 
-Depdeck scans the direct npm Dependencies declared in a root `package.json`.
-It creates a self-contained HTML Deck, emits JSON for scripts, and offers a
-policy Check for CI. The stdio MCP server exposes the same assessment through
-`list_deck`, `get_card`, and `check_deck`.
+Pixel Archive turns an npm project's direct dependencies into a self-contained
+HTML Deck. This release adds an offline Rarity Atlas, dependency filters, Field
+Journals, and Archive Notices for missing npm data.
 
-- Cards include npm weekly downloads, Rarity, publish recency, license, and rule Flavor.
-- Registry failures appear on degraded Cards so a partial assessment stays readable.
-- Windows, macOS, and Linux archives target amd64 and arm64. Verify the archive
-  against `checksums.txt` before extracting it.
-- Source builds require Go 1.26.9 or later. The Homebrew formula builds from the tagged source.
+- CLI help explains the path and output options. Manifest errors and plain
+  Check verdicts tell you what to do next. Scripts can use the same exit codes
+  and schema 1.1 JSON, including the Check reason codes.
+- The three stdio MCP tool descriptions explain project assessments, standalone
+  npm lookups, and the default publish-age and license-declaration policy.
+- Empty Checks now return an empty dependencies array in CLI JSON and MCP.
+- Windows, macOS, and Linux archives support amd64 and arm64. Compare your
+  archive's SHA-256 digest with the matching entry in checksums.txt before
+  extracting it. Source builds require Go 1.26.9 or later.
 
-See the [README](README.md) for installation and usage, and the
-[changelog](CHANGELOG.md) for the development history.
+See the [README](README.md) for usage and the [changelog](CHANGELOG.md) for
+the full list of changes.
