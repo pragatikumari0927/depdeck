@@ -15,7 +15,7 @@ Scope lock: [SPEC.md](SPEC.md). Why: [DECISIONS.md](DECISIONS.md).
 - Flavor: `rule` and `none` (no `ai` runtime)
 - Output: single `deck.html`, self-contained, byte-deterministic
 - Test seam: pipeline result, fixture npm, no live registry
-- Completion plan: `.scratch/depdeck-v1/COMPLETION_PLAN.md`
+- [Archived v1 completion plan](https://github.com/pragatikumari0927/depdeck/blob/510113e561b931b1d888b247026322b082d8c30d/.scratch/depdeck-v1/COMPLETION_PLAN.md)
 - Release readiness requires tickets 14–16 plus the original product tickets.
 
 ## v1.1 — next

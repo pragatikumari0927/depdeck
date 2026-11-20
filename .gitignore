@@ -1,6 +1,7 @@
-# Engram local working DB (never commit)
-.engram/engram.db
-.engram/engram.db-*
+# Local planning and agent state
+/.scratch/
+/.grok/
+/.engram/
 
 # Build artifacts
 /depdeck

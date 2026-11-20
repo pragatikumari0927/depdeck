@@ -12,6 +12,7 @@ This directory holds the canonical project guidance. Read `AGENTS.md` first. The
 
 ## By task
 
+- Contributing: [CONTRIBUTING.md](../CONTRIBUTING.md).
 - Security: [SECURITY.md](SECURITY.md) and [THREAT_MODEL.md](THREAT_MODEL.md).
 - Tests: [TESTING.md](TESTING.md).
 - Release: [RELEASING.md](RELEASING.md).

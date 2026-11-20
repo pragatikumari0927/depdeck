@@ -5,7 +5,7 @@ candidate before authorizing a tag, release, or tap change.
 
 ## Candidate preflight
 
-1. Review the candidate commit, the v1 tickets, and the [acceptance and security evidence](../.scratch/depdeck-v1/issues/15-security-and-acceptance.md).
+1. Review the candidate commit and the [v1 acceptance and security evidence](https://github.com/pragatikumari0927/depdeck/blob/510113e561b931b1d888b247026322b082d8c30d/.scratch/depdeck-v1/issues/15-security-and-acceptance.md).
 2. Run the [test workflow](../.github/workflows/test.yml) on the candidate. Run the
    [release preflight](../.github/workflows/release-preflight.yml) to build the six
    archives and install the staged source formula on macOS.
