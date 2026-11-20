@@ -10,6 +10,8 @@ Journals, and Archive Notices for missing npm data.
 - The three stdio MCP tool descriptions explain project assessments, standalone
   npm lookups, and the default publish-age and license-declaration policy.
 - Empty Checks now return an empty dependencies array in CLI JSON and MCP.
+- Release archives use Go 1.27.4. Preflight scans for known vulnerabilities
+  with that compiler before packaging.
 - Windows, macOS, and Linux archives support amd64 and arm64. Compare your
   archive's SHA-256 digest with the matching entry in checksums.txt before
   extracting it. The minimum for source builds is Go 1.26.11. Use the current

@@ -27,6 +27,12 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) an
 
 - Return `data.dependencies: []` for empty Checks in CLI JSON and MCP (#38).
 
+### Security
+
+- Raise the minimum Go toolchain to 1.26.11. Build release archives with
+  Go 1.27.4 and scan for known vulnerabilities with that compiler before
+  packaging (#48).
+
 ## [1.0.0] - 2026-11-13
 
 ### Added
