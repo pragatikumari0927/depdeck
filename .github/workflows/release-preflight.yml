@@ -11,23 +11,32 @@ permissions:
 jobs:
   archives:
     runs-on: ubuntu-latest
+    env:
+      GOTOOLCHAIN: local
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
         with:
           go-version: '1.27.4'
+      - name: Scan with the release compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(go env GOVERSION)" = 'go1.27.4'
+          go mod download
+          GOBIN="$RUNNER_TEMP" go install golang.org/x/vuln/cmd/govulncheck@v1.7.0
+          GOPROXY=off "$RUNNER_TEMP/govulncheck" -show version ./...
       - name: Verify offline snapshot
         shell: bash
         run: |
           set -euo pipefail
           archive="$RUNNER_TEMP/goreleaser.tar.gz"
-          curl -fsSL https://github.com/goreleaser/goreleaser/releases/download/v2.19.0/goreleaser_Linux_x86_64.tar.gz -o "$archive"
-          echo "ebc3194ad1d1b1787614405285a0039665cd4c5bd3305215a1b201600f90630b  $archive" | sha256sum -c
+          curl -fsSL https://github.com/goreleaser/goreleaser/releases/download/v2.20.3/goreleaser_Linux_x86_64.tar.gz -o "$archive"
+          echo "a36d5d7d07a5e538e052cef2a9f93f1cd4af493cf5a3712b9177c1ebe360f0e7  $archive" | sha256sum -c
           tar -xzf "$archive" -C "$RUNNER_TEMP" goreleaser
-          go mod download
           "$RUNNER_TEMP/goreleaser" check
           GOPROXY=off "$RUNNER_TEMP/goreleaser" release --snapshot --skip=publish
           python3 scripts/verify-release.py dist
@@ -50,7 +59,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: '24'
+          node-version: '24.22.3'
       - name: Install and test the staged source formula
         shell: bash
         run: |
@@ -74,4 +83,6 @@ jobs:
           node scripts/release-formula.mjs v1.0.0 "$source_dir/depdeck-1.0.0.tar.gz" "$tap/Formula/depdeck.rb" "http://127.0.0.1:$port/depdeck-1.0.0.tar.gz"
           brew install --build-from-source depdeck/preflight/depdeck
           brew test depdeck/preflight/depdeck
-          python3 scripts/verify-release.py --binary "$(brew --prefix depdeck/preflight/depdeck)/bin/depdeck" --version 1.0.0
+          binary="$(brew --prefix depdeck/preflight/depdeck)/bin/depdeck"
+          "$(brew --prefix go)/bin/go" version -m "$binary"
+          python3 scripts/verify-release.py --binary "$binary" --version 1.0.0

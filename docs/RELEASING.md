@@ -10,8 +10,8 @@ candidate before authorizing a tag, release, or tap change.
    [release preflight](../.github/workflows/release-preflight.yml) to build the six
    archives and install the staged source formula on macOS.
 3. Use Go 1.27.4 for this candidate. Install the official prebuilt GoReleaser
-   OSS 2.19.0 and git-cliff 2.14.2 binaries. Verify their SHA-256 digests
-   against the upstream release metadata.
+   OSS 2.20.3 and git-cliff 2.14.2 binaries. Verify their SHA-256 digests
+   against the upstream release metadata. Install govulncheck 1.7.0.
 4. In a fresh checkout of the exact candidate, confirm `dist/` is absent,
    populate the Go module cache, and run the snapshot commands below.
 5. Review `LICENSE`, `THIRD_PARTY_NOTICES.txt`, the changelog, the
@@ -19,7 +19,10 @@ candidate before authorizing a tag, release, or tap change.
    working tree is clean and verify the expected tag and tap access.
 
 ```sh
+export GOTOOLCHAIN=local
+test "$(go env GOVERSION)" = 'go1.27.4'
 go mod download
+GOPROXY=off govulncheck -show version ./...
 goreleaser check
 GOPROXY=off goreleaser release --snapshot --skip=publish
 python3 scripts/verify-release.py dist
@@ -40,8 +43,9 @@ before creating a Git tag.
 The [formula template](../release/Formula/depdeck.rb.in) builds
 `./cmd/depdeck` from source. Its test checks the version and the Check
 envelope. The preflight workflow serves a Git archive of the candidate on
-loopback, installs via a disposable tap, and runs `brew test`. The production
-formula uses the GitHub tarball for the approved tag.
+loopback, installs via a disposable tap, and runs `brew test`. It records the
+compiler embedded in the installed executable. The production formula uses
+the GitHub tarball for the approved tag.
 
 After publication is authorized and the tag exists, download its exact source
 tarball. Confirm that the remote tag resolves to the reviewed commit. Generate

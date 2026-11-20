@@ -1,8 +1,10 @@
-The v1 minimum is Go 1.26.9 (see ADR-0020). Use a patched stable Go toolchain for release builds.
+The minimum source build version is Go 1.26.11. Use a current security patch
+for your Go release line and the exact compiler in the release guide for
+release builds. [ADR-0023](adr/0023-go-patched-toolchains.md)
 go install golang.org/x/tools/cmd/goimports@v0.50.0
 go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0
-These tool versions require a recent Go toolchain; the project language minimum
-remains the version in go.mod. Put the Go binary directory (normally
+These tool versions require a recent Go toolchain. The project language
+baseline remains Go 1.26. Put the Go binary directory (normally
 `%USERPROFILE%\go\bin` on Windows) on PATH.
 Post-edit hooks skip `goimports` and `golangci-lint` when missing,
 print a one-time warning with the install command, and continue.

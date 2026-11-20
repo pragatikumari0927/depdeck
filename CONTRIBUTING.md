@@ -16,7 +16,8 @@ an HTML Deck, CLI output, or results for an MCP client.
 
 ## Build and test
 
-Install Go 1.26.9 or later and run these commands from the repository root.
+Use a current security patch, starting with Go 1.26.11 on the 1.26 line or
+Go 1.27.4 on the 1.27 line. Run these commands from the repository root.
 
 ```sh
 go mod download

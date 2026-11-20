@@ -103,7 +103,7 @@ Requires ADR-0001, ADR-0005, ADR-0006, ADR-0010, ADR-0019, ADR-0021.
 
 ## MCP surface
 
-Tools only: `list_deck`, `get_card`, `check_deck`. Use the official Go SDK v1.8.0 and explicit `inputSchema`. `flavor` enum is `rule` | `none` (`ai` is schema failure, not runtime fallback). The minimum Go version is `1.26.9` per ADR-0020.
+Tools only: `list_deck`, `get_card`, `check_deck`. Use the official Go SDK v1.8.0 and explicit `inputSchema`. `flavor` enum is `rule` | `none` (`ai` is schema failure, not runtime fallback). The minimum Go version is `1.26.11` per ADR-0023.
 
 - `list_deck`: `{ path, tag?, flavor? }`
 - `get_card`: `{ name, flavor? }` — npm only; no Roster path

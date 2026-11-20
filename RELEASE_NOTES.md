@@ -12,7 +12,8 @@ Journals, and Archive Notices for missing npm data.
 - Empty Checks now return an empty dependencies array in CLI JSON and MCP.
 - Windows, macOS, and Linux archives support amd64 and arm64. Compare your
   archive's SHA-256 digest with the matching entry in checksums.txt before
-  extracting it. Source builds require Go 1.26.9 or later.
+  extracting it. The minimum for source builds is Go 1.26.11. Use the current
+  security patch for your Go line.
 
 See the [README](README.md) for usage and the [changelog](CHANGELOG.md) for
 the full list of changes.
