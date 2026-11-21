@@ -1,60 +1,48 @@
-# PHASES
+# Project phases
 
-Roadmap and git workflow. Tickets implement against [SPEC.md](SPEC.md). This file keeps later work out of v1.
+Use [SPEC.md](SPEC.md) for the current contract and [DECISIONS.md](DECISIONS.md)
+for the accepted architecture decisions.
 
-## Status
+## Published v1.0.0
 
-v1 in progress. The baseline records 7 of the original 13 tickets as merged. New v1 work is tracked in tickets 14–16. Update this count only after work is merged.
+Depdeck v1.0.0 was published on 2026-11-13. It includes `scan`, `check`, and
+the stdio MCP server for direct npm dependencies. It produces self-contained
+HTML Decks with the original Card layout. The release provides six archives
+and a checksum manifest. [GitHub release](https://github.com/pragatikumari0927/depdeck/releases/tag/v1.0.0)
 
-## v1 — current
+The [archived completion plan](https://github.com/pragatikumari0927/depdeck/blob/510113e561b931b1d888b247026322b082d8c30d/.scratch/depdeck-v1/COMPLETION_PLAN.md)
+and [roadmap at the v1.0.0 tag](https://github.com/pragatikumari0927/depdeck/blob/v1.0.0/docs/PHASES.md)
+preserve the original ticket list and release criteria. The
+[publication record](https://github.com/pragatikumari0927/depdeck/pull/23) covers archive verification and the
+public Go and Homebrew install checks.
 
-Scope lock: [SPEC.md](SPEC.md). Why: [DECISIONS.md](DECISIONS.md).
+## Unreleased on main
 
-- Commands: `scan`, `check`, `mcp`
-- Ecosystem: npm only
-- Flavor: `rule` and `none` (no `ai` runtime)
-- Output: single `deck.html`, self-contained, byte-deterministic
-- Test seam: pipeline result, fixture npm, no live registry
-- [Archived v1 completion plan](https://github.com/pragatikumari0927/depdeck/blob/510113e561b931b1d888b247026322b082d8c30d/.scratch/depdeck-v1/COMPLETION_PLAN.md)
-- Release readiness requires tickets 14–16 plus the original product tickets.
+- Pixel Archive adds Rarity seals, the Rarity Atlas, dependency filters,
+  Field Journals, and Archive Notices. [PR #24](https://github.com/pragatikumari0927/depdeck/pull/24) · [PR #26](https://github.com/pragatikumari0927/depdeck/pull/26)
+- CLI guidance and MCP tool descriptions are clearer. Empty Checks return
+  `data.dependencies: []` in CLI JSON and MCP. [PR #39](https://github.com/pragatikumari0927/depdeck/pull/39) · [PR #42](https://github.com/pragatikumari0927/depdeck/pull/42) · [PR #38](https://github.com/pragatikumari0927/depdeck/pull/38)
+- The minimum Go compiler for source builds is 1.26.11. The release archive
+  preflight uses Go 1.27.4. [ADR-0023](adr/0023-go-patched-toolchains.md)
 
-## v1.1 — next
+The [changelog](../CHANGELOG.md) and [candidate notes](../RELEASE_NOTES.md)
+record the changes proposed for v1.1.0. The [candidate PR](https://github.com/pragatikumari0927/depdeck/pull/49)
+records the hosted preflight evidence. Follow the [release guide](RELEASING.md)
+for approval and publication.
 
-- `--flavor=ai` runtime via Ollama (ADR-0005 reserved the flag)
-- Individual card PNG export via chromedp, falling back to HTML when Chrome is missing
-- `install_size` as a Card stat (requires ADR to unfreeze `pkg/types`)
-- `depdeck doctor` — scan mcp.json, rule files, cache for leak categories
-- Decide whether `.agents/skills/` is tracked or ignored. If ignored,
-  track `skills-lock.json` and add `npx skills install
-  --frozen-lockfile` to `DEVELOPMENT.md`. Standard pattern: ignore the
-  directory like `node_modules/`, track the lock like
-  `package-lock.json`. Triage report: 2026-09-11.
+## Deferred ideas
 
-## v2 — deferred
+These ideas have no assigned release version.
 
-- GitHub enrichment — second source in `pkg/registry`
-- Multi-ecosystem parsers (go.mod, Cargo.toml, pyproject.toml)
-- `depdeck battle` — compare two decks
-- Monorepo CI check — fan-out across workspaces
-- Graph engineering — see `docs/adr/0015-graph-engineering-deferred.md` when written
+- AI-generated Flavor. `rule` and `none` are supported. The `ai` flag still
+  returns an error.
+- Individual Card PNG export, an `install_size` stat, and a `depdeck doctor`
+  command for local configuration diagnostics.
+- GitHub enrichment, additional ecosystems, `depdeck battle` for Deck
+  comparison, workspace traversal, and graph analysis.
 
-## Git workflow
+## Contributing
 
-- Trunk-based. `main` always shippable.
-- Conventional Commits. One logical change per commit.
-- One commit per ticket, not per batch.
-- Worktree parallel variants: `git worktree add ../depdeck-<variant> -b <branch>`. One agent per worktree; never two on the same tree.
-- Post-edit hooks run scoped tests. Pre-commit runs full-tree `go test ./... -race` on Linux CI.
-- PR under 400 lines. Bigger means the ticket was too large.
-- Squash to `main`. PR description becomes the commit message.
-
-## Release gate — before tagging v1.0.0
-
-- All original product tickets and v1 tickets 14–16 merged
-- Go 1.26.9 and official MCP SDK v1.8.0 recorded in module metadata
-- Security and acceptance evidence from ticket 15
-- Module path renamed
-- README with a working GIF demo
-- GitHub binary archives and source-built Homebrew formula
-- `go install` works from the canonical path
-- `CHANGELOG.md` generated from commit history via `git-cliff`. Format: Keep a Changelog. Regenerate on every release; do not hand-edit released sections.
+Use the [contributing guide](../CONTRIBUTING.md) to open a focused PR. Follow
+the [agent workflow](agents/README.md) for worktree and local setup, and the
+[testing guide](TESTING.md) for recording evidence.
