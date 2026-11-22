@@ -16,6 +16,7 @@ This directory holds the canonical project guidance. Read `AGENTS.md` first. The
 - Project status and roadmap: [PHASES.md](PHASES.md).
 - Security: [SECURITY.md](SECURITY.md) and [THREAT_MODEL.md](THREAT_MODEL.md).
 - Tests: [TESTING.md](TESTING.md).
+- Connecting a coding agent: [MCP setup guide](guides/mcp-setup.md).
 - Release process: [RELEASING.md](RELEASING.md).
 - Release history: [CHANGELOG.md](../CHANGELOG.md). Active release candidate:
   [RELEASE_NOTES.md](../RELEASE_NOTES.md).
