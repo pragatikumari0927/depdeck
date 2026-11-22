@@ -1,6 +1,8 @@
 # Testing
 
-Use the Go version in `go.mod`. Run tests without network access. Tests must use local fixtures or an HTTP test server. Do not depend on live npm data.
+Use a patched Go toolchain that meets the minimum in `go.mod`. Application
+tests use local fixtures and may start loopback HTTP servers. Download missing
+Go modules before running tests. Application tests do not depend on live npm.
 
 ## Checks
 
@@ -13,6 +15,11 @@ go test -race ./...
 ```
 
 Run the race check where the Go toolchain and compiler support it. Record any platform limit. Run the repository lint and security checks described in [DEVELOPMENT.md](DEVELOPMENT.md) and [SECURITY.md](SECURITY.md).
+
+The [CI workflow](../.github/workflows/test.yml) tests the minimum and stable Go
+versions on Linux, Windows, and macOS. The Linux jobs run race tests and the
+stable Linux job records statement coverage. The security job runs the Node
+tests, Go lint, vulnerability scanning, and secret scanning.
 
 ## Acceptance coverage
 
@@ -28,10 +35,11 @@ For each ticket, record commands and results in its completion notes. Do not cla
 
 ## Pixel Archive verification
 
-The Pixel Archive feature branch was verified on 2026-11-14 with Go 1.27.4,
-Node 24.19.0, and Chromium 157 on Windows. The race suite used WSL Linux
-and GCC 16.2.0. The executable read a seeded cache based on the six-card
-Pixel Archive v2 reference. The fixture values are sample npm facts.
+This historical record covers the Pixel Archive feature branch on 2026-11-14
+with Go 1.27.4, Node 24.19.0, and Chromium 157 on Windows. The race suite used
+WSL Linux and GCC 16.2.0. The executable read a seeded cache based on the
+six-card Pixel Archive v2 reference. The fixture values are sample npm facts.
+Use a CI run for the commit under review to verify later changes.
 
 | Check | Result |
 | --- | --- |

@@ -1,8 +1,10 @@
-# Depdeck 1.1.0
+# Depdeck v1.1.0 candidate notes
 
-Pixel Archive turns an npm project's direct dependencies into a self-contained
-HTML Deck. This release adds an offline Rarity Atlas, dependency filters, Field
-Journals, and Archive Notices for missing npm data.
+These notes cover unreleased changes on `main` since the
+[published v1.0.0 release](https://github.com/pragatikumari0927/depdeck/releases/tag/v1.0.0).
+The candidate adds Pixel Archive, a self-contained HTML Deck with an offline
+Rarity Atlas, dependency filters, Field Journals, and Archive Notices for
+missing npm data.
 
 - CLI help explains the path and output options. Manifest errors and plain
   Check verdicts tell you what to do next. Scripts can use the same exit codes

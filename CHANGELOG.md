@@ -5,7 +5,7 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) an
 
 ## [Unreleased]
 
-## [1.1.0] - Release candidate
+These changes are proposed for v1.1.0. See the [candidate notes](RELEASE_NOTES.md).
 
 ### Added
 
