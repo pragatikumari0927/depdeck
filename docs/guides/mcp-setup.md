@@ -240,42 +240,105 @@ The older editor-managed `.vscode/mcp.json` uses a top-level `servers`
 object. Use the client's current configuration destination and schema.
 See [VS Code's MCP configuration reference](https://code.visualstudio.com/docs/agents/reference/mcp-configuration).
 
-### Gemini CLI
+### Google Antigravity
 
-From your project, register a stdio server in the project settings.
+In the Antigravity IDE, open the Agent panel's **… → MCP Servers → Manage MCP
+Servers → View raw config**. Add the local server to `mcpServers`. The IDE
+supports a global configuration at `~/.gemini/config/mcp_config.json` and a
+workspace configuration at `.agents/mcp_config.json`. The same locations are
+used by Antigravity CLI; open its interactive MCP manager with `/mcp`.
 
-```sh
-gemini mcp add --scope project depdeck depdeck mcp
-gemini mcp list
+```json
+{
+  "mcpServers": {
+    "depdeck": {
+      "command": "depdeck",
+      "args": ["mcp"]
+    }
+  }
+}
 ```
 
-Gemini CLI writes the `mcpServers` entry to `.gemini/settings.json`. In a
-session, `/mcp` lists server status and tools. See the
-[Gemini CLI MCP guide](https://github.com/google-gemini/gemini-cli/blob/main/docs/tools/mcp-server.md).
+On Windows, use the full path to `depdeck.exe` if the client cannot resolve
+PATH. See the [official Antigravity MCP guide](https://antigravity.google/docs/ide-mcp).
+
+### Qoder CLI and IDE
+
+From the project directory, Qoder CLI adds a local-scoped stdio server by
+default.
+
+```sh
+qoder mcp add depdeck -- depdeck mcp
+qoder mcp list
+```
+
+Reload an already running CLI session with `/mcp reload`. Remove the local
+entry with `qoder mcp remove depdeck`.
+
+In Qoder IDE, open **Qoder IDE Settings → MCP → My Servers → + Add**. Choose
+STDIO and enter command `depdeck` with argument `mcp`. The JSON shape is:
+
+```json
+{
+  "mcpServers": {
+    "depdeck": {
+      "command": "depdeck",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+See the [Qoder CLI guide](https://docs.qoder.com/cli/mcp-servers) and
+[Qoder IDE guide](https://docs.qoder.com/user-guide/chat/model-context-protocol).
 
 ### OpenCode
 
-For OpenCode v2, add the local command from your project and check its status.
+Run this from the project that should use depdeck. OpenCode writes the entry
+to the project configuration.
 
 ```sh
 opencode mcp add depdeck -- depdeck mcp
 opencode mcp list
 ```
 
-For manual v2 configuration, put `"depdeck": {"type": "local", "command":
-["depdeck", "mcp"]}` under `mcp.servers` in `opencode.jsonc`. In v1, server
-names go directly under `mcp`. See the
-[OpenCode MCP guide](https://opencode.ai/docs/mcp-servers/) and
-[v1-to-v2 migration guide](https://opencode.ai/docs/migrate-v1/).
+For manual configuration, put this entry under `mcp.servers` in
+`opencode.jsonc`:
+
+```jsonc
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "servers": {
+      "depdeck": {
+        "type": "local",
+        "command": ["depdeck", "mcp"]
+      }
+    }
+  }
+}
+```
+
+Use `/mcps` in OpenCode to inspect or reconnect servers. See the
+[OpenCode MCP guide](https://opencode.ai/docs/mcp-servers/).
+
+### Kiro IDE
+
+Enable MCP in Kiro settings, then run **Kiro: Open workspace MCP config
+(JSON)** from the Command Palette. Add the entry under `mcpServers` in
+`.kiro/settings/mcp.json`. The user-level file is `~/.kiro/settings/mcp.json`.
+Kiro reconnects servers when you save the file. See the
+[Kiro MCP configuration guide](https://kiro.dev/docs/mcp/configuration/).
 
 ### More desktop clients
 
 | Client | Where to configure a local server |
 | --- | --- |
 | Claude Desktop | Open **Settings → Developer → Edit Config**. Merge the generic JSON entry in `claude_desktop_config.json` and restart the app. [Local server guide](https://modelcontextprotocol.io/docs/develop/connect-local-servers) |
+| JetBrains AI Assistant | Open **Settings → Tools → AI Assistant → Model Context Protocol (MCP)**, add a server, choose **STDIO**, and provide its command configuration. Your organization may manage which servers you can add. [JetBrains guide](https://www.jetbrains.com/help/ai-assistant/mcp.html) |
 | Zed | Choose **Settings → AI → MCP Servers → Add Server → Add Local Server**. Use command `depdeck` and argument `mcp`. Zed stores it under `context_servers`. [Zed guide](https://zed.dev/docs/ai/mcp) |
 | Cline | In the extension's MCP Servers panel, open **Configure MCP Servers** and merge the generic entry in `cline_mcp_settings.json`. [Cline MCP guide](https://docs.cline.bot/mcp/mcp-overview) |
-| Windsurf | In an existing Windsurf installation, use its MCP settings or merge the generic entry in `~/.codeium/windsurf/mcp_config.json`. [Windsurf config location](https://code.visualstudio.com/docs/agents/reference/mcp-configuration) |
+| Windsurf Cascade | The former Windsurf MCP documentation URL currently redirects to Devin Local documentation. Use the MCP settings in your installed version and confirm its current schema; this guide does not prescribe the legacy config path. [Former MCP docs URL](https://docs.windsurf.com/windsurf/cascade/mcp) |
 | Devin Local | Merge the generic JSON entry in the project's `.devin/mcp_config.json`, or use the user config path for your platform. Run `devin mcp list` in the CLI to inspect the registration. [Devin MCP guide](https://docs.devin.ai/cli/extensibility/mcp/configuration) |
 
 For any client configured by file, remove the `depdeck` entry from the scope

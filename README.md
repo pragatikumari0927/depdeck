@@ -101,10 +101,30 @@ After a successful npm fetch, `check` flags a Dependency if its Chaos exceeds 0.
 
 ## Connect your coding agent
 
-Model Context Protocol (MCP) lets your agent call depdeck as a local tool.
-After [installing depdeck](#start-your-collection), register it in Codex from
-the same environment where `depdeck --version` works. The add command saves a
-user-scoped Codex entry.
+Model Context Protocol (MCP) lets a coding agent call tools exposed by another
+program. depdeck runs as a **local stdio server**: the client starts
+`depdeck mcp` and talks to it through standard input and output. It is a
+long-running server process, not a command that prints a report and exits.
+
+Install depdeck first, then run `depdeck --version` in the same environment
+that starts your agent. If the command is missing, use the
+[installation steps above](#start-your-collection). On Windows, check with
+`Get-Command depdeck`; on macOS or Linux, use `command -v depdeck`. If your
+agent runs in WSL, a container, or a remote workspace, install or locate the
+executable inside that environment. Use an absolute executable path when its
+PATH cannot find depdeck.
+
+The registration commands below write to the client’s saved configuration.
+Check the scope before running one: a user entry applies to your account, and
+a project entry may be shared if you commit its configuration file. Review
+the command and tool permissions before you approve a server.
+
+### Terminal-first agents
+
+Run the commands for your client, then open a new project session and check
+that the depdeck server is connected.
+
+#### Codex CLI
 
 ```sh
 codex mcp add depdeck -- depdeck mcp
@@ -112,13 +132,161 @@ codex mcp list
 codex mcp get depdeck
 ```
 
-Open a new Codex session and use `/mcp` to find `list_deck`, `get_card`, and
-`check_deck`. Give the two project tools an absolute project path. Codex
-launches `depdeck mcp` over standard input and output.
+This adds a user-scoped server. In Codex CLI or its IDE extension, use `/mcp`
+to check for `list_deck`, `get_card`, and `check_deck`. Remove the entry with
+`codex mcp remove depdeck`.
 
-Using Cursor, Claude Code, Grok Build, Hermes, or another client? See the
-[MCP setup guide](docs/guides/mcp-setup.md) for client-specific commands,
-absolute executable paths, and a [copyable setup prompt](docs/guides/mcp-setup.md#copyable-setup-prompt).
+#### Claude Code
+
+```sh
+claude mcp add --transport stdio --scope local depdeck -- depdeck mcp
+claude mcp list
+claude mcp get depdeck
+```
+
+The `local` scope is for you in the current project. In a Claude Code session,
+use `/mcp` to check the connection. Remove it with
+`claude mcp remove --scope local depdeck`.
+
+#### Qoder CLI
+
+```sh
+qoder mcp add depdeck -- depdeck mcp
+qoder mcp list
+```
+
+The default scope is local to the current project. In an open Qoder CLI
+session, run `/mcp reload` after adding the server. Remove it with
+`qoder mcp remove depdeck`.
+
+#### OpenCode
+
+Run these commands from the project that should use depdeck:
+
+```sh
+opencode mcp add depdeck -- depdeck mcp
+opencode mcp list
+```
+
+OpenCode writes a project configuration. Use `/mcps` in the OpenCode
+interface to inspect or reconnect the server. Remove the `depdeck` entry from
+that project configuration when you no longer need it.
+
+#### Grok Build CLI
+
+```sh
+grok mcp add depdeck -- depdeck mcp
+grok mcp list
+grok mcp doctor depdeck
+```
+
+The default entry is user-scoped. To add it only to the current project, use
+`grok mcp add --scope project depdeck -- depdeck mcp` from that project.
+Remove it with `grok mcp remove depdeck`.
+
+#### Hermes Agent
+
+```sh
+hermes mcp add depdeck --command depdeck --args mcp
+hermes mcp list
+hermes mcp test depdeck
+```
+
+Hermes saves the server in its current profile. Remove it with
+`hermes mcp remove depdeck`.
+
+#### Google Antigravity CLI
+
+Open the Antigravity CLI MCP manager with `/mcp`. To configure the local
+server by hand, merge the entry below into `mcpServers` in the workspace file
+`.agents/mcp_config.json`. The global file is
+`~/.gemini/config/mcp_config.json`.
+
+### IDEs and editor agents
+
+Most editors use a JSON configuration. The server entry is usually the same,
+but each editor has its own file location and user interface. Merge this
+complete example into a file that uses the `mcpServers` format:
+
+```json
+{
+  "mcpServers": {
+    "depdeck": {
+      "command": "depdeck",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+Cursor's current stdio entry also requires `"type": "stdio"` inside the
+`depdeck` object. Follow the editor's schema when it differs from this common
+shape.
+
+On Windows, use the full path to `depdeck.exe` if the editor cannot resolve
+your PATH. Escape backslashes in JSON, for example
+`"C:\\Tools\\depdeck.exe"`. Do not replace other server entries.
+
+**Client setup map:**
+
+- **Google Antigravity IDE:** Open the Agent panel **… → MCP Servers → Manage MCP Servers → View raw config**. Use the global `~/.gemini/config/mcp_config.json` or workspace `.agents/mcp_config.json`. [Official setup](https://antigravity.google/docs/ide-mcp)
+- **Cursor:** Add the entry under `mcpServers` in `.cursor/mcp.json` or `~/.cursor/mcp.json`. Cursor requires `"type": "stdio"` for a local server. [Cursor MCP guide](https://cursor.com/docs/mcp)
+- **Kiro IDE:** Enable MCP in Settings and run **Kiro: Open workspace MCP config (JSON)** from the Command Palette. Use `.kiro/settings/mcp.json`; user config is `~/.kiro/settings/mcp.json`. [Kiro configuration](https://kiro.dev/docs/mcp/configuration/)
+- **Qoder IDE:** Open **Qoder IDE Settings → MCP → My Servers → + Add**, then choose STDIO and enter `depdeck` with argument `mcp`. [Qoder MCP guide](https://docs.qoder.com/user-guide/chat/model-context-protocol)
+- **GitHub Copilot in VS Code:** Run **MCP: Add Server** and choose **Command (stdio)**. Copilot Global is personal; workspace `.mcp.json` may be shared. [VS Code MCP guide](https://code.visualstudio.com/docs/agent-customization/mcp-servers)
+- **JetBrains AI Assistant:** Open **Settings → Tools → AI Assistant → Model Context Protocol (MCP)**, add a server, choose **STDIO**, and enter the command and argument. [JetBrains MCP guide](https://www.jetbrains.com/help/ai-assistant/mcp.html)
+- **Zed:** Open **Settings → AI → MCP Servers → Add Server → Add Local Server**. Enter command `depdeck` and argument `mcp`; Zed stores it under `context_servers`. [Zed MCP guide](https://zed.dev/docs/ai/mcp)
+- **Cline:** Open the extension's **MCP Servers** panel and add a local stdio server with command `depdeck` and argument `mcp`. [Cline MCP guide](https://docs.cline.bot/mcp/mcp-overview)
+- **Claude Desktop:** Open **Settings → Developer → Edit Config**, merge the server into `mcpServers`, and restart the app. [Local server guide](https://modelcontextprotocol.io/docs/develop/connect-local-servers)
+- **Windsurf Cascade:** Its former MCP documentation currently redirects to Devin Local docs, so setup details can depend on your installed version. See the [note in the full guide](docs/guides/mcp-setup.md#more-desktop-clients).
+
+See the [full MCP setup guide](docs/guides/mcp-setup.md) for platform paths,
+absolute executable examples, other clients, removal steps, and troubleshooting.
+
+### Ask your agent to set it up
+
+Paste this into a coding agent with terminal access. It checks the client and
+shows the configuration change before writing a persistent setting.
+
+```text
+Connect this coding agent to depdeck as a local stdio MCP server. First identify
+which client and operating system are running, and where this client starts
+child processes. Check whether `depdeck --version` works there. If it does not,
+show me the verified install steps; do not install software yet.
+
+Use the depdeck README's "Connect your coding agent" section and
+docs/guides/mcp-setup.md to choose the correct setup for this client. Before
+changing a configuration, show me the exact command or file path and tell me
+whether it is user-scoped or project-scoped. Ask before writing any persistent
+configuration. Keep existing servers. Use an absolute executable path if PATH
+does not resolve depdeck.
+
+After I approve the setup, configure only the depdeck entry, reload the client,
+and verify that list_deck, get_card, and check_deck are available. Explain that
+list_deck and check_deck need a project path, while get_card looks up one npm
+package independently. Do not change project files or install dependencies.
+```
+
+### Try these prompts after connecting
+
+- **Project overview:** “Use depdeck's `list_deck` with the absolute path to this project's root. Summarize its direct dependencies by runtime, development, and optional group. Separate unavailable npm facts from known values.”
+- **One package:** “Use depdeck's `get_card` for `react`. Summarize the npm facts it returns. Do not infer that the package is declared in this project.”
+- **Policy check:** “Use depdeck's `check_deck` with the absolute path to this project's root. Explain the default publish-age and license-declaration policy results. Report Fetch errors separately; do not describe them as vulnerabilities or policy flags.”
+
+### Know what the tools do
+
+| Tool | Input | What it tells you |
+| --- | --- | --- |
+| `list_deck` | Project directory or `package.json` path | Assesses direct dependencies from the root manifest. |
+| `get_card` | npm package name | Looks up one public npm package; it does not establish project membership. |
+| `check_deck` | Project directory or `package.json` path | Evaluates the default publish-age and license-declaration policy. |
+
+Rarity measures weekly downloads. Chaos reflects publish age. Neither is a
+vulnerability score. A Fetch error means npm facts were unavailable or
+unverified; it is not proof that a package is risky. Scans may contact the
+public npm registry. The saved HTML Deck remains offline. For MCP schema and
+tool details, see the [MCP contract](docs/SPEC.md#mcp-surface).
+
 
 ## Under the cartridge
 
