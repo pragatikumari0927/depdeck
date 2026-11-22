@@ -2,6 +2,13 @@
 /.scratch/
 /.grok/
 /.engram/
+/.agents/
+/.cursor/
+/.claude/skills/
+/agent/skills/
+/.codex/migration-state.json
+/.serena/project.local.yml
+/.serena/cache/
 
 # Build artifacts
 /depdeck
@@ -17,6 +24,7 @@ coverage.html
 
 # Local cache
 .depdeck-cache.json
+/graft/
 
 # CodeRabbit working artifacts
 coderabbit-*.jsonl
@@ -47,13 +55,8 @@ desktop.ini
 /tmp/
 *.tmp
 
-# Local Cursor state and npm residue
-.cursor/settings.json
+# Local npm manifest from skill tooling
 /package.json
-
-# Local AI agent config (not project code)
-.cursor/
-.agents/
 
 # Release snapshots
 /dist/

@@ -1,5 +1,6 @@
-# SECURITY
+# Security
 
-Read the canonical [SECURITY document](docs/SECURITY.md) before working in this area.
-
-This root file is a compatibility pointer. Edit the canonical document.
+Report suspected vulnerabilities privately. See the
+[reporting instructions](docs/SECURITY.md#reporting) for the channel and what
+to include. The full policy, including review and release checks, lives in
+[docs/SECURITY.md](docs/SECURITY.md).

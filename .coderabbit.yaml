@@ -9,9 +9,9 @@ reviews:
     - path: "**/*.go"
       instructions: |
         This is a Go CLI project called depdeck. Conventions live in:
-        - SPEC.md (frozen technical contract — authoritative)
-        - DECISIONS.md (index of ADRs in docs/adr/)
-        - .cursor/rules/*.mdc (Go style, architecture, CLI contract)
+        - docs/SPEC.md (frozen technical contract — authoritative)
+        - docs/DECISIONS.md (index of ADRs in docs/adr/)
+        - docs/RULES.md (rule index and local Cursor conventions)
 
         Read those before flagging style issues. Do not suggest patterns
         that contradict an ADR.

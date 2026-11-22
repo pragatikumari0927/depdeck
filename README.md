@@ -181,7 +181,7 @@ sequenceDiagram
 
 [Contributing](CONTRIBUTING.md) · [Development](docs/DEVELOPMENT.md) · [Documentation map](docs/README.md) · [Specification](docs/SPEC.md) · [Architecture decisions](docs/DECISIONS.md) · [Testing](docs/TESTING.md)
 
-Report suspected vulnerabilities privately through GitHub Security Advisories. [Security reporting guide](docs/SECURITY.md)
+Report suspected vulnerabilities privately. [Security reporting guide](docs/SECURITY.md#reporting)
 
 [Release notes](RELEASE_NOTES.md) · [Release process](docs/RELEASING.md) · [Changelog](CHANGELOG.md)
 

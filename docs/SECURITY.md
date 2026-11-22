@@ -14,12 +14,17 @@ Depdeck reads a local npm manifest and requests public npm registry data. It cre
 
 ## Review and release gates
 
-Before v1, run the checks in [TESTING.md](TESTING.md), inspect dependency and secret scan results, and complete an independent security review. Request the official Codex Security review when account access permits it. If the service is unavailable, record that fact and use the documented fallback. Never report a review that did not run.
+For release review, run the checks in [TESTING.md](TESTING.md), inspect dependency and secret scan results, and complete an independent security review. Request the official Codex Security review when account access permits it. If the service is unavailable, record that fact and use the documented fallback. Never report a review that did not run.
 
 Only release supported, reviewed builds. See [RELEASING.md](RELEASING.md). Keep third-party notices with distributions.
 
 ## Reporting
 
-Report suspected vulnerabilities privately through GitHub Security Advisories for this repository. Do not open a public issue for an unreleased vulnerability. Include the affected command or MCP tool, depdeck version or commit, reproduction steps, observed and expected behavior, and impact.
+Use the private reporting option on the repository's
+[Security Advisories page](https://github.com/pragatikumari0927/depdeck/security/advisories)
+when available. Otherwise, ask a maintainer for a private channel before
+sharing details. Keep suspected vulnerabilities out of public issues.
+Include the affected command or MCP tool, depdeck version or commit,
+reproduction steps, observed and expected behavior, and impact.
 
 Update this policy when controls, supported releases, or reporting channels change.
