@@ -13,9 +13,12 @@ This directory holds the canonical project guidance. Read `AGENTS.md` first. The
 ## By task
 
 - Contributing: [CONTRIBUTING.md](../CONTRIBUTING.md).
+- Project status and roadmap: [PHASES.md](PHASES.md).
 - Security: [SECURITY.md](SECURITY.md) and [THREAT_MODEL.md](THREAT_MODEL.md).
 - Tests: [TESTING.md](TESTING.md).
-- Release: [RELEASING.md](RELEASING.md).
+- Release process: [RELEASING.md](RELEASING.md).
+- Changes and candidate notes: [CHANGELOG.md](../CHANGELOG.md) and
+  [RELEASE_NOTES.md](../RELEASE_NOTES.md).
 - Agent work: [agents/README.md](agents/README.md).
 - Decisions: [adr/](adr/).
 
