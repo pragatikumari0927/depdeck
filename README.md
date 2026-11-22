@@ -99,36 +99,26 @@ After a successful npm fetch, `check` flags a Dependency if its Chaos exceeds 0.
 | `2` | Invalid input, usage, or a local error |
 | `3` | All dependencies in a nonempty Check had fetch errors |
 
-## Connect a coding agent
+## Connect your coding agent
 
-Model Context Protocol (MCP) lets a compatible coding agent call Depdeck as a local tool. For clients that use an `mcpServers` configuration, use this entry.
+Model Context Protocol (MCP) lets your agent call depdeck as a local tool.
+After [installing depdeck](#start-your-collection), register it in Codex from
+the same environment where `depdeck --version` works. The add command saves a
+user-scoped Codex entry.
 
-```json
-{
-  "mcpServers": {
-    "depdeck": {
-      "command": "depdeck",
-      "args": ["mcp"]
-    }
-  }
-}
+```sh
+codex mcp add depdeck -- depdeck mcp
+codex mcp list
+codex mcp get depdeck
 ```
 
-The server uses standard input and output. If your client cannot find `depdeck`, set `command` to the absolute executable path. Pass an absolute project path if the client runs the server from another directory.
+Open a new Codex session and use `/mcp` to find `list_deck`, `get_card`, and
+`check_deck`. Give the two project tools an absolute project path. Codex
+launches `depdeck mcp` over standard input and output.
 
-| Tool | Arguments | Result |
-| --- | --- | --- |
-| `list_deck` | `path`, optional `tag` and `flavor` | Cards for a project |
-| `get_card` | npm package `name`, optional `flavor` | One registry Card. Use `list_deck` for project membership. |
-| `check_deck` | `path` | Policy verdict and assessed dependencies |
-
-Use `rule` or `none` for `flavor`. Valid Tag values are `dependencies`, `devDependencies`, and `optionalDependencies`. CLI and MCP results use the same JSON envelope at schema `1.1`. Check the major version and read `data` according to the operation. For an empty Check, builds from `main` return `data.dependencies: []`. The published `v1.0.0` release omits that field for empty Checks. See the [output contract](docs/SPEC.md#envelope).
-
-### Prompts to try
-
-- “Use `list_deck` for this project with the Tag `devDependencies`. Summarize the publish dates and point out missing npm facts.”
-- “Use `get_card` for `react`. Show its weekly downloads, Rarity, publish date, and license.”
-- “Run `check_deck` for this project. Use the returned policy and Card facts to explain each flag. List Fetch errors separately.”
+Using Cursor, Claude Code, Grok Build, Hermes, or another client? See the
+[MCP setup guide](docs/guides/mcp-setup.md) for client-specific commands,
+absolute executable paths, and a [copyable setup prompt](docs/guides/mcp-setup.md#copyable-setup-prompt).
 
 ## Under the cartridge
 
