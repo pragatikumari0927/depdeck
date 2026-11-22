@@ -40,9 +40,10 @@ func TestSDKToolsAndStandaloneCard(t *testing.T) {
 		t.Fatal(err)
 	}
 	wantDescriptions := map[string]string{
-		"list_deck":  "List assessment data for direct dependencies in a project's root package.json. Use path for the project directory or manifest, tag to select one dependency group, and flavor to choose rule or none. Results include Fetch errors when npm data is unavailable.",
-		"get_card":   "Look up facts for one public npm package by name, such as react or @scope/package. Use flavor to choose rule or none. Call list_deck to check project membership. If npm data is unavailable, the Card includes a Fetch error.",
-		"check_deck": "Evaluate direct dependencies against the default publish-age and license-declaration policy. Returns the verdict, policy, flagged dependencies, and assessed dependencies with any Fetch errors. Chaos reflects publish age, and Rarity reflects weekly downloads. Use a vulnerability scanner for security findings.",
+		"list_deck":   "List assessment data for direct dependencies in a project's root package.json. Use path for the project directory or manifest, tag to select one dependency group, and flavor to choose rule or none. Results include Fetch errors when npm data is unavailable.",
+		"get_card":    "Look up facts for one public npm package by name, such as react or @scope/package. Use flavor to choose rule or none. Call list_deck to check project membership. If npm data is unavailable, the Card includes a Fetch error.",
+		"check_deck":  "Evaluate direct dependencies against the default publish-age and license-declaration policy. Returns the verdict, policy, flagged dependencies, and assessed dependencies with any Fetch errors. Chaos reflects publish age, and Rarity reflects weekly downloads. Use a vulnerability scanner for security findings.",
+		"render_deck": "Create a self-contained Pixel Archive HTML Deck from a project's direct dependencies using depdeck's canonical renderer. Use when the user wants the visual Deck, rather than recreating HTML from assessment data. This may contact npm. Writes a new .html file under the project directory and never overwrites an existing file; out is an optional relative path and defaults to deck.html. Returns the relative output path, Card count, and byte size.",
 	}
 	if len(listed.Tools) != len(wantDescriptions) {
 		t.Fatalf("tools = %+v", listed.Tools)
@@ -50,6 +51,29 @@ func TestSDKToolsAndStandaloneCard(t *testing.T) {
 	for _, tool := range listed.Tools {
 		if want := wantDescriptions[tool.Name]; want == "" || tool.Description != want {
 			t.Errorf("%s description = %q, want %q", tool.Name, tool.Description, want)
+		}
+		if tool.Name == "render_deck" {
+			encoded, err := json.Marshal(tool.InputSchema)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var schema struct {
+				Properties           map[string]json.RawMessage `json:"properties"`
+				Required             []string                   `json:"required"`
+				AdditionalProperties *bool                      `json:"additionalProperties"`
+			}
+			if err := json.Unmarshal(encoded, &schema); err != nil {
+				t.Fatal(err)
+			}
+			if len(schema.Properties) != 3 || len(schema.Required) != 1 || schema.Required[0] != "path" ||
+				schema.AdditionalProperties == nil || *schema.AdditionalProperties {
+				t.Errorf("render_deck schema = %s", encoded)
+			}
+			for _, property := range []string{"path", "out", "flavor"} {
+				if _, ok := schema.Properties[property]; !ok {
+					t.Errorf("render_deck schema omits %q: %s", property, encoded)
+				}
+			}
 		}
 	}
 	for _, tc := range []struct {
@@ -59,6 +83,7 @@ func TestSDKToolsAndStandaloneCard(t *testing.T) {
 	}{
 		{"list_deck", map[string]any{"path": " "}, "set path to a project directory or a package.json file"},
 		{"check_deck", map[string]any{"path": " "}, "set path to a project directory or a package.json file"},
+		{"render_deck", map[string]any{"path": " "}, "set path to a project directory or a package.json file"},
 		{"get_card", map[string]any{"name": "../private"}, "use an npm package name such as react or @scope/package"},
 		{"list_deck", map[string]any{"path": t.TempDir()}, "could not assess the project, check that path points to a readable package.json"},
 		{"check_deck", map[string]any{"path": t.TempDir()}, "could not assess the project, check that path points to a readable package.json"},

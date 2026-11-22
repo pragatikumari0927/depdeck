@@ -7,6 +7,7 @@ import (
 	"errors"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -34,7 +35,13 @@ type checkArgs struct {
 	Path string `json:"path"`
 }
 
-// New registers the three read-only assessment tools on an MCP server.
+type renderDeckArgs struct {
+	Path   string      `json:"path"`
+	Out    string      `json:"out"`
+	Flavor flavor.Mode `json:"flavor"`
+}
+
+// New registers the assessment tools and the canonical HTML Deck renderer.
 func New(opt pipeline.Options) *mcp.Server {
 	server := mcp.NewServer(&mcp.Implementation{Name: "depdeck", Version: types.BuildVersion}, nil)
 	requiredString := map[string]any{"type": "string", "minLength": 1}
@@ -95,6 +102,37 @@ func New(opt pipeline.Options) *mcp.Server {
 				return nil, errors.New("could not assess the project, check that path points to a readable package.json")
 			}
 			return check, nil
+		})
+
+	register(server, "render_deck", "Create a self-contained Pixel Archive HTML Deck from a project's direct dependencies using depdeck's canonical renderer. Use when the user wants the visual Deck, rather than recreating HTML from assessment data. This may contact npm. Writes a new .html file under the project directory and never overwrites an existing file; out is an optional relative path and defaults to deck.html. Returns the relative output path, Card count, and byte size.",
+		"path", map[string]any{
+			"path":   requiredString,
+			"out":    map[string]any{"type": "string", "description": "Optional new .html path relative to the project directory; defaults to deck.html."},
+			"flavor": flavorEnum,
+		},
+		func(ctx context.Context, args renderDeckArgs) (any, error) {
+			if strings.TrimSpace(args.Path) == "" {
+				return nil, errors.New("set path to a project directory or a package.json file")
+			}
+			output, err := cleanDeckOutput(args.Out)
+			if err != nil {
+				return nil, err
+			}
+			requestOpt := opt
+			requestOpt.Flavor = args.Flavor
+			deps, err := pipeline.Run(ctx, args.Path, requestOpt)
+			if err != nil {
+				return nil, errors.New("could not assess the project, check that path points to a readable package.json")
+			}
+			manifest, err := pipeline.ManifestPath(args.Path)
+			if err != nil {
+				return nil, errors.New("could not access the project directory")
+			}
+			result, err := writeDeckFile(filepath.Dir(manifest), output, deps)
+			if err != nil {
+				return nil, err
+			}
+			return result, nil
 		})
 	return server
 }

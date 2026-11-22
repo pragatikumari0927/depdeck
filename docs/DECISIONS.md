@@ -12,7 +12,7 @@ Index only. Reasoning lives in `docs/adr/`.
 | D-004 | On-disk HTTP cache, ETag, three TTL classes | [0004](adr/0004-on-disk-http-cache.md) |
 | D-005 | v1 flavor: rule and none only; ai errors | [0005](adr/0005-v1-flavor-rule-or-none.md) |
 | D-006 | One self-contained deck.html, byte-deterministic | [0006](adr/0006-self-contained-deck-html.md) |
-| D-007 | MCP: list_deck, get_card, check_deck | [0007](adr/0007-mcp-three-tools.md) |
+| D-007 | MCP assessment tools: list_deck, get_card, check_deck | [0007](adr/0007-mcp-three-tools.md) |
 | D-008 | Shared JSON envelope across CLI and MCP | [0008](adr/0008-json-envelope.md) |
 | D-009 | Rarity from npm weekly downloads | [0009](adr/0009-rarity-thresholds.md) |
 | D-010 | v1 Check policy numbers | [0010](adr/0010-check-policy-v1.md) |
@@ -28,6 +28,7 @@ Index only. Reasoning lives in `docs/adr/`.
 | D-020 | Keep the upstream Go security minimum (superseded by D-023) | [0020](adr/0020-go-security-minimum.md) |
 | D-021 | Explain CLI Check results and MCP tool purpose | [0021](adr/0021-cli-and-mcp-wording.md) |
 | D-023 | Use patched Go toolchains for source and release builds | [0023](adr/0023-go-patched-toolchains.md) |
+| D-025 | MCP can create a Deck with the canonical HTML renderer | [0025](adr/0025-mcp-canonical-deck-renderer.md) |
 
 ## Standing conventions
 

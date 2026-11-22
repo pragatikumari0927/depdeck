@@ -28,7 +28,7 @@ tests, Go lint, vulnerability scanning, and secret scanning.
 - Registry: semver selection compatible with common npm ranges, malformed data, timeouts, redirects, body limits, and fetch errors.
 - Pipeline: all check outcomes and incomplete assessments, with a fixed clock and no network dependency.
 - CLI: current-directory default, exit codes, stdout and stderr separation, JSON envelope, HTML output, and write failures.
-- MCP: all three tools, schema major-version use, structured content, tool errors, and a preserved assessment when npm fetch fails.
+- MCP: all four tools, schema major-version use, structured content, tool errors, a preserved assessment when npm fetch fails, and canonical Deck rendering with offline fixtures.
 - HTML: hostile package names and versions do not create markup or script.
 
 For each ticket, record commands and results in its completion notes. Do not claim a check passed if it did not run.

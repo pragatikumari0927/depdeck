@@ -133,8 +133,8 @@ codex mcp get depdeck
 ```
 
 This adds a user-scoped server. In Codex CLI or its IDE extension, use `/mcp`
-to check for `list_deck`, `get_card`, and `check_deck`. Remove the entry with
-`codex mcp remove depdeck`.
+to check for `list_deck`, `get_card`, `check_deck`, and `render_deck`. Remove
+the entry with `codex mcp remove depdeck`.
 
 #### Claude Code
 
@@ -262,9 +262,10 @@ configuration. Keep existing servers. Use an absolute executable path if PATH
 does not resolve depdeck.
 
 After I approve the setup, configure only the depdeck entry, reload the client,
-and verify that list_deck, get_card, and check_deck are available. Explain that
-list_deck and check_deck need a project path, while get_card looks up one npm
-package independently. Do not change project files or install dependencies.
+and verify that list_deck, get_card, check_deck, and render_deck are available.
+Explain that list_deck, check_deck, and render_deck need a project path, while
+get_card looks up one npm package independently. Do not change project files or
+install dependencies.
 ```
 
 ### Try these prompts after connecting
@@ -272,6 +273,7 @@ package independently. Do not change project files or install dependencies.
 - **Project overview:** “Use depdeck's `list_deck` with the absolute path to this project's root. Summarize its direct dependencies by runtime, development, and optional group. Separate unavailable npm facts from known values.”
 - **One package:** “Use depdeck's `get_card` for `react`. Summarize the npm facts it returns. Do not infer that the package is declared in this project.”
 - **Policy check:** “Use depdeck's `check_deck` with the absolute path to this project's root. Explain the default publish-age and license-declaration policy results. Report Fetch errors separately; do not describe them as vulnerabilities or policy flags.”
+- **Pixel Archive:** “Use depdeck's `render_deck` for this project with `out` set to `depdeck.html`. If that file already exists, stop and ask me before choosing another output path. Tell me the relative path and Card count.”
 
 ### Know what the tools do
 
@@ -280,6 +282,14 @@ package independently. Do not change project files or install dependencies.
 | `list_deck` | Project directory or `package.json` path | Assesses direct dependencies from the root manifest. |
 | `get_card` | npm package name | Looks up one public npm package; it does not establish project membership. |
 | `check_deck` | Project directory or `package.json` path | Evaluates the default publish-age and license-declaration policy. |
+| `render_deck` | Project directory or `package.json` path; optional relative output | Creates the canonical self-contained Pixel Archive HTML under the project. It does not overwrite files; npm data may be fetched. |
+
+The published **v1.0.0** MCP server has the original three assessment tools
+and does not include `render_deck`. The Pixel Archive renderer and this tool
+are on `main`. To use them through MCP, install the executable from current
+`main` and update the command in your MCP client to that executable. Restart
+the client and verify the tool list again. See the
+[source build steps](docs/guides/mcp-setup.md#install-depdeck-first).
 
 Rarity measures weekly downloads. Chaos reflects publish age. Neither is a
 vulnerability score. A Fetch error means npm facts were unavailable or

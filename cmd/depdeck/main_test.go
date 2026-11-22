@@ -219,7 +219,7 @@ func TestReleaseBinaryOffline(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		expected := map[string]string{"check_deck": "path", "get_card": "name", "list_deck": "path"}
+		expected := map[string]string{"check_deck": "path", "get_card": "name", "list_deck": "path", "render_deck": "path"}
 		for _, tool := range list.Tools {
 			raw, err := json.Marshal(tool.InputSchema)
 			if err != nil {
@@ -268,6 +268,20 @@ func TestReleaseBinaryOffline(t *testing.T) {
 		check := decodeData[types.CheckData](t, data, "check_deck", "1.0.0-test")
 		if !check.Pass || check.Reason != "partial_fetch_errors" || len(check.Dependencies) != 2 {
 			t.Fatalf("MCP Check = %+v", check)
+		}
+		rendered := callData(ctx, t, session, "render_deck", map[string]any{"path": project, "out": "mcp-deck.html", "flavor": "none"})
+		renderInfo := decodeData[struct {
+			Output string `json:"output"`
+			Cards  int    `json:"cards"`
+			Bytes  int    `json:"bytes"`
+		}](t, rendered, "render_deck", "1.0.0-test")
+		if renderInfo.Output != "mcp-deck.html" || renderInfo.Cards != 2 || renderInfo.Bytes == 0 {
+			t.Fatalf("MCP render info = %+v", renderInfo)
+		}
+		html, err := os.ReadFile(filepath.Join(project, renderInfo.Output))
+		if err != nil || len(html) != renderInfo.Bytes || !strings.Contains(string(html), "Rarity Atlas") ||
+			!strings.Contains(string(html), "fresh") || !strings.Contains(string(html), "Archive Notice") {
+			t.Fatalf("MCP rendered Deck: error=%v size=%d info=%+v", err, len(html), renderInfo)
 		}
 		t.Run("empty_check", func(t *testing.T) {
 			data := callData(ctx, t, session, "check_deck", map[string]any{"path": emptyProject})

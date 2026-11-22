@@ -9,8 +9,14 @@ Running `depdeck mcp` directly can look idle. It is waiting for protocol
 messages, so use your client's MCP tool view to check the connection. Press
 Ctrl+C if you started it manually. Depdeck needs no listening port or MCP
 server URL. An assessment can look up package names in the public npm registry.
-A saved HTML Deck from `depdeck scan` opens and filters offline. Your coding
-client's own settings govern where it processes the tool results.
+A saved HTML Deck from `depdeck scan` or MCP `render_deck` opens and filters
+offline. Your coding client's own settings govern where it processes the tool
+results.
+
+`render_deck` writes a new HTML file inside the selected project when called.
+It never replaces an existing file or creates directories. Review the output
+path in the tool call; use the CLI if you need to choose a destination outside
+the project.
 
 ## Install depdeck first
 
@@ -24,6 +30,23 @@ For current source builds, see the [README source install](../../README.md#try-t
 go version
 go install github.com/pragatikumari0927/depdeck/cmd/depdeck@v1.0.0
 ```
+
+The published **v1.0.0** server exposes `list_deck`, `get_card`, and
+`check_deck`. Its CLI generates the earlier Card design, and its MCP server
+has no HTML-rendering tool. To use the Pixel Archive renderer through MCP,
+build the executable from current `main`:
+
+```sh
+git clone https://github.com/pragatikumari0927/depdeck.git
+cd depdeck
+git switch main
+go install ./cmd/depdeck
+```
+
+Point the MCP client's `command` at this newly installed executable, then
+restart the client. Check its resolved executable path and tool inventory if
+it still shows only the three v1.0.0 tools. Do not replace a shared client
+configuration without reviewing its scope.
 
 `PATH` is the list of directories a process searches for executables. If
 `depdeck --version` succeeds in your client's environment, continue to
@@ -361,15 +384,16 @@ Use the absolute executable if PATH is unavailable. Launch it with the
 single argument mcp. Keep the existing server entries.
 
 After reloading the client, verify that depdeck exposes list_deck, get_card,
-and check_deck. For a smoke test, create a disposable project with an empty
-package.json and call list_deck and check_deck using its absolute path.
-Avoid live npm for this smoke test. Report the results, any step I must do
-in the client, and how to remove the new configuration.
+check_deck, and render_deck. For a smoke test, create a disposable project
+with an empty package.json and call list_deck, check_deck, and render_deck
+using its absolute path. The empty project avoids live npm; render_deck should
+create `deck.html` in that disposable project. Report the results, any step I
+must do in the client, and how to remove the new configuration.
 ```
 
 ## Verify the tools
 
-Look for these three tools under the `depdeck` entry. Some clients show a
+Look for these four tools under the `depdeck` entry. Some clients show a
 server prefix before each name. Use an absolute path to a project directory
 or its `package.json` for project operations.
 
@@ -378,6 +402,7 @@ or its `package.json` for project operations.
 | `list_deck` | `path` | Assessment of the root project's direct dependencies. Optionally supply `tag` or `flavor`. |
 | `get_card` | npm package `name` | Public npm facts for one package, independent of any project. Optionally supply `flavor`. |
 | `check_deck` | `path` | Default policy verdict, flagged and assessed dependencies, and any Fetch errors on their Cards. |
+| `render_deck` | `path`; optional `out`, `flavor` | Writes the canonical self-contained Pixel Archive HTML and returns its relative path, Card count, and byte size. It defaults to `deck.html`, never overwrites an existing file, and keeps output inside the project. |
 
 The tag values are `dependencies`, `devDependencies`, and
 `optionalDependencies`. Flavor accepts `rule` and `none`. CLI JSON and MCP use
@@ -386,10 +411,10 @@ shapes and the [MCP contract](../SPEC.md#mcp-surface) lists the arguments.
 For an empty Check, builds from `main` return `data.dependencies: []`.
 The published `v1.0.0` release omits that field for empty Checks.
 
-A project with `{}` in `package.json` can verify the two project tools
-without npm access. On a source checkout, run the repository's offline
-tests to verify all three tool calls, including `get_card`, without relying
-on live npm.
+A project with `{}` in `package.json` can verify the project tools and create
+an empty Deck without npm access. On a source checkout, run the repository's
+offline tests to verify all four tool calls, including `get_card` and
+`render_deck`, without relying on live npm.
 
 ```sh
 go test ./cmd/depdeck ./internal/mcp -count=1
@@ -405,6 +430,10 @@ go test ./cmd/depdeck ./internal/mcp -count=1
 3. “Run depdeck's `check_deck` on the absolute path to this project's root.
    Explain which Cards triggered the default publish-age or license
    policy, and list incomplete npm lookups separately.”
+4. “Use depdeck's `render_deck` on the absolute path to this project's root.
+   Create the canonical Pixel Archive. If the default `deck.html` already
+   exists, do not overwrite it; ask me to choose another relative `.html`
+   path. Report the output path and Card count.”
 
 Check flags assessed Cards with Chaos above `0.5` or a missing license
 declaration after a successful lookup. Chaos reflects publish age and Rarity

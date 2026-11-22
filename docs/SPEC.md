@@ -4,7 +4,7 @@ Frozen v1 technical contract. Claims are checkable against code. Index of why: [
 
 ## Non-goals
 
-v1 does not implement: GitHub enrichment; lockfile resolution (`resolved_version` stays empty); workspace walk; `--flavor=ai` runtime (flag errors); `depdeck serve`; MCP `render_html` / `audit` / `search_deck` / `compare_decks`; private-registry auth; transitives, `peerDependencies`, or `bundledDependencies` on the Deck. The registry selects a version that matches the declared npm range.
+v1 does not implement: GitHub enrichment; lockfile resolution (`resolved_version` stays empty); workspace walk; `--flavor=ai` runtime (flag errors); `depdeck serve`; MCP `audit` / `search_deck` / `compare_decks`; private-registry auth; transitives, `peerDependencies`, or `bundledDependencies` on the Deck. The registry selects a version that matches the declared npm range. MCP `render_html` was not implemented; the additive `render_deck` tool uses the canonical renderer.
 
 Requires ADR-0002, ADR-0005, ADR-0007, ADR-0011, and DECISIONS.md v2 to change.
 
@@ -21,7 +21,7 @@ Requires ADR-0002, ADR-0005, ADR-0007, ADR-0011, and DECISIONS.md v2 to change.
 | `pkg/render` | HTML bytes from Dependencies |
 | `internal/pipeline` | parse → fetch → stats → flavor |
 | `internal/cli` | `scan`, `check`, flags, exit codes |
-| `internal/mcp` | `list_deck`, `get_card`, `check_deck` |
+| `internal/mcp` | `list_deck`, `get_card`, `check_deck`, `render_deck` |
 | `cmd/depdeck` | Wiring only |
 | `pkg/render/templates/` | deck.html, embedded via go:embed |
 | `testdata/` | Fixture npm responses |
@@ -80,6 +80,7 @@ Successful CLI `--json` and MCP results:
 | `scan` | `list_deck` | `{ "dependencies": [ Dependency, ... ] }` |
 | `check` | `check_deck` | `{ "pass", "flagged", "reason", "policy", "dependencies" }` |
 | (none) | `get_card` | one standalone Card, without project-only fields |
+| (none) | `render_deck` | `{ "output", "cards", "bytes" }` for a generated HTML Deck |
 
 `schema_version` is `"1.1"`, the first supported shipped baseline. The earlier documented MCP 1.0 shape was not shipped. Consumers check the major component only. JSON is not byte-identical across runs (`generated_at`). HTML must not contain `generated_at`.
 
@@ -103,23 +104,25 @@ Requires ADR-0001, ADR-0005, ADR-0006, ADR-0010, ADR-0019, ADR-0021.
 
 ## MCP surface
 
-Tools only: `list_deck`, `get_card`, `check_deck`. Use the official Go SDK v1.8.0 and explicit `inputSchema`. `flavor` enum is `rule` | `none` (`ai` is schema failure, not runtime fallback). The minimum Go version is `1.26.11` per ADR-0023.
+Tools: `list_deck`, `get_card`, `check_deck`, and `render_deck`. Use the official Go SDK v1.8.0 and explicit `inputSchema`. `flavor` enum is `rule` | `none` (`ai` is schema failure, not runtime fallback). The minimum Go version is `1.26.11` per ADR-0023.
 
 - `list_deck`: `{ path, tag?, flavor? }`
 - `get_card`: `{ name, flavor? }` — npm only; no Roster path
 - `check_deck`: `{ path }`
+- `render_deck`: `{ path, out?, flavor? }` — writes the canonical HTML Deck to a new `.html` file under the project; `out` defaults to `deck.html` and existing files are never overwritten.
 
 The CLI and MCP use the same pipeline. MCP project paths follow the caller's working directory. Standalone Card responses omit `version`, `tag`, and `resolved_version`.
 
-`isError` only for malformed args or crashes. npm 404 / 429 / timeout / all-fetch-failed: success with `errors` on Dependencies.
+`isError` is used for invalid arguments, assessment failures, or output failures. npm 404 / 429 / timeout / all-fetch-failed remain successful assessments with `errors` on Dependencies.
 
 Descriptions:
 
 - `list_deck`: List assessment data for direct dependencies in a project's root package.json. Use path for the project directory or manifest, tag to select one dependency group, and flavor to choose rule or none. Results include Fetch errors when npm data is unavailable.
 - `get_card`: Look up facts for one public npm package by name, such as react or @scope/package. Use flavor to choose rule or none. Call list_deck to check project membership. If npm data is unavailable, the Card includes a Fetch error.
 - `check_deck`: Evaluate direct dependencies against the default publish-age and license-declaration policy. Returns the verdict, policy, flagged dependencies, and assessed dependencies with any Fetch errors. Chaos reflects publish age, and Rarity reflects weekly downloads. Use a vulnerability scanner for security findings.
+- `render_deck`: Create a self-contained Pixel Archive HTML Deck with the canonical renderer. Use it when a user wants the visual Deck instead of recreating HTML from assessment data. This may contact npm. It writes a new file under the project, never overwrites an existing file, and returns the relative path, Card count, and byte size.
 
-Requires ADR-0007, ADR-0003, ADR-0005, ADR-0021.
+Requires ADR-0007, ADR-0003, ADR-0005, ADR-0021, ADR-0025.
 
 ## Check policy
 
