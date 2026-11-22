@@ -30,11 +30,12 @@ ADR-0012 locks five threats and their mitigations. Keep each threat covered:
 | Package data injects HTML or terminal control sequences | Escape template values and quote package names in CLI warnings. | [Renderer tests](../pkg/render/render_test.go), [CLI tests](../internal/cli/cli_test.go) |
 | MCP peer sends an oversized frame or invalid arguments | Limit inbound frames to 16 MiB and validate tool arguments against explicit schemas. | [Stdio process tests](../cmd/depdeck/main_test.go) |
 | Output path overwrites the manifest | Compare file identities before assessment and before atomically replacing the destination. | [CLI process tests](../cmd/depdeck/main_test.go) |
+| MCP Deck output escapes the project or replaces an existing file | Accept only a relative `.html` path, use `os.Root` to confine path resolution, and create with exclusive semantics. Do not create directories. | [MCP render path tests](../internal/mcp/render_deck_test.go) |
 
 ## Residual risks
 
 The public registry can be unavailable or return incomplete data. Depdeck preserves Fetch errors in an assessment where the contract allows it. Cache hashes identify entries. They do not authenticate data.
 
-The invoking user and MCP host govern filesystem access. OS permissions and mounts determine whether a path resolves to a local or remote filesystem. The file-identity checks cover existing aliases. They do not guard against hostile concurrent filesystem changes by an actor with write access. The declared version is preserved in output, so project owners should keep credentials out of manifest declarations.
+The invoking user and MCP host govern filesystem access. OS permissions and mounts determine whether a path resolves to a local or remote filesystem. The CLI file-identity checks cover existing aliases. The MCP renderer confines writes to the selected project and refuses existing targets. A process crash during a write can leave a partial new file; an authorized local actor can also change project files concurrently. The declared version is preserved in output, so project owners should keep credentials out of manifest declarations.
 
 Update this model when a new input, output, trust boundary, or network behavior is added. Link each new mitigation to a test or review check.

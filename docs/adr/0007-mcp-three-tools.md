@@ -2,7 +2,9 @@
 
 MCP exposes `list_deck`, `get_card`, and `check_deck`. No HTML, audit, AI, search, or compare tools. `get_card(name)` talks to npm only — no Roster path, no `not_on_roster`. Project membership is `list_deck(path)` plus filter.
 
-**Status:** accepted
+This is the original v1 inventory. [ADR-0025](0025-mcp-canonical-deck-renderer.md) adds `render_deck`; the three assessment tools and their contracts remain unchanged.
+
+**Status:** accepted; tool inventory extended by [ADR-0025](0025-mcp-canonical-deck-renderer.md)
 
 ## Envelope
 

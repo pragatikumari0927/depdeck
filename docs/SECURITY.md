@@ -9,6 +9,7 @@ Depdeck reads a local npm manifest and requests public npm registry data. It cre
 - Use HTTPS for registry requests. Do not forward credentials or user headers to another host.
 - Do not execute shell commands from package data. Do not install dependencies during a scan.
 - Escape package data before writing HTML. Keep output paths explicit and report write failures.
+- MCP `render_deck` writes only a new relative `.html` file under the selected project. It does not overwrite files or create directories; review the destination before calling the tool.
 - Keep secrets and personal data out of logs, fixtures, issues, and commits.
 - Keep dependencies pinned or bounded by the module lock data. Review dependency changes.
 
