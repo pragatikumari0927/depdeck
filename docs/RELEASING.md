@@ -28,13 +28,16 @@ go mod download
 GOPROXY=off govulncheck -show version ./...
 goreleaser check
 GOPROXY=off goreleaser release --snapshot --skip=publish
-python3 scripts/verify-release.py dist
+python3 scripts/verify-release.py dist --expect-render-deck
 ```
 
 The verifier checks the expected OS and architecture combinations, archive
 members, and SHA-256, then runs the host's extracted binary through CLI and MCP
-smoke tests. Use a fresh checkout for each snapshot comparison. GoReleaser
-writes to `dist/`. Keep it disposable and verify its path before any cleanup.
+smoke tests. `--expect-render-deck` checks all four MCP tools and renders an
+offline empty Deck. Omit that option only when checking the published v1.0.0
+binary, which has the original three tools. Use a fresh checkout for each
+snapshot comparison. GoReleaser writes to `dist/`. Keep it disposable and
+verify its path before any cleanup.
 
 Preview Conventional Commits since the latest tag with
 `git-cliff --config cliff.toml --unreleased`. Use the preview to update the

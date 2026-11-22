@@ -19,7 +19,7 @@ def require(condition, message):
         raise SystemExit(message)
 
 
-def smoke(binary, version):
+def smoke(binary, version, expect_render_deck=False):
     with tempfile.TemporaryDirectory(prefix="depdeck-smoke-") as directory:
         root = Path(directory)
         (root / "package.json").write_text("{}", encoding="utf-8")
@@ -65,7 +65,10 @@ def smoke(binary, version):
                 send({"method": "notifications/initialized"})
                 send({"id": 2, "method": "tools/list"})
                 tools = receive()["result"]["tools"]
-                require({tool["name"] for tool in tools} == {"list_deck", "get_card", "check_deck"},
+                expected_tools = {"list_deck", "get_card", "check_deck"}
+                if expect_render_deck:
+                    expected_tools.add("render_deck")
+                require({tool["name"] for tool in tools} == expected_tools,
                         "Unexpected MCP tool inventory")
                 send({"id": 3, "method": "tools/call", "params": {
                     "name": "check_deck", "arguments": {"path": "."},
@@ -73,6 +76,17 @@ def smoke(binary, version):
                 assessment = receive()["result"]["structuredContent"]
                 require(assessment["generated_by"] == identity and assessment["data"]["reason"] == "empty_roster",
                         "Unexpected MCP assessment")
+                if expect_render_deck:
+                    send({"id": 4, "method": "tools/call", "params": {
+                        "name": "render_deck", "arguments": {"path": ".", "out": "release-smoke.html"},
+                    }})
+                    rendered = receive()["result"]["structuredContent"]
+                    require(rendered["generated_by"] == identity and
+                            rendered["data"]["output"] == "release-smoke.html" and
+                            rendered["data"]["cards"] == 0 and rendered["data"]["bytes"] > 0,
+                            "Unexpected MCP Deck render result")
+                    deck = (root / "release-smoke.html").read_text(encoding="utf-8")
+                    require("Rarity Atlas" in deck, "MCP Deck render did not use the canonical renderer")
                 process.stdin.close()
                 require(process.wait(timeout=30) == 0, "MCP failed to shut down on EOF")
                 require(not process.stderr.read(), "Unexpected MCP diagnostic")
@@ -82,7 +96,7 @@ def smoke(binary, version):
     print(f"CLI and MCP smoke passed for {identity}")
 
 
-def verify(dist):
+def verify(dist, expect_render_deck=False):
     expected = {(os_name, arch) for os_name in ("windows", "linux", "darwin")
                 for arch in ("amd64", "arm64")}
     seen = set()
@@ -115,7 +129,7 @@ def verify(dist):
                         with package.extractfile(executable) as stream:
                             binary.write_bytes(stream.read())
                     binary.chmod(0o755)
-                    smoke(binary, version)
+                    smoke(binary, version, expect_render_deck)
                     native_checked = True
         print(f"{digest}  {name}")
     require(seen == expected, f"Missing archive targets: {expected - seen}")
@@ -127,10 +141,12 @@ if __name__ == "__main__":
     parser.add_argument("dist", nargs="?", type=Path)
     parser.add_argument("--binary", type=Path)
     parser.add_argument("--version")
+    parser.add_argument("--expect-render-deck", action="store_true",
+                        help="require and exercise the Pixel Archive MCP render_deck tool")
     args = parser.parse_args()
     if args.binary and args.version and not args.dist:
-        smoke(args.binary.resolve(), args.version)
+        smoke(args.binary.resolve(), args.version, args.expect_render_deck)
     elif args.dist and not args.binary and not args.version:
-        verify(args.dist)
+        verify(args.dist, args.expect_render_deck)
     else:
         parser.error("provide a snapshot directory or --binary and --version")

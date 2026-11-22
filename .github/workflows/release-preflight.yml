@@ -39,14 +39,14 @@ jobs:
           tar -xzf "$archive" -C "$RUNNER_TEMP" goreleaser
           "$RUNNER_TEMP/goreleaser" check
           GOPROXY=off "$RUNNER_TEMP/goreleaser" release --snapshot --skip=publish
-          python3 scripts/verify-release.py dist
+          python3 scripts/verify-release.py dist --expect-render-deck
       - name: Verify isolated Go install
         shell: bash
         run: |
           set -euo pipefail
           install_dir="$(mktemp -d "$RUNNER_TEMP/go-install.XXXXXX")"
           GOBIN="$install_dir" GOPROXY=off go install ./cmd/depdeck
-          python3 scripts/verify-release.py --binary "$install_dir/depdeck" --version dev
+          python3 scripts/verify-release.py --binary "$install_dir/depdeck" --version dev --expect-render-deck
 
   homebrew:
     runs-on: macos-latest
@@ -85,4 +85,4 @@ jobs:
           brew test depdeck/preflight/depdeck
           binary="$(brew --prefix depdeck/preflight/depdeck)/bin/depdeck"
           "$(brew --prefix go)/bin/go" version -m "$binary"
-          python3 scripts/verify-release.py --binary "$binary" --version 1.0.0
+          python3 scripts/verify-release.py --binary "$binary" --version 1.0.0 --expect-render-deck
