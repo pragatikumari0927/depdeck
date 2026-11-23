@@ -12,14 +12,16 @@ These changes are proposed for v1.1.0. See the [candidate notes](RELEASE_NOTES.m
 - Add the Pixel Archive Deck with pixel-art Rarity seals, the Rarity Atlas,
   dependency group filters, Field Journals, and readable Archive Notices
   (#24, #26).
+- Add the `render_deck` MCP tool. It writes the canonical self-contained HTML
+  Deck inside the project and refuses to overwrite an existing file (#59).
 
 ### Changed
 
 - Explain CLI options, manifest errors, and Check verdicts in plain English.
   Keep the documented Scan success line, exit codes, and JSON schema 1.1
   (#39, #42).
-- Clarify when to use each MCP tool and what its results measure. Keep the three
-  tool names and their input and output schemas (#39).
+- Clarify when to use each MCP tool and what its results measure. Keep existing
+  tool names and schemas; the MCP server now exposes four tools (#39, #59).
 - Revise the README to show the Pixel Archive interface and distinguish the
   published 1.0.0 binaries from builds of `main` (#36).
 
