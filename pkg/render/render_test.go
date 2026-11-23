@@ -210,6 +210,91 @@ func TestCardRaritySeals(t *testing.T) {
 	}
 }
 
+func TestPackageArtworkCatalogAndFallback(t *testing.T) {
+	t.Parallel()
+	deps := []types.Dependency{
+		{Name: "vite", Tag: types.TagDependencies, WeeklyDownloads: new(12000), Rarity: types.RarityLegendary},
+		{Name: "vite-plugin-vue", Tag: types.TagDependencies, WeeklyDownloads: new(12000), Rarity: types.RarityLegendary},
+		{Name: "@vitejs/plugin-vue", Tag: types.TagDevDependencies, WeeklyDownloads: new(12000), Rarity: types.RarityLegendary},
+		{Name: "@scope/vite", Tag: types.TagOptionalDependencies, WeeklyDownloads: new(12000), Rarity: types.RarityLegendary},
+	}
+	out := render(t, deps)
+	if !bytes.Contains(out, []byte(`<symbol id="art-vite"`)) {
+		t.Fatal("exact vite package did not include its curated symbol")
+	}
+	if got := bytes.Count(out, []byte(`data-artwork="vite"`)); got != 1 {
+		t.Fatalf("curated Vite artwork cards = %d, want 1", got)
+	}
+	if got := bytes.Count(out, []byte(`data-artwork="generated"`)); got != 3 {
+		t.Fatalf("fallback artwork cards = %d, want 3", got)
+	}
+	if bytes.Count(out, []byte(`href="#art-vite"`)) != 1 {
+		t.Fatal("curated artwork should be referenced once by the exact package")
+	}
+	_, cards, found := bytes.Cut(out, []byte(`<div class="deck">`))
+	if !found || bytes.Count(cards, []byte(`data-rarity="Legendary"`)) != len(deps) || bytes.Count(cards, []byte(`class="rarity-label">Legendary</span>`)) != len(deps) {
+		t.Fatal("artwork changed or removed the independent Rarity label")
+	}
+	for _, name := range []string{"vite-plugin-vue", "@vitejs/plugin-vue", "@scope/vite"} {
+		if !bytes.Contains(out, []byte(name)) {
+			t.Errorf("package name %q missing from visible Card content", name)
+		}
+	}
+	if bytes.Contains(out, []byte(`href="https://`)) || bytes.Contains(out, []byte(`<image`)) || bytes.Contains(out, []byte("url(http")) {
+		t.Fatal("artwork introduced an external asset reference")
+	}
+}
+
+func TestArtworkFallbackIsDeterministicAndEscapesNames(t *testing.T) {
+	t.Parallel()
+	deps := []types.Dependency{{
+		Name: `@scope/<svg onload="alert(1)">`, Tag: types.TagDependencies,
+		WeeklyDownloads: new(12), Rarity: types.RarityCommon,
+	}}
+	a := render(t, deps)
+	b := render(t, deps)
+	if !bytes.Equal(a, b) {
+		t.Fatal("identical artwork input produced different HTML")
+	}
+	if bytes.Contains(a, []byte(`<svg onload="alert(1)">`)) || bytes.Contains(a, []byte(`</symbol><script>`)) || bytes.Contains(a, []byte(`id="art-fallback-<`)) {
+		t.Fatal("hostile package name entered SVG markup")
+	}
+	if !bytes.Contains(a, []byte(`@scope/&lt;svg onload=&#34;alert(1)&#34;&gt;`)) {
+		t.Fatal("hostile package name was not escaped in visible text")
+	}
+	if !bytes.Contains(a, []byte(`data-rarity="Common"`)) || !bytes.Contains(a, []byte(`rarity-label">Common</span>`)) {
+		t.Fatal("generated fallback changed Rarity classification")
+	}
+}
+
+func TestArtworkSymbolsAreOfflineAndShared(t *testing.T) {
+	t.Parallel()
+	deps := []types.Dependency{
+		{Name: "vite", Tag: types.TagDependencies},
+		{Name: "vite", Tag: types.TagDevDependencies},
+		{Name: "react", Tag: types.TagDependencies},
+		{Name: "react", Tag: types.TagOptionalDependencies},
+	}
+	out := render(t, deps)
+	if got := bytes.Count(out, []byte(`<symbol id="art-vite"`)); got != 1 {
+		t.Fatalf("Vite symbol definitions = %d, want one shared definition", got)
+	}
+	if got := bytes.Count(out, []byte(`<symbol id="art-fallback-`)); got != 1 {
+		t.Fatalf("same fallback identity should be defined once, got %d definitions", got)
+	}
+	if got := bytes.Count(out, []byte(`class="package-art"`)); got != len(deps) {
+		t.Fatalf("Card art references = %d, want %d", got, len(deps))
+	}
+	if !bytes.Contains(out, []byte(`class="package-art" data-artwork="generated" viewBox="0 0 16 16" aria-hidden="true" focusable="false"`)) {
+		t.Fatal("package art should be decorative and use the compact shared view")
+	}
+	for _, forbidden := range []string{`<image`, `href="https://`, `src="https://`, `@import`, `url(https://`} {
+		if bytes.Contains(out, []byte(forbidden)) {
+			t.Errorf("offline Deck contains external asset marker %q", forbidden)
+		}
+	}
+}
+
 func TestArchiveNotices(t *testing.T) {
 	t.Parallel()
 	for _, tc := range []struct {
@@ -389,8 +474,8 @@ func TestRarityAtlas(t *testing.T) {
 				if got := bytes.Count(out, []byte(`<symbol id="`+want.seal+`"`)); got != 1 {
 					t.Errorf("%s symbol definitions = %d, want 1", want.name, got)
 				}
-				if got := bytes.Count(out, []byte(`href="#`+want.seal+`"`)); got != count*2+1 {
-					t.Errorf("%s references = %d, want %d for the seal, illustration and Atlas", want.name, got, count*2+1)
+				if got := bytes.Count(out, []byte(`href="#`+want.seal+`"`)); got != count+1 {
+					t.Errorf("%s references = %d, want %d for the Card seals and Atlas", want.name, got, count+1)
 				}
 			}
 			if bytes.Contains(out, []byte("alert(1)")) {
