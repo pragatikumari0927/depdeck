@@ -162,7 +162,7 @@ func (s *Store) Put(source, name string, class Class, e Entry) error {
 	if s.Disabled || !cacheable(class, e) {
 		return nil
 	}
-	if err := os.MkdirAll(s.Root, 0o755); err != nil {
+	if err := os.MkdirAll(s.Root, 0o700); err != nil {
 		return fmt.Errorf("mkdir %s: %w", s.Root, err)
 	}
 	dest := s.path(source, name, class)
