@@ -22,6 +22,7 @@ ADR-0012 locks five threats and their mitigations. Keep each threat covered:
 | Stored XSS in the HTML deck | Escape interpolated values with `html/template`. Use a static script and self-contained assets. | [Renderer tests](../pkg/render/render_test.go), [Deck template](../pkg/render/templates/deck.html) |
 | Secret leakage through MCP configuration | Keep credentials out of configs. The product has no private-registry authentication. | [Read-only CI secret scan](../.github/workflows/test.yml), [security policy](SECURITY.md) |
 | Cache poisoning | Hash per-package cache keys, enforce TTLs, validate cached bodies, and cache only successful or not-found responses. | [Cache tests](../pkg/cache/cache_test.go), [registry tests](../pkg/registry/registry_test.go) |
+| Cache directory metadata exposure | Create missing cache directories with mode 0700 on Unix-like systems and use restrictive temporary cache files. Preserve existing directories. | [Cache permission tests](../pkg/cache/cache_permissions_unix_test.go) |
 | MCP output used as agent instructions | Return typed data and fixed operational diagnostics. Keep package fields non-authoritative. | [MCP adapter tests](../internal/mcp/mcp_test.go), [stdio process tests](../cmd/depdeck/main_test.go) |
 | Oversized or deeply nested manifest | Require a regular file and JSON object. Bound manifest reads to 4 MiB. | [Parser tests](../pkg/parser/parser_test.go), [process tests](../cmd/depdeck/main_test.go) |
 | Oversized, malformed, or slow registry response | Bound bodies, timeouts, and concurrent requests. Validate metadata and counts before applying facts. | [Registry fixture tests](../pkg/registry/registry_test.go) |
@@ -34,7 +35,23 @@ ADR-0012 locks five threats and their mitigations. Keep each threat covered:
 
 ## Residual risks
 
-The public registry can be unavailable or return incomplete data. Depdeck preserves Fetch errors in an assessment where the contract allows it. Cache hashes identify entries. They do not authenticate data.
+The public registry can be unavailable or return incomplete data. Depdeck preserves
+Fetch errors in an assessment where the contract allows it. Cache hashes identify
+entries. They do not authenticate data. Newly created cache directories use mode
+0700 on Unix-like systems, subject to the process umask. On Unix-like systems,
+cache files use mode 0600
+through `os.CreateTemp` and are atomically renamed. This reduces cross-user
+cache-index visibility and blocks other users from planting or replacing entries
+in newly created cache roots.
+
+Existing cache directories are not chmodded, so their current permissions remain in
+effect. On Windows, mode bits do not set ACLs; new directories and files inherit
+the parent ACL. A same-user process, or another user with write access to an
+existing shared cache root, can still replace or poison entries. Cache reads can
+follow symlinks, and a writer with access can race the stat/open sequence.
+Concurrent writers use unique temporary files and atomic replacement; the last
+complete replacement wins. These controls do not defend against a process running
+as the same user.
 
 The invoking user and MCP host govern filesystem access. OS permissions and mounts determine whether a path resolves to a local or remote filesystem. The CLI file-identity checks cover existing aliases. The MCP renderer confines writes to the selected project and refuses existing targets. A process crash during a write can leave a partial new file; an authorized local actor can also change project files concurrently. The declared version is preserved in output, so project owners should keep credentials out of manifest declarations.
 
