@@ -56,16 +56,49 @@ The CLI process suite also covers a successful package lookup followed by a
 downloads 404 or 500 and a registry record dated in the future. It checks
 the HTML messages and the original JSON error kinds and publish date.
 
-Run the text enlargement regression with Node 24 and Chromium. Pass a local
-CLI-generated Deck containing at least one assessed Card and one degraded
-Card with an Archive Notice.
+## Pixel Archive browser regression
+
+The `browser` job in the test workflow runs an offline Chromium regression on
+pushes and pull requests. It is a separate status check and is not configured
+as a required branch-protection check. The job uses Node 24.22.3,
+Playwright 1.65.0 to install its matching Chromium build, and the Go 1.26.11
+minimum toolchain. It adds one Ubuntu runner and downloads Chromium plus its
+system libraries; the exact duration depends on GitHub-hosted runner cache and
+package download time.
+
+The test builds a temporary Deck by running
+`scripts/browser-fixture/main.go` through the production Go HTML renderer. The
+fixture is synthetic, includes all five Rarity states, all three dependency
+groups, degraded Cards, and hostile package text. It does not contact npm or
+use a project cache. The test renders it twice and compares the output bytes
+before opening the first Deck as a local file in Chromium.
+
+The browser check covers:
+
+- No HTTP or HTTPS browser requests.
+- Runtime, Development, Optional, and All Cards filters, including hidden
+  Card layout and unchanged Rarity Atlas totals.
+- The five Atlas counts, semantic landmarks, labeled filter controls, and
+  keyboard-visible focus.
+- Hostile package names and versions as escaped text.
+- 100% and 200% root text size at 320, 390, 768, 1024, and 1440 CSS pixels.
+
+Run the check locally with Node 24 and a Chromium executable:
 
 ```sh
-node scripts/verify-deck-reflow.cjs /path/to/chromium /path/to/deck.html
+go run ./scripts/browser-fixture > /tmp/depdeck-browser-fixture.html
+node scripts/verify-deck-reflow.cjs /path/to/chromium
 ```
 
-Chromium passed at 100% and 200% root text size at all five viewport widths.
-The test checks document and content overflow and rejects external requests.
+The browser test generates its own disposable fixture files; the first command
+is optional and lets a developer inspect the same fixture manually. Use
+`node_modules/.bin/playwright` from the pinned version to install Chromium as
+shown in `.github/workflows/test.yml`. On Windows, pass the path to a local
+Chrome or Chromium executable.
+
+This automation runs Chromium only. It does not claim Firefox, Safari,
+screen-reader, or automated WCAG audit coverage. The existing Go renderer tests
+remain responsible for the complete HTML contract and escaping regressions.
 
 The [desktop screenshot](assets/pixel-archive-desktop.png) and
 [mobile screenshot](assets/pixel-archive-mobile.png) are crops of the

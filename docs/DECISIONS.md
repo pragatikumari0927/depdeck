@@ -29,6 +29,7 @@ Index only. Reasoning lives in `docs/adr/`.
 | D-021 | Explain CLI Check results and MCP tool purpose | [0021](adr/0021-cli-and-mcp-wording.md) |
 | D-023 | Use patched Go toolchains for source and release builds | [0023](adr/0023-go-patched-toolchains.md) |
 | D-025 | MCP can create a Deck with the canonical HTML renderer | [0025](adr/0025-mcp-canonical-deck-renderer.md) |
+| D-026 | Exact-name local package artwork with deterministic fallback | [0026](adr/0026-offline-package-artwork.md) |
 
 ## Standing conventions
 

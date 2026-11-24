@@ -100,10 +100,13 @@ Use the weekly download cutoffs in [ADR-0009](adr/0009-rarity-thresholds.md). Kn
 Unknown is an HTML label for a Card with no verified rank.
 
 Use a square Card frame, a consistent neutral face, and a tier accent on the
-heading. The illustration area uses an enlarged tier seal and a shared
-geometric backdrop at a 2:1 aspect ratio. Keep package names and declared versions readable at full
-length. Per-package artwork requires an approved design and licensing decision.
-See [ADR-0006](adr/0006-self-contained-deck-html.md).
+heading. The illustration area uses a package-identity emblem on a shared
+geometric backdrop at a 2:1 aspect ratio. Keep the rarity seal separate from
+the illustration. Keep package names and declared versions readable at full
+length. Exact-name artwork is locally bundled and decorative; unmatched names
+use a deterministic original pixel motif. Catalog entries require provenance
+and licensing review. See [ADR-0006](adr/0006-self-contained-deck-html.md) and
+[ADR-0026](adr/0026-offline-package-artwork.md).
 
 ### Field Journal and Archive Notices
 
