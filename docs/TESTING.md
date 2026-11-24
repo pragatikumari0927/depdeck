@@ -95,6 +95,10 @@ is optional and lets a developer inspect the same fixture manually. Use
 `node_modules/.bin/playwright` from the pinned version to install Chromium as
 shown in `.github/workflows/test.yml`. On Windows, pass the path to a local
 Chrome or Chromium executable.
+GitHub's Ubuntu runner restricts the user namespaces Chromium uses for its
+sandbox, so the workflow sets `DEPDECK_CHROMIUM_NO_SANDBOX=1` for this
+disposable, offline browser job. Local runs keep Chromium's sandbox enabled by
+default.
 
 This automation runs Chromium only. It does not claim Firefox, Safari,
 screen-reader, or automated WCAG audit coverage. The existing Go renderer tests

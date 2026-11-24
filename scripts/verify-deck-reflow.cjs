@@ -38,12 +38,14 @@ async function checkBrowser() {
 
   const browserProfile = path.join(profile, 'chromium-profile');
   await mkdir(browserProfile);
-  const browser = spawn(chrome, [
+  const browserArgs = [
     '--headless', '--remote-debugging-port=0', '--disable-background-networking',
     '--disable-crash-reporter', '--disable-breakpad', '--no-first-run',
     '--disable-extensions', '--disable-default-apps',
     '--user-data-dir=' + browserProfile, 'about:blank',
-  ], { windowsHide: true, stdio: ['ignore', 'ignore', 'pipe'] });
+  ];
+  if (process.env.DEPDECK_CHROMIUM_NO_SANDBOX === '1') browserArgs.push('--no-sandbox');
+  const browser = spawn(chrome, browserArgs, { windowsHide: true, stdio: ['ignore', 'ignore', 'pipe'] });
   let browserDiagnostics = '';
   browser.stderr.setEncoding('utf8');
   browser.stderr.on('data', chunk => { browserDiagnostics += chunk; });
