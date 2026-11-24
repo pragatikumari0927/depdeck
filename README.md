@@ -2,6 +2,8 @@
 
 <img src="docs/assets/pixel-archive-hero.svg" alt="Pixel Archive banner with three pixel-art trading cards" width="1120">
 
+<img src="docs/assets/depdeck-logo.svg" alt="depdeck logo: a pixel-edged archive badge with stacked cards, a block D, and a scan beam" width="80" height="80">
+
 # depdeck
 
 **Your `package.json` has a secret card collection.**
@@ -245,8 +247,17 @@ absolute executable examples, other clients, removal steps, and troubleshooting.
 
 ### Ask your agent to set it up
 
-Paste this into a coding agent with terminal access. It checks the client and
-shows the configuration change before writing a persistent setting.
+Choose either prompt. The short version is quick to paste. The detailed version gives the agent more setup context. Both ask the agent to show the proposed configuration and get your approval before saving it.
+
+#### Short prompt
+
+```text
+Connect this client to depdeck's local stdio MCP server. Check `depdeck --version`; if it is missing, show me install steps but do not install anything.
+Before saving configuration, show me the exact command or file path and scope, preserve other servers, and ask for my approval.
+After approval, configure depdeck, reload the client, and verify `list_deck`, `get_card`, `check_deck`, and `render_deck`.
+```
+
+#### Detailed prompt
 
 ```text
 Connect this coding agent to depdeck as a local stdio MCP server. First identify
