@@ -102,10 +102,20 @@ remain responsible for the complete HTML contract and escaping regressions.
 
 The [desktop screenshot](assets/pixel-archive-desktop.png) and
 [mobile screenshot](assets/pixel-archive-mobile.png) are crops of the
-CLI-generated Deck. The implementation uses shared tier artwork, an Atlas
-with text counts, alphabetical Card order, and the Go rules for Flavor and
-Special Moves. The prototype used per-package illustrations, count bars,
-a fixed example order, and sample copy. Browser verification covered Chromium.
-Firefox, Safari, and screen readers were outside this run.
+CLI-generated Deck. The [current README demo](assets/deck-demo.gif) captures
+the Go renderer at 1280 by 1150 CSS pixels. Its offline assessed fixture has
+five sample Cards: `react` (Legendary, Runtime), `chalk` (Rare, Runtime),
+`typescript` (Epic, Development), `tiny-helper` (Common, Optional), and
+`unlisted-demo` (Unknown, Optional). The facts and dates are illustrative, not
+live npm results. The capture shows All, Runtime, Development, and Optional
+filters; Atlas totals remain one Card per rarity.
+
+Chromium verification confirmed all five Atlas rows, visible Card counts of
+5, 2, 1, and 2 for All, Runtime, Development, and Optional, unchanged Atlas
+totals after filtering, no horizontal overflow at 1280 pixels, and no external
+requests (the only request was the local `file:` document). The GIF is 800 by
+719 pixels. Package-specific artwork is not part of `main`; the cards use the
+shared Rarity illustrations. Browser verification covered Chromium. Firefox,
+Safari, and screen readers were outside this run.
 
 <img src="assets/pixel-archive-mobile.png" alt="Mobile Deck with collection summary, Rarity Atlas, Tag filters, and the first Card" width="375">
