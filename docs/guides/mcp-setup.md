@@ -253,11 +253,15 @@ absolute path if necessary.
       "type": "stdio",
       "command": "depdeck",
       "args": ["mcp"],
-      "tools": ["list_deck", "get_card", "check_deck"]
+      "tools": ["list_deck", "get_card", "check_deck", "render_deck"]
     }
   }
 }
 ```
+
+This allowlist is for current builds. The published v1.0.0 binary exposes the
+original three tools; `render_deck` is available in the newer Pixel Archive
+builds on `main`.
 
 The older editor-managed `.vscode/mcp.json` uses a top-level `servers`
 object. Use the client's current configuration destination and schema.

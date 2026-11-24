@@ -17,6 +17,11 @@ class Depdeck < Formula
 
   test do
     require "json"
+    notices = (pkgshare/"THIRD_PARTY_NOTICES.txt").read
+    assert_includes notices, "Package artwork: Vite"
+    assert_includes notices, "Copyright (c) 2019-present, VoidZero Inc. and Vite contributors"
+    assert_includes notices, "Permission is hereby granted, free of charge"
+    assert_includes notices, "THE SOFTWARE IS PROVIDED \"AS IS\""
     assert_equal "depdeck #{version}", shell_output("#{bin}/depdeck --version").strip
     (testpath/"package.json").write("{}")
     assessment = JSON.parse(shell_output("#{bin}/depdeck check --json"))

@@ -368,7 +368,7 @@ func matches(c *semver.Constraints, candidate string) bool {
 func npmRange(declared string) (string, error) {
 	rangeText := strings.TrimSpace(declared)
 	if rangeText == "" {
-		return "*", nil
+		return "", errors.New("unsupported npm declaration")
 	}
 	if rangeText == "~0.0.0" {
 		return ">=0.0.0 <0.1.0", nil

@@ -3,9 +3,11 @@ package mcpface
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -103,6 +105,16 @@ func TestRenderDeckToolWritesPixelArchiveFromOfflineAssessment(t *testing.T) {
 	if string(secondHTML) != html {
 		t.Fatal("identical fixture assessments produced different HTML")
 	}
+	repeated, err := clientSession.CallTool(ctx, &mcp.CallToolParams{
+		Name: "render_deck", Arguments: map[string]any{"path": project},
+	})
+	if err != nil || repeated == nil || !repeated.IsError {
+		t.Fatalf("repeated render to existing default output = %+v, error = %v", repeated, err)
+	}
+	unchanged, err := os.ReadFile(filepath.Join(project, "deck.html"))
+	if err != nil || string(unchanged) != html {
+		t.Fatalf("repeated render changed the existing Deck: %v", err)
+	}
 }
 
 func TestRenderDeckToolRefusesUnsafeOrExistingOutput(t *testing.T) {
@@ -137,6 +149,15 @@ func TestRenderDeckToolRefusesUnsafeOrExistingOutput(t *testing.T) {
 			}
 		})
 	}
+	if err := os.Mkdir(filepath.Join(project, "directory.html"), 0700); err != nil {
+		t.Fatal(err)
+	}
+	result, err := clientSession.CallTool(ctx, &mcp.CallToolParams{
+		Name: "render_deck", Arguments: map[string]any{"path": project, "out": "directory.html"},
+	})
+	if err != nil || result == nil || !result.IsError {
+		t.Fatalf("filesystem output failure = %+v, error = %v", result, err)
+	}
 
 	outsideDir := t.TempDir()
 	if err := os.Symlink(outsideDir, filepath.Join(project, "escape")); err == nil {
@@ -156,7 +177,7 @@ func TestRenderDeckToolRefusesUnsafeOrExistingOutput(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(project, "exists.html"), []byte("keep me"), 0600); err != nil {
 		t.Fatal(err)
 	}
-	result, err := clientSession.CallTool(ctx, &mcp.CallToolParams{
+	result, err = clientSession.CallTool(ctx, &mcp.CallToolParams{
 		Name: "render_deck", Arguments: map[string]any{"path": project, "out": "exists.html"},
 	})
 	if err != nil || result == nil || !result.IsError {
@@ -170,6 +191,62 @@ func TestRenderDeckToolRefusesUnsafeOrExistingOutput(t *testing.T) {
 	if err != nil || string(contents) != "keep me" {
 		t.Fatalf("outside file changed: %q, error = %v", contents, err)
 	}
+}
+
+func TestMCPHandlesConcurrentAssessmentCalls(t *testing.T) {
+	ctx := context.Background()
+	project := t.TempDir()
+	if err := os.WriteFile(filepath.Join(project, "package.json"), []byte(`{"dependencies":{"fixture-pkg":"^1.0.0"}}`), 0600); err != nil {
+		t.Fatal(err)
+	}
+	clientSession, serverSession := connectTestSessions(t, pipeline.Options{Registry: renderFixtureRegistry{}})
+	defer func() { _ = clientSession.Close(); _ = serverSession.Wait() }()
+
+	var wg sync.WaitGroup
+	errs := make(chan error, 16)
+	for i := range 16 {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			tool := "list_deck"
+			args := map[string]any{"path": project}
+			if i%2 == 1 {
+				tool = "check_deck"
+			}
+			result, err := clientSession.CallTool(ctx, &mcp.CallToolParams{Name: tool, Arguments: args})
+			if err != nil {
+				errs <- err
+				return
+			}
+			if result == nil || result.IsError {
+				errs <- fmt.Errorf("%s returned an MCP error: %+v", tool, result)
+			}
+		}(i)
+	}
+	wg.Wait()
+	close(errs)
+	for err := range errs {
+		t.Error(err)
+	}
+}
+
+func FuzzCleanDeckOutput(f *testing.F) {
+	for _, seed := range []string{"", "deck.html", "../outside.html", `C:\private\deck.html`, "nested/deck.HTML", "name.txt", "a/../../b.html"} {
+		f.Add(seed)
+	}
+	f.Fuzz(func(t *testing.T, requested string) {
+		cleaned, err := cleanDeckOutput(requested)
+		if err != nil {
+			return
+		}
+		if !filepath.IsLocal(cleaned) || !strings.EqualFold(filepath.Ext(cleaned), ".html") {
+			t.Fatalf("accepted output path is not local HTML: %q", cleaned)
+		}
+		again, err := cleanDeckOutput(cleaned)
+		if err != nil || again != cleaned {
+			t.Fatalf("output normalization is not stable: %q => %q, %v", cleaned, again, err)
+		}
+	})
 }
 
 func connectTestSessions(t *testing.T, opt pipeline.Options) (*mcp.ClientSession, *mcp.ServerSession) {

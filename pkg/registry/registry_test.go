@@ -523,7 +523,7 @@ func TestFetchSelectsHighestVersionInDeclaredRange(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if dep.Name != "react" || dep.Version != "^1.0.0" {
+	if dep.Name != "react" || dep.Version != "^1.0.0" || dep.ResolvedVersion != "" {
 		t.Fatalf("project identity changed: %+v", dep)
 	}
 	if dep.License != "ISC" || dep.LastPublish != "2022-02-03T04:05:06Z" {
@@ -570,6 +570,29 @@ func TestFetchRejectsIncompatibleAndUnsupportedDeclarations(t *testing.T) {
 	}
 }
 
+func TestFetchRejectsEmptyAndWhitespaceDeclarationsWithoutRegistryRequests(t *testing.T) {
+	t.Parallel()
+	var calls atomic.Int32
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		calls.Add(1)
+		_, _ = w.Write([]byte(`{"name":"pkg","dist-tags":{"latest":"1.0.0"},"versions":{"1.0.0":{"license":"MIT"}}}`))
+	}))
+	defer srv.Close()
+	c := testClient(t, srv, testStore(t))
+	for _, declared := range []string{"", " ", "\t\n"} {
+		dep, err := c.Fetch(t.Context(), "pkg", declared)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(dep.Errors) != 1 || dep.Errors[0].Kind != string(types.FetchParse) {
+			t.Errorf("declaration %q errors = %+v, want parse error", declared, dep.Errors)
+		}
+	}
+	if got := calls.Load(); got != 0 {
+		t.Fatalf("empty declaration made %d registry requests", got)
+	}
+}
+
 func TestFetchDownloadFailureIsDegraded(t *testing.T) {
 	t.Parallel()
 	body := fixture(t, "react-packument.json")
@@ -593,6 +616,48 @@ func TestFetchDownloadFailureIsDegraded(t *testing.T) {
 			}
 			if dep.License != "" || dep.WeeklyDownloads != nil {
 				t.Fatalf("invalid downloads must degrade the whole Card: %+v", dep)
+			}
+		})
+	}
+}
+
+func TestPartialMetadataAndDownloadsFailuresStayUnknown(t *testing.T) {
+	for _, tc := range []struct {
+		name            string
+		metadataStatus  int
+		downloadsStatus int
+		wantKind        types.FetchKind
+	}{
+		{name: "metadata failure", metadataStatus: http.StatusServiceUnavailable, wantKind: types.FetchNetwork},
+		{name: "downloads failure after metadata", metadataStatus: http.StatusOK, downloadsStatus: http.StatusInternalServerError, wantKind: types.FetchNetwork},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			metadata := fixture(t, "react-packument.json")
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path == "/downloads/point/last-week/react" {
+					if tc.downloadsStatus != http.StatusOK {
+						http.Error(w, "fixture failure", tc.downloadsStatus)
+						return
+					}
+					_, _ = w.Write([]byte(`{"downloads":1200}`))
+					return
+				}
+				if tc.metadataStatus != http.StatusOK {
+					http.Error(w, "fixture failure", tc.metadataStatus)
+					return
+				}
+				_, _ = w.Write(metadata)
+			}))
+			defer srv.Close()
+			dep, err := testClient(t, srv, testStore(t)).Fetch(t.Context(), "react", "^18.0.0")
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(dep.Errors) != 1 || dep.Errors[0].Kind != string(tc.wantKind) {
+				t.Fatalf("fetch errors = %+v, want %s", dep.Errors, tc.wantKind)
+			}
+			if dep.License != "" || dep.WeeklyDownloads != nil || dep.Rarity != "" || dep.Chaos != nil {
+				t.Fatalf("incomplete npm response fabricated assessed facts: %+v", dep)
 			}
 		})
 	}
@@ -693,6 +758,7 @@ func TestVersionSelectionPrereleaseRule(t *testing.T) {
 	for _, tc := range []struct{ declared, want string }{
 		{"*", "stable"},
 		{"^2.0.0-beta.1", "beta-two"},
+		{"2.0.0-beta.2", "beta-two"},
 		{"^2.0.0-beta.3", ""},
 	} {
 		constraint, err := npmRange(tc.declared)
@@ -744,4 +810,22 @@ func TestLicenseDropsControlCharacters(t *testing.T) {
 	if license != "MIT" {
 		t.Fatalf("license = %q, want MIT", license)
 	}
+}
+
+func FuzzParsePackument(f *testing.F) {
+	f.Add("pkg", "^1.0.0", []byte(`{"name":"pkg","dist-tags":{"latest":"1.0.0"},"versions":{"1.0.0":{"license":"MIT"}}}`))
+	f.Add("@scope/pkg", "latest", []byte(`null`))
+	f.Fuzz(func(t *testing.T, name, declared string, body []byte) {
+		if int64(len(body)) > maxMetadataBody {
+			t.Skip()
+		}
+		rangeText, err := npmRange(declared)
+		if err != nil {
+			return
+		}
+		dep, err := parsePackument(name, declared, rangeText, body)
+		if err == nil && (dep.Name != name || dep.Version != declared) {
+			t.Fatalf("successful parse changed requested identity: %+v", dep)
+		}
+	})
 }

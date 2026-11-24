@@ -13,6 +13,8 @@ import tempfile
 import zipfile
 from pathlib import Path
 
+VITE_LICENSE_PATH = Path(__file__).resolve().parents[1] / "pkg" / "render" / "artwork" / "LICENSE-vite.txt"
+
 
 def require(condition, message):
     if not condition:
@@ -46,6 +48,20 @@ def check_binary_scan_result(result, binary):
     require(result.returncode == 0,
             f"govulncheck binary scan failed for {binary}: {result.stdout}{result.stderr}")
     print(f"Binary vulnerability scan passed  {binary}")
+
+
+def check_artwork_notice(notice):
+    required = (
+        "Package artwork: Vite",
+        "vitejs/vite/docs/public/logo.svg",
+        "Copyright (c) 2019-present, VoidZero Inc. and Vite contributors",
+        "Permission is hereby granted, free of charge",
+        "imply affiliation with or endorsement by Vite, VoidZero, or its contributors",
+    )
+    for item in required:
+        require(item in notice, f"Third-party notices are missing artwork attribution: {item}")
+    license_text = VITE_LICENSE_PATH.read_text(encoding="utf-8").strip()
+    require(license_text in notice, "Third-party notices do not contain the complete Vite MIT license")
 
 
 def scan_binary(scanner, binary):
@@ -192,6 +208,9 @@ def verify(dist, expect_render_deck=False, expected_go_version=None, govulncheck
         with (zipfile.ZipFile(archive) if extension == "zip" else tarfile.open(archive)) as package:
             names = package.namelist() if extension == "zip" else package.getnames()
             require(len(names) == len(members) and set(names) == members, f"Wrong contents: {name}: {names}")
+            notice_bytes = (package.read("THIRD_PARTY_NOTICES.txt") if extension == "zip"
+                            else package.extractfile("THIRD_PARTY_NOTICES.txt").read())
+            check_artwork_notice(notice_bytes.decode("utf-8"))
             with tempfile.TemporaryDirectory(prefix="depdeck-archive-") as directory:
                 binary = Path(directory) / executable
                 if extension == "zip":

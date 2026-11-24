@@ -10,8 +10,8 @@ const [chrome] = process.argv.slice(2);
 assert.ok(chrome, 'Usage: node scripts/verify-deck-reflow.cjs <Chromium executable>');
 const repo = path.resolve(__dirname, '..');
 const expected = {
-  '': ['runtime-legendary', 'runtime-common', "<script>alert('fixture')</script>", 'development-epic', 'development-unknown', 'optional-rare', 'optional-unknown'],
-  dependencies: ['runtime-legendary', 'runtime-common', "<script>alert('fixture')</script>"],
+  '': ['runtime-legendary', 'vite', "<script>alert('fixture')</script>", 'development-epic', 'development-unknown', 'optional-rare', 'optional-unknown'],
+  dependencies: ['runtime-legendary', 'vite', "<script>alert('fixture')</script>"],
   devDependencies: ['development-epic', 'development-unknown'],
   optionalDependencies: ['optional-rare', 'optional-unknown'],
 };
@@ -128,6 +128,23 @@ async function checkBrowser() {
     }
     assert.equal(await evaluate('document.querySelectorAll(".card").length'), 7, 'fixture should contain seven Cards');
     assert.deepEqual(await activeAtlas(), expectedAtlas, 'Atlas counts must match the complete assessed Deck');
+    const packageArtwork = await evaluate('(() => {' +
+      'const arts = [...document.querySelectorAll(".package-art")];' +
+      'const curated = arts.find(art => art.dataset.artwork === "vite");' +
+      'const fallback = arts.find(art => art.dataset.artwork === "generated");' +
+      'return { curatedHref: curated?.querySelector("use")?.getAttribute("href"),' +
+      'fallbackCount: arts.filter(art => art.dataset.artwork === "generated").length,' +
+      'curatedBox: curated?.getBBox().width,' +
+      'fallbackBox: fallback?.getBBox().width,' +
+      'separateSeal: curated?.closest(".card")?.querySelector(".rarity-seal") !== null' +
+      '};' +
+    '})()');
+    assert.equal(packageArtwork.curatedHref, '#art-vite', 'exact vite package uses curated artwork');
+    assert.equal(packageArtwork.fallbackCount, 6, 'unsupported package identities use generated artwork');
+    assert.ok(packageArtwork.curatedBox > 0 && packageArtwork.fallbackBox > 0,
+      'curated and fallback artwork have visible geometry at Card size');
+    assert.equal(packageArtwork.separateSeal, true, 'Rarity seal remains separate from package artwork');
+    console.log('Curated Vite and fallback artwork rendered visibly beside separate Rarity seals: passed');
 
     const semantics = await evaluate('(() => ({' +
       'main: document.querySelectorAll("main").length,' +

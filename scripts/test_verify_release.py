@@ -11,6 +11,35 @@ SPEC.loader.exec_module(verify_release)
 
 
 class MCPReleaseSmokeTests(unittest.TestCase):
+    def test_repository_third_party_notices_include_complete_vite_license(self):
+        root_notices = verify_release.VITE_LICENSE_PATH.parents[3] / "THIRD_PARTY_NOTICES.txt"
+        verify_release.check_artwork_notice(root_notices.read_text(encoding="utf-8"))
+
+    def test_artwork_notice_requires_vite_provenance_license_and_trademark_scope(self):
+        notice = """Package artwork: Vite
+Source: vitejs/vite/docs/public/logo.svg
+License: MIT License
+Copyright (c) 2019-present, VoidZero Inc. and Vite contributors
+Permission is hereby granted, free of charge
+The Vite mark identifies the exact npm package. This use does not imply affiliation with or endorsement by Vite, VoidZero, or its contributors.
+"""
+        license_text = verify_release.VITE_LICENSE_PATH.read_text(encoding="utf-8")
+        verify_release.check_artwork_notice(notice + license_text)
+
+    def test_artwork_notice_rejects_missing_license_or_provenance(self):
+        for notice in (
+            "Package artwork: Vite\nSource: vitejs/vite/docs/public/logo.svg\n",
+            "Package artwork: Vite\nLicense: MIT License\n",
+            "Package artwork: Vite\nSource: vitejs/vite/docs/public/logo.svg\nLicense: MIT License\n",
+        ):
+            with self.subTest(notice=notice), self.assertRaises(SystemExit):
+                verify_release.check_artwork_notice(notice)
+
+    def test_archives_must_include_vite_notice(self):
+        # Archive-level extraction uses the same notice validator as the public helper.
+        with self.assertRaises(SystemExit):
+            verify_release.check_artwork_notice("Depdeck third-party notices\n")
+
     def test_v1_release_requires_original_three_tools(self):
         self.assertEqual(
             verify_release.expected_mcp_tools(False),

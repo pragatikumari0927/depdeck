@@ -7,6 +7,12 @@ Rarity Atlas, dependency filters, Field Journals, and Archive Notices for
 missing npm data. It also adds `render_deck`, an MCP tool that creates this
 canonical Deck inside a project without overwriting an existing file.
 
+Cards also carry package identity artwork independently of their Rarity seal.
+The current catalog includes the reviewed Vite mark; other package names use
+deterministic original pixel artwork. The generated Deck stays self-contained
+and works offline. Release archives and the Homebrew installation include the
+Vite attribution and MIT license in `THIRD_PARTY_NOTICES.txt`.
+
 - CLI help explains the path and output options. Manifest errors and plain
   Check verdicts tell you what to do next. Scripts can use the same exit codes
   and schema 1.1 JSON, including the Check reason codes.
@@ -16,6 +22,13 @@ canonical Deck inside a project without overwriting an existing file.
   publish-age and license-declaration policy results without treating them as
   vulnerability findings.
 - Empty Checks now return an empty dependencies array in CLI JSON and MCP.
+- New Unix cache directories use owner-only permissions. Existing directories
+  and cache contents are left as they are.
+- Offline Chromium browser regression checks cover filtering, layout, scaling,
+  accessibility basics, escaping, and external requests. They do not claim
+  Firefox, Safari, or screen-reader coverage.
+- The README now uses the project logo and a current Go-rendered Pixel Archive
+  sample. The documented sample data is illustrative; it is not a live npm scan.
 - Release archives use Go 1.27.4. Preflight scans for known vulnerabilities
   with that compiler before packaging.
 - Windows, macOS, and Linux archives support amd64 and arm64. Compare your
