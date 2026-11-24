@@ -171,9 +171,9 @@ Requires ADR-0005.
 
 ## Render
 
-One self-contained HTML file. `html/template` only. No `template.HTML` / `template.JS` on fetched strings. Filter `<script>` is a static template string. Same Dependency slice (stable sort by `name`) → identical bytes. No timestamps or random IDs. Default path: `deck.html` next to scanned `package.json`. Target under 150 KB uncompressed for 47 Cards. No `depdeck serve`. No per-card logos in v1.
+One self-contained HTML file. `html/template` only. No `template.HTML` / `template.JS` on fetched strings. Filter `<script>` is a static template string. Same Dependency slice (stable sort by `name`) → identical bytes. No timestamps or random IDs. Default path: `deck.html` next to scanned `package.json`. Target under 150 KB uncompressed for 47 Cards. No `depdeck serve`. Card artwork uses a small exact-name catalog of reviewed local SVG symbols and a deterministic, original pixel-art fallback; artwork is decorative, independent of Rarity, and never selected by keyword. No runtime asset requests.
 
-Requires ADR-0006.
+Requires ADR-0006 and ADR-0026.
 
 ## Cache
 
