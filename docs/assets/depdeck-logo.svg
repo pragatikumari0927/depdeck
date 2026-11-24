@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">depdeck logo</title>
+  <desc id="desc">A pixel-edged archive badge with stacked cards, a block D, and a cyan scan beam.</desc>
+  <path d="M32 8h64v8h16v16h8v64h-8v16H96v8H32v-8H16V96H8V32h8V16h16z" fill="#0B1423" stroke="#FFDF79" stroke-width="4" stroke-linejoin="miter"/>
+  <path d="M66 24h20v6h8v6h6v39h-6v6h-8v6H66v-6h-6V30h6z" fill="#273F73" stroke="#87F2FF" stroke-width="4" stroke-linejoin="miter"/>
+  <path d="M34 30h38v6h6v56h-6v6H34v-6h-6V36h6z" fill="#F1F5FB" stroke="#FFDF79" stroke-width="4" stroke-linejoin="miter"/>
+  <path d="M36 36h34v7H36z" fill="#273F73"/>
+  <path d="M42 49h14v5h7v5h5v20h-5v5h-7v5H42z M50 58v22h5v-4h5V62h-5v-4z" fill="#0B1423" fill-rule="evenodd"/>
+  <path d="M30 66h48v6H30z" fill="#87F2FF"/>
+  <path d="M78 63h8v12h-8z" fill="#FFDF79"/>
+</svg>
