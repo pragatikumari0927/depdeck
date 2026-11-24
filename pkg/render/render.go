@@ -39,19 +39,23 @@ type atlasRow struct {
 
 type deckCard struct {
 	types.Dependency
-	Tier      rarityTier
-	TagLabel  string
-	Published string
-	Journal   [2]string
-	Notices   []archiveNotice
+	Tier           rarityTier
+	ArtworkID      string
+	ArtworkKind    string
+	ArtworkViewBox string
+	TagLabel       string
+	Published      string
+	Journal        [2]string
+	Notices        []archiveNotice
 }
 
 type deckView struct {
-	Cards     []deckCard
-	Atlas     [len(rarityTiers)]atlasRow
-	Legendary int
-	Unknown   int
-	TagCount  int
+	Cards          []deckCard
+	ArtworkSymbols []artworkSymbol
+	Atlas          [len(rarityTiers)]atlasRow
+	Legendary      int
+	Unknown        int
+	TagCount       int
 }
 
 func rarityIndex(dep types.Dependency) int {
@@ -106,10 +110,19 @@ func Render(deps []types.Dependency, w io.Writer) error {
 		view.Atlas[i].rarityTier = tier
 	}
 	tags := make(map[types.Tag]struct{})
+	seenArtwork := make(map[string]struct{})
 	for _, dep := range ordered {
 		tier := rarityIndex(dep)
 		view.Atlas[tier].Count++
 		card := makeCard(dep, rarityTiers[tier])
+		art, symbol := artworkFor(dep.Name)
+		card.ArtworkID = art.ID
+		card.ArtworkKind = art.Kind
+		card.ArtworkViewBox = symbol.ViewBox
+		if _, exists := seenArtwork[symbol.ID]; !exists {
+			seenArtwork[symbol.ID] = struct{}{}
+			view.ArtworkSymbols = append(view.ArtworkSymbols, symbol)
+		}
 		view.Cards = append(view.Cards, card)
 		if card.TagLabel != "" {
 			tags[dep.Tag] = struct{}{}

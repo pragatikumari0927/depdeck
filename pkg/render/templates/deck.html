@@ -315,6 +315,14 @@
       aspect-ratio: 1;
       filter: drop-shadow(4px 4px #101525);
     }
+    .card-art .package-art {
+      z-index: 1;
+      width: clamp(56px, 28%, 96px);
+      max-height: 80%;
+      overflow: visible;
+      filter: drop-shadow(4px 4px #101525);
+      shape-rendering: crispEdges;
+    }
     .card-body { display: flex; flex: 1; flex-direction: column; gap: var(--space-2); padding: var(--space-3); }
     .name { font: 800 clamp(1rem, 1.6vw, 1.2rem)/1.25 var(--font-display); }
     .version, .resolved { margin-top: var(--space-1); font: 0.8125rem/1.35 var(--font-display); }
@@ -417,6 +425,11 @@
       <path fill="currentColor" d="M2 0h6v1h-6zM1 1h2v2h-2zM7 1h2v1h-2zM8 2h2v2h-2zM8 10h2v2h-2zM6 4h3v1h-3zM5 5h2v1h-2zM4 6h2v2h-2z"/>
       <path fill="#fffef0" d="M4 9h2v2h-2z"/>
     </symbol>
+    {{ range .ArtworkSymbols }}
+    <symbol id="{{ .ID }}" viewBox="{{ .ViewBox }}">
+      {{ range .Paths }}<path d="{{ .D }}" fill="{{ .Fill }}"/>{{ end }}
+    </symbol>
+    {{ end }}
   </svg>
   <main class="window">
     <div class="title-bar">
@@ -477,7 +490,7 @@
   {{ range .Cards -}}
   <article class="card{{ if eq .Tier.Label "Unknown" }} card--no-data{{ end }}" data-rarity="{{ .Tier.Label }}" data-tag="{{ .Tag }}">
   <div class="rarity"><span class="rarity-label">{{ .Tier.Label }}</span>{{ template "seal" .Tier.Seal }}</div>
-  <div class="card-art" aria-hidden="true">{{ template "seal" .Tier.Seal }}</div>
+  <div class="card-art" aria-hidden="true"><svg class="package-art" data-artwork="{{ .ArtworkKind }}" viewBox="{{ .ArtworkViewBox }}" aria-hidden="true" focusable="false"><use href="#{{ .ArtworkID }}"></use></svg></div>
   <div class="card-body">
   <header>
   <h3 class="name">{{ .Name }}</h3>
