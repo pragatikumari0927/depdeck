@@ -88,12 +88,12 @@ Requires ADR-0008 to change.
 
 ## CLI surface
 
-Commands: `scan [path]`, `check [path]`. Path is optional. Without it, use the current directory and read its `package.json`. A supplied path can name `package.json` or its directory. A missing or invalid manifest returns exit `2`.
+Commands: `scan [path]`, `check [path]`, and `mcp`. Path is optional for `scan` and `check`. Without it, use the current directory and read its `package.json`. A supplied path can name `package.json` or its directory. A missing or invalid manifest returns exit `2`. `depdeck --version` and `depdeck version` print the build version. `depdeck mcp` starts the stdio MCP server and takes no arguments.
 
-Flags: `--json`, `--flavor` (default `rule`), `--no-cache`, `--out` (default `deck.html` next to that `package.json`; `-` writes HTML to stdout).
+Flags for `scan` and `check`: `--json`, `--flavor` (default `rule`), `--no-cache`. `scan` also accepts `--out` (default `deck.html` next to that `package.json`; `-` writes HTML to stdout).
 
 - `--json`: envelope on stdout; no HTML file.
-- Default `scan`: write HTML; one line on stderr `Wrote deck.html (N cards)`.
+- Default `scan`: write HTML; one line on stderr `Wrote <path> (N cards)`, where `<path>` is the output file.
 - Plain `check` writes one human-readable verdict line to stdout. `--json` carries the stable reason codes. Fetch warnings go to stderr.
 - No `--both`.
 - `--flavor=ai`: exit `2`; stderr contains `ai` and `v1.1`; no rule Flavor; no HTML.
@@ -120,7 +120,7 @@ Descriptions:
 - `list_deck`: List assessment data for direct dependencies in a project's root package.json. Use path for the project directory or manifest, tag to select one dependency group, and flavor to choose rule or none. Results include Fetch errors when npm data is unavailable.
 - `get_card`: Look up facts for one public npm package by name, such as react or @scope/package. Use flavor to choose rule or none. Call list_deck to check project membership. If npm data is unavailable, the Card includes a Fetch error.
 - `check_deck`: Evaluate direct dependencies against the default publish-age and license-declaration policy. Returns the verdict, policy, flagged dependencies, and assessed dependencies with any Fetch errors. Chaos reflects publish age, and Rarity reflects weekly downloads. Use a vulnerability scanner for security findings.
-- `render_deck`: Create a self-contained Pixel Archive HTML Deck with the canonical renderer. Use it when a user wants the visual Deck instead of recreating HTML from assessment data. This may contact npm. It writes a new file under the project, never overwrites an existing file, and returns the relative path, Card count, and byte size.
+- `render_deck`: Create a self-contained Pixel Archive HTML Deck from a project's direct dependencies using depdeck's canonical renderer. Use when the user wants the visual Deck, rather than recreating HTML from assessment data. This may contact npm. Writes a new .html file under the project directory and never overwrites an existing file; out is an optional relative path and defaults to deck.html. Returns the relative output path, Card count, and byte size.
 
 Requires ADR-0007, ADR-0003, ADR-0005, ADR-0021, ADR-0025.
 
@@ -165,7 +165,7 @@ Requires ADR-0009, ADR-0010.
 
 Modes: `rule` (default), `none`. Mode `ai` returns an error whose message contains `ai` and `v1.1`. CLI maps that to exit `2`. No silent `rule` fallback.
 
-`rule` + `len(errors) > 0` → `flavor_source` `rule_name_only` (name hash). Else `rule_full` (name + stats). Zero downloads is not degraded. `none` clears `flavor_text` and `flavor_source`. Templates do not mention GitHub issues.
+`rule` + `len(errors) > 0` → `flavor_source` `rule_name_only` (name hash). Else `rule_full` (name + stats). Zero downloads is not degraded. `none` clears `flavor_text`, `special_move`, and `flavor_source`. Templates do not mention GitHub issues.
 
 Requires ADR-0005.
 
@@ -189,6 +189,6 @@ One seam: `pipeline.Run` and `pipeline.Check` return `[]Dependency` / `CheckData
 
 Parser negative: `testdata/workspace/` root vs nested `package.json` — only root Roster names.
 
-Render: call `Deck` twice; `bytes.Equal`.
+Render: call `Render` twice; `bytes.Equal`.
 
 Requires ADR-0001, ADR-0004, ADR-0006, ADR-0011.
