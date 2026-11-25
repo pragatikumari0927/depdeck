@@ -35,13 +35,6 @@
 
 </details>
 
-<details>
-<summary>See the scan that produced this Deck</summary>
-
-<img src="docs/assets/scan-terminal.gif" alt="Terminal recording of a real scan writing a five-card deck" width="1100">
-
-</details>
-
 This animation is a real Pixel Archive from current `main`. It was captured after scanning a five-package sample project against the public package registry on 25 Nov 2026. It shows package identity artwork — the curated Vite mark and original fallback art — and the Runtime, Development, and Optional filters. The Rarity Atlas totals stay fixed as the visible Cards change. In this capture, Vite is Unknown because the registry response exceeded the current size limit; the curated mark still appears. [Pixel Archive verification results](docs/TESTING.md#pixel-archive-verification)
 
 ## Start your collection

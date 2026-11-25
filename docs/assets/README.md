@@ -1,8 +1,7 @@
 # Documentation assets
 
 The [README](../../README.md) uses the Pixel Archive hero, current demo, a
-mobile screenshot, a terminal scan recording, and a plain-language architecture
-diagram. The [testing guide](../TESTING.md#pixel-archive-verification)
+mobile screenshot, and a plain-language architecture diagram. The [testing guide](../TESTING.md#pixel-archive-verification)
 records historical offline fixture and browser checks; that write-up still
 describes an earlier demo capture.
 
@@ -11,7 +10,6 @@ describes an earlier demo capture.
 | [pixel-archive-hero.svg](pixel-archive-hero.svg) | README branding |
 | [depdeck-logo.svg](depdeck-logo.svg) | README logo |
 | [deck-demo.gif](deck-demo.gif) | Current Pixel Archive capture from a real scan of a sample project, including package identity artwork and working group filters |
-| [scan-terminal.gif](scan-terminal.gif) | Terminal recording of the scan that produced the current demo Deck |
 | [pixel-archive-mobile.png](pixel-archive-mobile.png) | Mobile Pixel Archive capture of the same Deck |
 | [architecture.svg](architecture.svg), [architecture.png](architecture.png) | Current plain-language architecture diagram for the README; the PNG is a high-resolution export |
 | [social-preview.png](social-preview.png), [social-preview.svg](social-preview.svg) | 1280×640 GitHub social preview. Upload the PNG under Settings → Social preview; there is no API for that step |
