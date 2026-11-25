@@ -537,8 +537,8 @@ func TestFixtureHTTPProcesses(t *testing.T) {
 			t.Fatalf("unexpected assessment: %s", raw)
 		}
 		failed, future, missing := result.Dependencies[0], result.Dependencies[1], result.Dependencies[2]
-		if len(failed.Errors) != 1 || failed.Errors[0].Kind != string(types.FetchNetwork) ||
-			len(missing.Errors) != 1 || missing.Errors[0].Kind != string(types.FetchNotFound) ||
+		if len(failed.Errors) != 1 || failed.Errors[0].Kind != types.FetchNetwork ||
+			len(missing.Errors) != 1 || missing.Errors[0].Kind != types.FetchNotFound ||
 			future.LastPublish != "2099-03-13T00:00:00Z" || future.Chaos == nil || *future.Chaos != 0 {
 			t.Fatalf("unexpected registry facts: %s", raw)
 		}
@@ -572,7 +572,7 @@ func TestFixtureHTTPProcesses(t *testing.T) {
 	if check.Pass || check.Reason != "all_fetches_failed" || len(check.Flagged) != 0 || len(check.Dependencies) != 3 || len(deck.Dependencies) != 3 {
 		t.Fatalf("all-fetch-failed results: %s and %s", rawDeck, rawCheck)
 	}
-	for i, kind := range []string{"parse", "not_found", "rate_limit"} {
+	for i, kind := range []types.FetchKind{types.FetchParse, types.FetchNotFound, types.FetchRateLimit} {
 		for _, dep := range []types.Dependency{deck.Dependencies[i], check.Dependencies[i]} {
 			if len(dep.Errors) != 1 || dep.Errors[0].Source != "npm" || dep.Errors[0].Kind != kind {
 				t.Fatalf("expected %s fetch error, got %+v", kind, dep)

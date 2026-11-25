@@ -186,7 +186,7 @@ func Test404NotFoundCached1h(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(dep.Errors) != 1 || dep.Errors[0].Kind != string(types.FetchNotFound) || dep.Errors[0].Source != sourceNPM {
+	if len(dep.Errors) != 1 || dep.Errors[0].Kind != types.FetchNotFound || dep.Errors[0].Source != sourceNPM {
 		t.Fatalf("Errors = %+v", dep.Errors)
 	}
 	_, hit, err := store.Get(sourceNPM, "missing-pkg", cache.ClassNotFound, frozen)
@@ -227,7 +227,7 @@ func Test429RateLimitNotCached(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(dep.Errors) != 1 || dep.Errors[0].Kind != string(types.FetchRateLimit) {
+	if len(dep.Errors) != 1 || dep.Errors[0].Kind != types.FetchRateLimit {
 		t.Fatalf("Errors = %+v", dep.Errors)
 	}
 	p := filepath.Join(store.Root, cache.Key(sourceNPM, "ratey", cache.ClassOK))
@@ -256,7 +256,7 @@ func TestTimeoutNotCached(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(dep.Errors) != 1 || dep.Errors[0].Kind != string(types.FetchTimeout) {
+	if len(dep.Errors) != 1 || dep.Errors[0].Kind != types.FetchTimeout {
 		t.Fatalf("Errors = %+v", dep.Errors)
 	}
 	p := filepath.Join(store.Root, cache.Key(sourceNPM, "slow", cache.ClassOK))
@@ -278,7 +278,7 @@ func TestMalformedJSONParse(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(dep.Errors) != 1 || dep.Errors[0].Kind != string(types.FetchParse) {
+	if len(dep.Errors) != 1 || dep.Errors[0].Kind != types.FetchParse {
 		t.Fatalf("Errors = %+v", dep.Errors)
 	}
 	p := filepath.Join(store.Root, cache.Key(sourceNPM, "bad", cache.ClassOK))
@@ -413,7 +413,7 @@ func Test5xxNetworkNotCached(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(dep.Errors) != 1 || dep.Errors[0].Kind != string(types.FetchNetwork) {
+	if len(dep.Errors) != 1 || dep.Errors[0].Kind != types.FetchNetwork {
 		t.Fatalf("Errors = %+v", dep.Errors)
 	}
 	p := filepath.Join(store.Root, cache.Key(sourceNPM, "boom", cache.ClassOK))
@@ -444,7 +444,7 @@ func TestFetchRejectsUnsafePackageNamesBeforeHTTP(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if len(dep.Errors) != 1 || dep.Errors[0].Kind != string(types.FetchParse) {
+		if len(dep.Errors) != 1 || dep.Errors[0].Kind != types.FetchParse {
 			t.Errorf("Fetch(%q) errors = %+v", name, dep.Errors)
 		}
 	}
@@ -470,7 +470,7 @@ func TestFetchRejectsCrossOriginRedirect(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(dep.Errors) != 1 || dep.Errors[0].Kind != string(types.FetchNetwork) {
+	if len(dep.Errors) != 1 || dep.Errors[0].Kind != types.FetchNetwork {
 		t.Fatalf("redirect errors = %+v", dep.Errors)
 	}
 	if targetCalls.Load() != 0 {
@@ -506,7 +506,7 @@ func TestFetchCapsSameOriginRedirectsWithCustomPolicy(t *testing.T) {
 	if got := calls.Load(); got > 10 {
 		t.Fatalf("same-origin redirect policy allowed %d requests, want at most 10", got)
 	}
-	if len(dep.Errors) != 1 || dep.Errors[0].Kind != string(types.FetchNetwork) {
+	if len(dep.Errors) != 1 || dep.Errors[0].Kind != types.FetchNetwork {
 		t.Fatalf("redirect errors = %+v; requests = %d", dep.Errors, calls.Load())
 	}
 }
@@ -552,21 +552,21 @@ func TestFetchRejectsIncompatibleAndUnsupportedDeclarations(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(dep.Errors) != 1 || dep.Errors[0].Kind != string(types.FetchNotFound) {
+	if len(dep.Errors) != 1 || dep.Errors[0].Kind != types.FetchNotFound {
 		t.Fatalf("no matching release errors = %+v", dep.Errors)
 	}
 	dep, err = c.Fetch(context.Background(), "react", "^1.0.0")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(dep.Errors) != 1 || dep.Errors[0].Kind != string(types.FetchNotFound) {
+	if len(dep.Errors) != 1 || dep.Errors[0].Kind != types.FetchNotFound {
 		t.Fatalf("cached no-match errors = %+v", dep.Errors)
 	}
 	dep, err = c.Fetch(context.Background(), "react", "https://example.invalid/pkg.tgz")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(dep.Errors) != 1 || dep.Errors[0].Kind != string(types.FetchParse) {
+	if len(dep.Errors) != 1 || dep.Errors[0].Kind != types.FetchParse {
 		t.Fatalf("unsupported declaration errors = %+v", dep.Errors)
 	}
 	if calls.Load() != 1 {
@@ -588,7 +588,7 @@ func TestFetchRejectsEmptyAndWhitespaceDeclarationsWithoutRegistryRequests(t *te
 		if err != nil {
 			t.Fatal(err)
 		}
-		if len(dep.Errors) != 1 || dep.Errors[0].Kind != string(types.FetchParse) {
+		if len(dep.Errors) != 1 || dep.Errors[0].Kind != types.FetchParse {
 			t.Errorf("declaration %q errors = %+v, want parse error", declared, dep.Errors)
 		}
 	}
@@ -615,7 +615,7 @@ func TestFetchDownloadFailureIsDegraded(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if len(dep.Errors) != 1 || dep.Errors[0].Kind != string(types.FetchParse) {
+			if len(dep.Errors) != 1 || dep.Errors[0].Kind != types.FetchParse {
 				t.Fatalf("invalid download count errors = %+v", dep.Errors)
 			}
 			if dep.License != "" || dep.WeeklyDownloads != nil {
@@ -657,7 +657,7 @@ func TestPartialMetadataAndDownloadsFailuresStayUnknown(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if len(dep.Errors) != 1 || dep.Errors[0].Kind != string(tc.wantKind) {
+			if len(dep.Errors) != 1 || dep.Errors[0].Kind != tc.wantKind {
 				t.Fatalf("fetch errors = %+v, want %s", dep.Errors, tc.wantKind)
 			}
 			if dep.License != "" || dep.WeeklyDownloads != nil || dep.Rarity != "" || dep.Chaos != nil {
@@ -723,7 +723,7 @@ func TestFetchRejectsMismatchedMetadataIdentity(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(dep.Errors) != 1 || dep.Errors[0].Kind != string(types.FetchParse) {
+	if len(dep.Errors) != 1 || dep.Errors[0].Kind != types.FetchParse {
 		t.Fatalf("mismatched metadata errors = %+v", dep.Errors)
 	}
 }
@@ -749,7 +749,7 @@ func TestFetchKeepsHTTPStatusWhenErrorBodyIsOversized(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if len(dep.Errors) != 1 || dep.Errors[0].Kind != string(tc.kind) {
+			if len(dep.Errors) != 1 || dep.Errors[0].Kind != tc.kind {
 				t.Fatalf("status %d: errors = %+v", tc.status, dep.Errors)
 			}
 		})
@@ -803,7 +803,7 @@ func TestFetchDoesNotReflectMalformedRedirect(t *testing.T) {
 	}))
 	defer srv.Close()
 	dep, err := testClient(t, srv, testStore(t)).Fetch(t.Context(), "pkg", "*")
-	if err != nil || len(dep.Errors) != 1 || dep.Errors[0].Kind != string(types.FetchNetwork) ||
+	if err != nil || len(dep.Errors) != 1 || dep.Errors[0].Kind != types.FetchNetwork ||
 		dep.Errors[0].Detail != "npm request failed" {
 		t.Fatalf("unexpected redirect result: %+v, %v", dep, err)
 	}
@@ -907,7 +907,7 @@ func TestFetchRejectsRetainedMetadataOverLimit(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(dep.Errors) != 1 || dep.Errors[0].Kind != string(types.FetchParse) ||
+	if len(dep.Errors) != 1 || dep.Errors[0].Kind != types.FetchParse ||
 		dep.Errors[0].Detail != "npm response exceeds size limit" {
 		t.Fatalf("errors = %+v, want a size-limit parse error", dep.Errors)
 	}
@@ -963,7 +963,7 @@ func TestFetchInvalidMetadataJSONIsParseError(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(dep.Errors) != 1 || dep.Errors[0].Kind != string(types.FetchParse) {
+	if len(dep.Errors) != 1 || dep.Errors[0].Kind != types.FetchParse {
 		t.Fatalf("errors = %+v, want parse", dep.Errors)
 	}
 	if dep.Errors[0].Detail == "npm request failed" || dep.Errors[0].Detail == "npm response exceeds size limit" {

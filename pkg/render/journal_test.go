@@ -78,7 +78,7 @@ func TestFieldJournal(t *testing.T) {
 			"degraded with stale fields",
 			types.Dependency{Tag: types.TagOptionalDependencies, WeeklyDownloads: new(0), Rarity: types.RarityCommon,
 				LastPublish: "2019-01-01T00:00:00Z", License: "stale-license",
-				Errors: []types.FetchError{{Kind: string(types.FetchNetwork)}}},
+				Errors: []types.FetchError{{Kind: types.FetchNetwork}}},
 			[2]string{
 				"The seal is Unknown. This scan could not verify weekly downloads.",
 				"Filed with the optional dependencies. The publish date and license could not be verified.",

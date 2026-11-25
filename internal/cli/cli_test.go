@@ -16,7 +16,7 @@ import (
 type missingRegistry struct{}
 
 func (missingRegistry) Fetch(_ context.Context, name, version string) (*types.Dependency, error) {
-	return &types.Dependency{Name: name, Version: version, Errors: []types.FetchError{{Source: "npm", Kind: "not_found", Detail: "missing"}}}, nil
+	return &types.Dependency{Name: name, Version: version, Errors: []types.FetchError{{Source: "npm", Kind: types.FetchNotFound, Detail: "missing"}}}, nil
 }
 
 func TestJSONAndCheckExitWithInjectedRegistry(t *testing.T) {
@@ -112,7 +112,7 @@ func TestWarningsQuoteControlCharacters(t *testing.T) {
 	var stderr bytes.Buffer
 	warnings([]types.Dependency{{
 		Name:   "pkg\x1b[2J\nforged",
-		Errors: []types.FetchError{{Source: "npm", Kind: "parse"}},
+		Errors: []types.FetchError{{Source: "npm", Kind: types.FetchParse}},
 	}}, &stderr)
 	if got := stderr.String(); got != "Warning: npm data unavailable for \"pkg\\x1b[2J\\nforged\".\n" {
 		t.Fatalf("warning = %q", got)

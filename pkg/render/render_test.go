@@ -152,7 +152,7 @@ func TestDegraded(t *testing.T) {
 		Name:    "left-behind",
 		Version: "0.0.1",
 		Tag:     types.TagOptionalDependencies,
-		Errors:  []types.FetchError{{Source: "npm", Kind: string(types.FetchTimeout)}},
+		Errors:  []types.FetchError{{Source: "npm", Kind: types.FetchTimeout}},
 	}})
 	if !bytes.Contains(out, []byte("left-behind")) {
 		t.Fatal("degraded card missing")
@@ -313,7 +313,7 @@ func TestArchiveNotices(t *testing.T) {
 		t.Run(string(tc.kind), func(t *testing.T) {
 			fetch := types.FetchError{
 				Source: "private-host",
-				Kind:   string(tc.kind),
+				Kind:   tc.kind,
 				Detail: `Get "https://private.example": open C:\private\registry-token.json <script>raw-detail</script>`,
 			}
 			deps := []types.Dependency{{
@@ -363,9 +363,9 @@ func TestArchiveNotices(t *testing.T) {
 func TestDistinctArchiveNotices(t *testing.T) {
 	t.Parallel()
 	out := render(t, []types.Dependency{{Name: "fixture", Errors: []types.FetchError{
-		{Kind: string(types.FetchTimeout)},
-		{Kind: string(types.FetchNetwork)},
-		{Kind: string(types.FetchTimeout)},
+		{Kind: types.FetchTimeout},
+		{Kind: types.FetchNetwork},
+		{Kind: types.FetchTimeout},
 	}}})
 	first := bytes.Index(out, []byte("<h4>The registry took too long</h4>"))
 	second := bytes.Index(out, []byte("<h4>The npm request failed</h4>"))
@@ -427,7 +427,7 @@ func TestRarityAtlas(t *testing.T) {
 		types.Dependency{Name: "unverified", Tag: types.TagOptionalDependencies},
 		types.Dependency{Name: "missing-count", Rarity: types.RarityCommon},
 		types.Dependency{Name: "failed", Rarity: types.RarityCommon, WeeklyDownloads: &downloads[0],
-			Errors: []types.FetchError{{Kind: string(types.FetchTimeout)}}},
+			Errors: []types.FetchError{{Kind: types.FetchTimeout}}},
 		types.Dependency{Name: "hostile-tier", Rarity: types.Rarity(`"><script>alert(1)</script>`), WeeklyDownloads: &downloads[0]},
 	)
 
@@ -525,7 +525,7 @@ func TestDeckSizeFor47Cards(t *testing.T) {
 		if i%5 == 0 {
 			deps[i] = types.Dependency{
 				Name: deps[i].Name, Version: deps[i].Version, Tag: types.TagOptionalDependencies,
-				Errors: []types.FetchError{{Kind: string(types.FetchNotFound)}},
+				Errors: []types.FetchError{{Kind: types.FetchNotFound}},
 			}
 		}
 	}

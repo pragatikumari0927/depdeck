@@ -25,7 +25,7 @@ func main() {
 		},
 		{
 			Name: "<script>alert('fixture')</script>", Version: "<img src=x onerror=alert(1)>", Tag: types.TagDependencies,
-			Errors: []types.FetchError{{Source: "npm", Kind: string(types.FetchNetwork)}},
+			Errors: []types.FetchError{{Source: "npm", Kind: types.FetchNetwork}},
 		},
 		{
 			Name: "development-epic", Version: "^2.0.0", Tag: types.TagDevDependencies,
@@ -35,7 +35,7 @@ func main() {
 		},
 		{
 			Name: "development-unknown", Version: "^1.0.0", Tag: types.TagDevDependencies,
-			Errors: []types.FetchError{{Source: "npm", Kind: string(types.FetchTimeout)}},
+			Errors: []types.FetchError{{Source: "npm", Kind: types.FetchTimeout}},
 		},
 		{
 			Name: "optional-rare", Version: "^4.0.0", Tag: types.TagOptionalDependencies,
@@ -45,7 +45,7 @@ func main() {
 		},
 		{
 			Name: "optional-unknown", Version: "^1.0.0", Tag: types.TagOptionalDependencies,
-			Errors: []types.FetchError{{Source: "npm", Kind: string(types.FetchNotFound)}},
+			Errors: []types.FetchError{{Source: "npm", Kind: types.FetchNotFound}},
 		},
 	}
 	if err := render.Render(deps, os.Stdout); err != nil {

@@ -41,7 +41,7 @@ func TestApplyNameOnly(t *testing.T) {
 	dep := types.Dependency{
 		Name: "left-pad",
 		Errors: []types.FetchError{
-			{Source: "npm", Kind: string(types.FetchNotFound), Detail: "404"},
+			{Source: "npm", Kind: types.FetchNotFound, Detail: "404"},
 		},
 	}
 	Apply(&dep)

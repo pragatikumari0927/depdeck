@@ -565,7 +565,7 @@ func degradedWithVersion(name, declared string, kind types.FetchKind, detail str
 }
 
 func fetchError(kind types.FetchKind, detail string) *types.FetchError {
-	return &types.FetchError{Source: sourceNPM, Kind: string(kind), Detail: detail}
+	return &types.FetchError{Source: sourceNPM, Kind: kind, Detail: detail}
 }
 
 func fetchKindFor(err error) types.FetchKind {
@@ -580,7 +580,7 @@ func degraded(name string, kind types.FetchKind, detail string) *types.Dependenc
 		Name: name,
 		Errors: []types.FetchError{{
 			Source: sourceNPM,
-			Kind:   string(kind),
+			Kind:   kind,
 			Detail: detail,
 		}},
 	}

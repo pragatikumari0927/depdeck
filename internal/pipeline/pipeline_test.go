@@ -21,7 +21,7 @@ func (f *fakeRegistry) Fetch(_ context.Context, name, declared string) (*types.D
 	f.calls[name]++
 	f.mu.Unlock()
 	if name == "missing" {
-		return &types.Dependency{Name: name, Version: declared, Errors: []types.FetchError{{Source: "npm", Kind: "not_found", Detail: "missing"}}}, nil
+		return &types.Dependency{Name: name, Version: declared, Errors: []types.FetchError{{Source: "npm", Kind: types.FetchNotFound, Detail: "missing"}}}, nil
 	}
 	if name == "unknown" {
 		return &types.Dependency{Name: name, Version: declared, License: "MIT", LastPublish: "2026-01-01T00:00:00Z"}, nil

@@ -18,7 +18,7 @@ import (
 type missingRegistry struct{}
 
 func (missingRegistry) Fetch(_ context.Context, name, version string) (*types.Dependency, error) {
-	return &types.Dependency{Name: name, Version: version, Errors: []types.FetchError{{Source: "npm", Kind: "not_found", Detail: "missing"}}}, nil
+	return &types.Dependency{Name: name, Version: version, Errors: []types.FetchError{{Source: "npm", Kind: types.FetchNotFound, Detail: "missing"}}}, nil
 }
 
 func TestSDKToolsAndStandaloneCard(t *testing.T) {
