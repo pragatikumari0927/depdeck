@@ -14,6 +14,7 @@ import zipfile
 from pathlib import Path
 
 VITE_LICENSE_PATH = Path(__file__).resolve().parents[1] / "pkg" / "render" / "artwork" / "LICENSE-vite.txt"
+DEPDECK_MODULE_PATH = "github.com/pragatikumari0927/depdeck"
 
 
 def require(condition, message):
@@ -21,17 +22,25 @@ def require(condition, message):
         raise SystemExit(message)
 
 
-def check_go_metadata(metadata, expected_go_version):
+def check_go_metadata(metadata, expected_go_version, expected_module_path=None, expected_module_version=None):
     actual = metadata.get("GoVersion") if isinstance(metadata, dict) else None
     require(isinstance(actual, str) and re.fullmatch(r"go\d+\.\d+\.\d+", actual),
             f"Missing or invalid embedded Go compiler version: {actual!r}")
     if expected_go_version:
         require(actual == expected_go_version,
                 f"Expected compiler {expected_go_version}, found {actual}")
+    if expected_module_path is not None or expected_module_version is not None:
+        main = metadata.get("Main") if isinstance(metadata, dict) else None
+        observed_path = main.get("Path") if isinstance(main, dict) else None
+        observed_version = main.get("Version") if isinstance(main, dict) else None
+        require(observed_path == expected_module_path and observed_version == expected_module_version,
+                "Expected module "
+                f"{expected_module_path}@{expected_module_version}, found "
+                f"{observed_path}@{observed_version}")
     return actual
 
 
-def verify_go_metadata(binary, expected_go_version):
+def verify_go_metadata(binary, expected_go_version, expected_module_path=None, expected_module_version=None):
     result = subprocess.run(["go", "version", "-m", "-json", str(binary)],
                             capture_output=True, text=True, timeout=30)
     require(result.returncode == 0, f"Could not inspect Go build metadata for {binary}: {result.stderr}")
@@ -39,9 +48,35 @@ def verify_go_metadata(binary, expected_go_version):
         metadata = json.loads(result.stdout)
     except json.JSONDecodeError as error:
         raise SystemExit(f"Invalid Go build metadata for {binary}: {error}") from error
-    version = check_go_metadata(metadata, expected_go_version)
-    print(f"Embedded compiler {version}  {binary}")
+    version = check_go_metadata(metadata, expected_go_version, expected_module_path, expected_module_version)
+    if expected_module_path is not None:
+        main = metadata.get("Main")
+        observed_path = main.get("Path") if isinstance(main, dict) else None
+        observed_version = main.get("Version") if isinstance(main, dict) else None
+        print(f"Requested module {expected_module_path}@{expected_module_version}")
+        print(f"Embedded module {observed_path}@{observed_version}  {binary}", flush=True)
+    print(f"Embedded compiler {version}  {binary}", flush=True)
     return version
+
+
+def check_application_identity(observed, expected_version, expected_module_path=None, expected_module_version=None):
+    canonical = f"depdeck {expected_version}"
+    legacy_v1_identity = (
+        expected_version == "1.0.0"
+        and expected_module_path == DEPDECK_MODULE_PATH
+        and expected_module_version == "v1.0.0"
+        and observed == "depdeck v1.0.0"
+    )
+    if legacy_v1_identity:
+        return "v1.0.0"
+    require(observed == canonical,
+            f"Expected application identity {canonical!r}, observed {observed!r}")
+    return expected_version
+
+
+def check_mcp_server_version(observed, expected_version):
+    require(observed == expected_version,
+            f"Expected MCP server version {expected_version!r}, observed {observed!r}")
 
 
 def check_binary_scan_result(result, binary):
@@ -112,9 +147,10 @@ def check_render_result(envelope, identity, output, actual_bytes, html):
 
 
 def smoke(binary, version, expect_render_deck=False, expected_go_version=None,
-          govulncheck=None, binary_checks_done=False):
+          govulncheck=None, binary_checks_done=False, expected_module_path=None,
+          expected_module_version=None):
     if not binary_checks_done:
-        verify_go_metadata(binary, expected_go_version)
+        verify_go_metadata(binary, expected_go_version, expected_module_path, expected_module_version)
         if govulncheck:
             scan_binary(govulncheck, binary)
     with tempfile.TemporaryDirectory(prefix="depdeck-smoke-") as directory:
@@ -130,8 +166,10 @@ def smoke(binary, version, expect_render_deck=False, expected_go_version=None,
             require(result.returncode == code, f"{args} returned {result.returncode}: {result.stderr}")
             return result
 
-        identity = f"depdeck {version}"
-        require(run("--version").stdout.strip() == identity, "Unexpected CLI version")
+        app_version = check_application_identity(
+            run("--version").stdout.strip(), version, expected_module_path, expected_module_version
+        )
+        identity = f"depdeck {app_version}"
         require(run("scan", "--flavor=ai", code=2).stderr, "Missing CLI error diagnostic")
         cli = json.loads(run("check", "--json").stdout)
         cli_data = check_envelope(cli, "check", identity)
@@ -158,7 +196,7 @@ def smoke(binary, version, expect_render_deck=False, expected_go_version=None,
                     "protocolVersion": "2025-11-25", "capabilities": {},
                     "clientInfo": {"name": "release-smoke", "version": "1"},
                 }})
-                require(receive()["result"]["serverInfo"]["version"] == version, "Unexpected MCP version")
+                check_mcp_server_version(receive()["result"]["serverInfo"]["version"], app_version)
                 send({"method": "notifications/initialized"})
                 send({"id": 2, "method": "tools/list"})
                 tools = receive()["result"]["tools"]
@@ -244,12 +282,17 @@ if __name__ == "__main__":
                         help="require and exercise the Pixel Archive MCP render_deck tool")
     parser.add_argument("--expected-go-version",
                         help="require this embedded compiler version, for example go1.27.4")
+    parser.add_argument("--module-path", help="require this embedded Go module path")
+    parser.add_argument("--module-version", help="require this embedded Go module version")
     parser.add_argument("--govulncheck", type=Path,
                         help="run govulncheck binary mode on every inspected executable")
     args = parser.parse_args()
+    if (args.module_path is None) != (args.module_version is None):
+        parser.error("--module-path and --module-version must be provided together")
     if args.binary and args.version and not args.dist:
         smoke(args.binary.resolve(), args.version, args.expect_render_deck,
-              args.expected_go_version, args.govulncheck)
+              args.expected_go_version, args.govulncheck, expected_module_path=args.module_path,
+              expected_module_version=args.module_version)
     elif args.dist and args.version and not args.binary:
         verify(args.dist, args.version, args.expect_render_deck,
                args.expected_go_version, args.govulncheck)
