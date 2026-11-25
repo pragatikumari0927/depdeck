@@ -1,6 +1,8 @@
-# Depdeck v1.1.0 candidate notes
+# Depdeck v1.1.0
 
-These notes cover unreleased changes on `main` since the
+**Release status:** Prepared, not published. The latest public release remains v1.0.0.
+
+These notes cover changes on `main` since the
 [published v1.0.0 release](https://github.com/pragatikumari0927/depdeck/releases/tag/v1.0.0).
 The candidate adds Pixel Archive, a self-contained HTML Deck with an offline
 Rarity Atlas, dependency filters, Field Journals, and Archive Notices for

@@ -16,19 +16,37 @@ preserve the original ticket list and release criteria. The
 [publication record](https://github.com/pragatikumari0927/depdeck/pull/23) covers archive verification and the
 public Go and Homebrew install checks.
 
-## Unreleased on main
+## v1.1.0 release preparation
 
-- Pixel Archive adds Rarity seals, the Rarity Atlas, dependency filters,
-  Field Journals, and Archive Notices. [PR #24](https://github.com/pragatikumari0927/depdeck/pull/24) · [PR #26](https://github.com/pragatikumari0927/depdeck/pull/26)
-- CLI guidance and MCP tool descriptions are clearer. Empty Checks return
-  `data.dependencies: []` in CLI JSON and MCP. [PR #39](https://github.com/pragatikumari0927/depdeck/pull/39) · [PR #42](https://github.com/pragatikumari0927/depdeck/pull/42) · [PR #38](https://github.com/pragatikumari0927/depdeck/pull/38)
-- The minimum Go compiler for source builds is 1.26.11. The release archive
-  preflight uses Go 1.27.4. [ADR-0023](adr/0023-go-patched-toolchains.md)
+The v1.1.0 changes are merged to `main` but are not tagged or published.
+Published v1.0.0 remains the latest release. PR
+[#71](https://github.com/pragatikumari0927/depdeck/pull/71) merged reviewed
+candidate `62f5dc99af869c8d4372302e24d8e03288b2bf3c` as
+`bb415d41009d6419c1ace1d432f7b1dba408c0cc`; both commits have tree
+`0aef71309a72c7a10c40c7af1df6e0dc6011b110`.
 
-The [changelog](../CHANGELOG.md) and [candidate notes](../RELEASE_NOTES.md)
-record the changes proposed for v1.1.0. The [candidate PR](https://github.com/pragatikumari0927/depdeck/pull/49)
-records the hosted preflight evidence. Follow the [release guide](RELEASING.md)
-for approval and publication.
+- Pixel Archive adds the Rarity Atlas, group filters, Field Journals, Archive
+  Notices, deterministic package artwork, and the `render_deck` MCP tool.
+- CLI and MCP wording, empty Check results, and manifest version selection
+  have focused regressions. The assessment and JSON/MCP contracts remain stable.
+- New Unix cache directories use owner-only permissions. Release archives
+  include the Vite artwork attribution, MIT license, and trademark disclaimer.
+- Browser regression coverage checks generated HTML offline in Chromium.
+- Source builds require Go 1.26.11; release artifacts use Go 1.27.4, with
+  vulnerability scans in release preflight. See
+  [ADR-0023](adr/0023-go-patched-toolchains.md).
+
+The [test workflow](https://github.com/pragatikumari0927/depdeck/actions/runs/45517402993)
+passed all nine jobs on the merged commit. The earlier
+[release preflight](https://github.com/pragatikumari0927/depdeck/actions/runs/45442068391)
+passed on candidate `62f5dc99af869c8d4372302e24d8e03288b2bf3c`, whose tree
+matches merged `main`. Run preflight again on the final release commit; this
+candidate run is retained as supporting evidence, not a substitute.
+
+The [changelog](../CHANGELOG.md) keeps v1.1.0 under Unreleased until the
+release date is approved. The [v1.1.0 release notes](../RELEASE_NOTES.md)
+describe the upcoming release. Follow the [release guide](RELEASING.md) for
+artifact preparation and the separate approval required for publication.
 
 ## Deferred ideas
 
