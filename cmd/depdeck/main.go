@@ -10,6 +10,7 @@ import (
 	"runtime/debug"
 	"syscall"
 
+	"github.com/Masterminds/semver/v3"
 	"github.com/pragatikumari0927/depdeck/internal/cli"
 	mcpface "github.com/pragatikumari0927/depdeck/internal/mcp"
 	"github.com/pragatikumari0927/depdeck/internal/pipeline"
@@ -33,17 +34,36 @@ func mainCode() int {
 
 func installedVersion() string {
 	info, ok := debug.ReadBuildInfo()
-	if !ok || info.Main.Version == "" || info.Main.Version == "(devel)" {
+	if !ok {
+		return "dev"
+	}
+	return resolveBuildVersion("dev", info)
+}
+
+func resolveBuildVersion(linkerVersion string, info *debug.BuildInfo) string {
+	if linkerVersion != "dev" {
+		return linkerVersion
+	}
+	return installedVersionFromBuildInfo(info)
+}
+
+func installedVersionFromBuildInfo(info *debug.BuildInfo) string {
+	const modulePath = "github.com/pragatikumari0927/depdeck"
+	if info == nil || info.Main.Path != modulePath || info.Main.Version == "" || info.Main.Version == "(devel)" {
 		return "dev"
 	}
 	// A versioned module install has no local VCS stamp. Local builds may
-	// carry a generated pseudo-version even without a release version.
+	// carry VCS metadata and must not be presented as a tagged release.
 	for _, setting := range info.Settings {
 		if setting.Key == "vcs.revision" {
 			return "dev"
 		}
 	}
-	return info.Main.Version
+	version, err := semver.NewVersion(info.Main.Version)
+	if err != nil {
+		return "dev"
+	}
+	return version.String()
 }
 
 func dispatch(ctx context.Context, args []string, opt pipeline.Options) int {

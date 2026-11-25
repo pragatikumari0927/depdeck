@@ -12,6 +12,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"reflect"
+	"runtime/debug"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -25,6 +26,67 @@ import (
 )
 
 const mixedRoster = `{"dependencies":{"fresh":"^1.0.0"},"devDependencies":{"missing":"^1.0.0"}}`
+
+func TestInstalledVersionFromBuildInfo(t *testing.T) {
+	modulePath := "github.com/pragatikumari0927/depdeck"
+	tests := []struct {
+		name string
+		info *debug.BuildInfo
+		want string
+	}{
+		{
+			name: "tagged module version is canonicalized",
+			info: &debug.BuildInfo{Main: debug.Module{Path: modulePath, Version: "v1.1.0"}},
+			want: "1.1.0",
+		},
+		{
+			name: "pseudo-version stays identifiable but is not a release tag",
+			info: &debug.BuildInfo{Main: debug.Module{Path: modulePath, Version: "v1.1.1-0.20261125000000-abcdef123456"}},
+			want: "1.1.1-0.20261125000000-abcdef123456",
+		},
+		{
+			name: "local development build stays dev",
+			info: &debug.BuildInfo{Main: debug.Module{Path: modulePath, Version: "(devel)"}},
+			want: "dev",
+		},
+		{
+			name: "local VCS build stays dev",
+			info: &debug.BuildInfo{
+				Main:     debug.Module{Path: modulePath, Version: "v1.1.0"},
+				Settings: []debug.BuildSetting{{Key: "vcs.revision", Value: "abcdef123456"}},
+			},
+			want: "dev",
+		},
+		{name: "missing build metadata stays dev", info: nil, want: "dev"},
+		{
+			name: "another module cannot claim depdeck identity",
+			info: &debug.BuildInfo{Main: debug.Module{Path: "example.com/other", Version: "v1.1.0"}},
+			want: "dev",
+		},
+		{
+			name: "invalid module version stays dev",
+			info: &debug.BuildInfo{Main: debug.Module{Path: modulePath, Version: "release-candidate"}},
+			want: "dev",
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if got := installedVersionFromBuildInfo(test.info); got != test.want {
+				t.Fatalf("installed version = %q, want %q", got, test.want)
+			}
+		})
+	}
+}
+
+func TestLinkerVersionTakesPrecedenceOverModuleVersion(t *testing.T) {
+	info := &debug.BuildInfo{Main: debug.Module{
+		Path:    "github.com/pragatikumari0927/depdeck",
+		Version: "v1.0.0",
+	}}
+	if got := resolveBuildVersion("1.1.0", info); got != "1.1.0" {
+		t.Fatalf("linker-provided version = %q, want 1.1.0", got)
+	}
+}
 
 type wireEnvelope struct {
 	SchemaVersion string          `json:"schema_version"`
