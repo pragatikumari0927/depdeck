@@ -138,9 +138,132 @@ codex mcp list
 codex mcp get depdeck
 ```
 
-For other clients, platform-specific paths, setup commands, and troubleshooting,
-see the [MCP setup guide](docs/guides/mcp-setup.md). Review the configuration
-scope and proposed command before saving it; preserve other MCP servers.
+### Set up another coding agent
+
+These examples connect the agent to the `depdeck` executable already installed
+on your computer. They save a setting in the client or project, so first choose
+where you want it to apply. A project setting follows that project; a user
+setting is available across your projects. Keep your existing MCP servers and
+add only the `depdeck` entry. If the client cannot find `depdeck`, use the full
+path to `depdeck.exe` (Windows) or `depdeck` (macOS/Linux) as the command.
+
+<details>
+<summary><strong>Claude Code</strong></summary>
+
+Run these commands in the project folder you want Claude Code to use. The
+`local` setting is private to your account and applies to this project.
+
+```sh
+claude mcp add --transport stdio --scope local depdeck -- depdeck mcp
+claude mcp list
+```
+
+Open Claude Code in that project and run `/mcp` to check the connection. See
+the [Claude Code MCP guide](https://code.claude.com/docs/en/mcp).
+
+</details>
+
+<details>
+<summary><strong>Cursor</strong></summary>
+
+For one project, create or edit `.cursor/mcp.json` in its folder and add this
+entry inside the existing `mcpServers` object. For all your Cursor projects,
+use `~/.cursor/mcp.json` instead. Merge the entry with what is already there.
+
+```json
+{
+  "mcpServers": {
+    "depdeck": {
+      "type": "stdio",
+      "command": "depdeck",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+Open Cursor's MCP settings to confirm the server is enabled. See the
+[Cursor MCP guide](https://cursor.com/docs/mcp).
+
+</details>
+
+<details>
+<summary><strong>OpenCode</strong></summary>
+
+Choose the command for where you want depdeck available.
+
+```sh
+# Only this project (run from its folder)
+opencode mcp add depdeck -- depdeck mcp
+
+# All your projects
+opencode mcp add depdeck --global -- depdeck mcp
+
+opencode mcp list
+```
+
+You can also add the server to `opencode.json` or `opencode.jsonc` under
+`mcp.servers`:
+
+```jsonc
+{
+  "mcp": {
+    "servers": {
+      "depdeck": {
+        "type": "local",
+        "command": ["depdeck", "mcp"]
+      }
+    }
+  }
+}
+```
+
+In OpenCode, use `/mcps` to inspect the connection. See the
+[OpenCode MCP guide](https://opencode.ai/docs/mcp-servers/).
+
+</details>
+
+<details>
+<summary><strong>Hermes Agent</strong></summary>
+
+These commands add depdeck to the selected Hermes profile (the default profile
+uses `~/.hermes/config.yaml`) and check that Hermes can connect.
+
+```sh
+hermes mcp add depdeck --command depdeck --args mcp
+hermes mcp list
+hermes mcp test depdeck
+```
+
+See the [Hermes MCP command reference](https://hermes-agent.nousresearch.com/docs/reference/cli-commands)
+and [configuration reference](https://hermes-agent.nousresearch.com/docs/reference/mcp-config-reference).
+
+</details>
+
+<details>
+<summary><strong>Grok Build</strong></summary>
+
+Choose one command. The first adds depdeck to your user settings. The second,
+when run inside a project folder, keeps the setting with that project.
+
+```sh
+# For your account
+grok mcp add depdeck -- depdeck mcp
+
+# For the current project
+grok mcp add depdeck --scope project -- depdeck mcp
+
+grok mcp list
+grok mcp doctor depdeck
+```
+
+See the [Grok Build MCP guide](https://docs.x.ai/build/features/mcp-servers).
+
+</details>
+
+For other clients, platform-specific paths, setup commands, and
+troubleshooting, see the [MCP setup guide](docs/guides/mcp-setup.md). Check the
+configuration scope and exact command before saving; preserve other servers.
 
 ### Ask your agent to connect
 
@@ -181,34 +304,21 @@ For exact tool arguments and schemas, see the [MCP contract](docs/SPEC.md#mcp-su
   <img src="docs/assets/architecture.svg" alt="How a project becomes a card deck: the project's dependency list and the package registry with a local cache feed a shared assessment engine, which powers Scan, Check, and AI assistant tools. Scan produces a card deck as an offline page or data export. Check returns a pass or fail policy verdict. An assistant can also look up one package without a project list." width="1120">
 </p>
 
-An assistant can also look up one package directly. It needs no project list.
+Here is the same journey in everyday terms:
 
-<details>
-<summary>Follow a scan from the project list to the Deck</summary>
+1. **Start with your list.** Scan reads the package names in your project's
+   `package.json`. It does not install them or run their scripts.
+2. **Look up the facts.** depdeck first checks its saved local copy. If a fact
+   is missing or needs refreshing, it asks the public npm registry. That lookup
+   needs internet access; opening the finished Deck does not.
+3. **Make the results useful.** depdeck organizes the facts so Scan, Check, and
+   the AI tools describe the same packages consistently.
+4. **Choose how to view them.** Scan can make the HTML Deck or JSON data. Check
+   reports whether the default policy found an issue. An AI agent can use the
+   same information through MCP.
 
-```mermaid
-sequenceDiagram
-  participant Scan as Scan
-  participant Engine as Shared assessment engine
-  participant Cache as Local cache
-  participant Registry as Package registry
-  participant Deck as Card deck
-  Scan->>Engine: Read the project's dependency list
-  Engine->>Cache: Look up package facts
-  opt Cache miss or refresh
-    Engine->>Registry: Request the needed package facts
-    Registry-->>Engine: Package facts
-  end
-  Engine-->>Scan: Assessed packages
-  alt Data export requested
-    Scan-->>Scan: Write a data export
-  else Offline page requested
-    Scan->>Deck: Render the cards
-    Deck-->>Scan: Return a self-contained page
-  end
-```
-
-</details>
+An AI agent can also look up one npm package by name without reading a project
+list. That lookup is independent of your `package.json`.
 
 ## Scope and project links
 
