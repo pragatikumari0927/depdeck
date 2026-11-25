@@ -50,9 +50,12 @@ def verify_go_metadata(binary, expected_go_version, expected_module_path=None, e
         raise SystemExit(f"Invalid Go build metadata for {binary}: {error}") from error
     version = check_go_metadata(metadata, expected_go_version, expected_module_path, expected_module_version)
     if expected_module_path is not None:
+        main = metadata.get("Main")
+        observed_path = main.get("Path") if isinstance(main, dict) else None
+        observed_version = main.get("Version") if isinstance(main, dict) else None
         print(f"Requested module {expected_module_path}@{expected_module_version}")
-        print(f"Embedded module {expected_module_path}@{expected_module_version}  {binary}")
-    print(f"Embedded compiler {version}  {binary}")
+        print(f"Embedded module {observed_path}@{observed_version}  {binary}", flush=True)
+    print(f"Embedded compiler {version}  {binary}", flush=True)
     return version
 
 
