@@ -8,6 +8,9 @@ on:
 permissions:
   contents: read
 
+env:
+  RELEASE_VERSION: '1.1.0'
+
 jobs:
   archives:
     runs-on: ubuntu-latest
@@ -41,7 +44,7 @@ jobs:
           tar -xzf "$archive" -C "$RUNNER_TEMP" goreleaser
           "$RUNNER_TEMP/goreleaser" check
           GOPROXY=off "$RUNNER_TEMP/goreleaser" release --snapshot --skip=publish
-          python3 scripts/verify-release.py dist --expect-render-deck --expected-go-version go1.27.4 --govulncheck "$RUNNER_TEMP/govulncheck"
+          python3 scripts/verify-release.py dist --version "$RELEASE_VERSION" --expect-render-deck --expected-go-version go1.27.4 --govulncheck "$RUNNER_TEMP/govulncheck"
       - name: Verify isolated Go install
         shell: bash
         run: |
@@ -67,7 +70,7 @@ jobs:
         run: |
           set -euo pipefail
           source_dir="$(mktemp -d "$RUNNER_TEMP/depdeck-source.XXXXXX")"
-          git archive --format=tar.gz --prefix=depdeck-1.0.0/ HEAD > "$source_dir/depdeck-1.0.0.tar.gz"
+          git archive --format=tar.gz --prefix="depdeck-$RELEASE_VERSION/" HEAD > "$source_dir/depdeck-$RELEASE_VERSION.tar.gz"
           cd "$source_dir"
           python3 -u -m http.server 0 --bind 127.0.0.1 > server.log 2>&1 &
           server=$!
@@ -82,9 +85,9 @@ jobs:
           tap="$(brew --repository)/Library/Taps/depdeck/homebrew-preflight"
           git init "$tap"
           cd "$GITHUB_WORKSPACE"
-          node scripts/release-formula.mjs v1.0.0 "$source_dir/depdeck-1.0.0.tar.gz" "$tap/Formula/depdeck.rb" "http://127.0.0.1:$port/depdeck-1.0.0.tar.gz"
+          node scripts/release-formula.mjs "v$RELEASE_VERSION" "$source_dir/depdeck-$RELEASE_VERSION.tar.gz" "$tap/Formula/depdeck.rb" "http://127.0.0.1:$port/depdeck-$RELEASE_VERSION.tar.gz"
           brew install --build-from-source depdeck/preflight/depdeck
           brew test depdeck/preflight/depdeck
           binary="$(brew --prefix depdeck/preflight/depdeck)/bin/depdeck"
           "$(brew --prefix go)/bin/go" version -m "$binary"
-          python3 scripts/verify-release.py --binary "$binary" --version 1.0.0 --expect-render-deck --expected-go-version go1.27.4
+          python3 scripts/verify-release.py --binary "$binary" --version "$RELEASE_VERSION" --expect-render-deck --expected-go-version go1.27.4

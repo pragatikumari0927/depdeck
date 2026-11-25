@@ -5,7 +5,7 @@ import { dirname, resolve } from 'node:path';
 
 const [tag, sourceArchive, formulaPath, stagedURL, ...extra] = process.argv.slice(2);
 if (!/^v\d+\.\d+\.\d+$/.test(tag ?? '') || !sourceArchive || !formulaPath || extra.length) {
-  throw new Error('Usage: node scripts/release-formula.mjs v1.0.0 source.tar.gz Formula/depdeck.rb [loopback-source-url]');
+  throw new Error('Usage: node scripts/release-formula.mjs vMAJOR.MINOR.PATCH source.tar.gz Formula/depdeck.rb [loopback-source-url]');
 }
 const url = stagedURL
   ? new URL(stagedURL)

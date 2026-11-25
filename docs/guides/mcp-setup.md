@@ -31,6 +31,20 @@ go version
 go install github.com/pragatikumari0927/depdeck/cmd/depdeck@v1.0.0
 ```
 
+The v1.1.0 release is prepared but not published. After it appears on the
+[releases page](https://github.com/pragatikumari0927/depdeck/releases), its MCP
+server will include `render_deck` alongside the three assessment tools. Use
+its archive or install the versioned executable with:
+
+```sh
+go install github.com/pragatikumari0927/depdeck/cmd/depdeck@v1.1.0
+```
+
+The Homebrew tap will also provide v1.1.0 after its formula is published. Until
+then, the command above is a future install instruction; v1.0.0 remains the
+available release. The source-build steps below provide the Pixel Archive MCP
+renderer before the release is published.
+
 The published **v1.0.0** server exposes `list_deck`, `get_card`, and
 `check_deck`. Its CLI generates the earlier Card design, and its MCP server
 has no HTML-rendering tool. To use the Pixel Archive renderer through MCP,

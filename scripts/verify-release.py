@@ -50,7 +50,9 @@ def check_binary_scan_result(result, binary):
     print(f"Binary vulnerability scan passed  {binary}")
 
 
-def check_artwork_notice(notice):
+def check_artwork_notice(notice, require_vite=True):
+    if not require_vite:
+        return
     required = (
         "Package artwork: Vite",
         "vitejs/vite/docs/public/logo.svg",
@@ -184,7 +186,7 @@ def smoke(binary, version, expect_render_deck=False, expected_go_version=None,
     print(f"CLI and MCP smoke passed for {identity}")
 
 
-def verify(dist, expect_render_deck=False, expected_go_version=None, govulncheck=None):
+def verify(dist, expected_version, expect_render_deck=False, expected_go_version=None, govulncheck=None):
     expected = {(os_name, arch) for os_name in ("windows", "linux", "darwin")
                 for arch in ("amd64", "arm64")}
     seen = set()
@@ -197,6 +199,8 @@ def verify(dist, expect_render_deck=False, expected_go_version=None, govulncheck
         match = re.fullmatch(r"depdeck_(.+)_(windows|linux|darwin)_(amd64|arm64)\.(zip|tar\.gz)", name)
         require(match, f"Unexpected archive name: {name}")
         version, os_name, arch, extension = match.groups()
+        require(version == expected_version,
+                f"Archive {name} is version {version}, expected approved version {expected_version}")
         target = (os_name, arch)
         require(target not in seen, f"Duplicate target: {target}")
         seen.add(target)
@@ -210,7 +214,7 @@ def verify(dist, expect_render_deck=False, expected_go_version=None, govulncheck
             require(len(names) == len(members) and set(names) == members, f"Wrong contents: {name}: {names}")
             notice_bytes = (package.read("THIRD_PARTY_NOTICES.txt") if extension == "zip"
                             else package.extractfile("THIRD_PARTY_NOTICES.txt").read())
-            check_artwork_notice(notice_bytes.decode("utf-8"))
+            check_artwork_notice(notice_bytes.decode("utf-8"), expect_render_deck)
             with tempfile.TemporaryDirectory(prefix="depdeck-archive-") as directory:
                 binary = Path(directory) / executable
                 if extension == "zip":
@@ -235,7 +239,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("dist", nargs="?", type=Path)
     parser.add_argument("--binary", type=Path)
-    parser.add_argument("--version")
+    parser.add_argument("--version", help="approved release version for archives or expected binary version")
     parser.add_argument("--expect-render-deck", action="store_true",
                         help="require and exercise the Pixel Archive MCP render_deck tool")
     parser.add_argument("--expected-go-version",
@@ -246,7 +250,8 @@ if __name__ == "__main__":
     if args.binary and args.version and not args.dist:
         smoke(args.binary.resolve(), args.version, args.expect_render_deck,
               args.expected_go_version, args.govulncheck)
-    elif args.dist and not args.binary and not args.version:
-        verify(args.dist, args.expect_render_deck, args.expected_go_version, args.govulncheck)
+    elif args.dist and args.version and not args.binary:
+        verify(args.dist, args.version, args.expect_render_deck,
+               args.expected_go_version, args.govulncheck)
     else:
-        parser.error("provide a snapshot directory or --binary and --version")
+        parser.error("provide a snapshot directory and --version, or --binary and --version")
