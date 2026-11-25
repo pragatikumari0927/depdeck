@@ -5,7 +5,7 @@ Depdeck reads a local npm manifest and requests public npm registry data. It cre
 ## Secure coding
 
 - Treat manifest names, versions, registry responses, cache files, and command arguments as untrusted input.
-- Bound `package.json` input to 4 MiB, metadata responses to 32 MiB, downloads responses to 256 KiB, encoded metadata cache entries to 48 MiB, and encoded downloads cache entries to 384 KiB. Use request timeouts and a fixed concurrency limit.
+- Bound `package.json` input to 4 MiB, metadata response reads to 128 MiB, retained metadata to 32 MiB, downloads responses to 256 KiB, encoded metadata cache entries to 48 MiB, and encoded downloads cache entries to 384 KiB. Use request timeouts and a fixed concurrency limit.
 - Use HTTPS for registry requests. Do not forward credentials or user headers to another host.
 - Do not execute shell commands from package data. Do not install dependencies during a scan.
 - Escape package data before writing HTML. Keep output paths explicit and report write failures.

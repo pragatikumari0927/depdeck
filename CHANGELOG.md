@@ -5,6 +5,13 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) an
 
 ## [Unreleased]
 
+### Fixed
+
+- Stream npm packuments and keep only the fields used for version selection,
+  license, and last_publish so packages whose full metadata exceeds 32 MiB,
+  including `vite`, still get a real Card. Cap bytes read at 128 MiB and
+  retained metadata at 32 MiB (#97).
+
 ## [1.1.0] - 2026-11-25
 
 Target publication date: 2026-11-25. If publication moves to a later date,

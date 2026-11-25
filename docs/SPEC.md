@@ -149,7 +149,7 @@ Requires ADR-0002, ADR-0011.
 
 For npm metadata, select `dist-tags.latest` only when it is published and satisfies the declared range. Otherwise select the highest matching stable version. A prerelease is selected only when `latest` explicitly names it and the range allows it under npm's same major, minor, and patch rule. Read `license` and `last_publish` from the selected version; `last_publish` means its publish time at assessment, not the document modification time. Preserve the declared version in `version`; leave `resolved_version` empty. Unsupported declarations produce npm `parse` errors; no match produces npm `not_found`.
 
-Bound successful HTTP JSON bodies to 32 MiB for metadata and 256 KiB for downloads. Classify non-200 responses by status without reading their bodies. A 304 refreshes a valid stale metadata entry. Reject cross-origin and scheme-changing redirects, and allow at most ten same-origin redirects.
+Stream successful npm metadata JSON and retain only the fields used for version selection, license, and last_publish. Bound the bytes read from a metadata response to 128 MiB and the retained metadata document to 32 MiB. Bound downloads response bodies to 256 KiB. Classify non-200 responses by status without reading their bodies. A 304 refreshes a valid stale metadata entry. Reject cross-origin and scheme-changing redirects, and allow at most ten same-origin redirects.
 
 Requires ADR-0017, ADR-0004.
 
