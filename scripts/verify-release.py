@@ -40,7 +40,7 @@ def verify_go_metadata(binary, expected_go_version):
     except json.JSONDecodeError as error:
         raise SystemExit(f"Invalid Go build metadata for {binary}: {error}") from error
     version = check_go_metadata(metadata, expected_go_version)
-    print(f"Embedded compiler {version}  {binary}")
+    print(f"Embedded compiler {version}  {binary}", flush=True)
     return version
 
 
@@ -131,7 +131,9 @@ def smoke(binary, version, expect_render_deck=False, expected_go_version=None,
             return result
 
         identity = f"depdeck {version}"
-        require(run("--version").stdout.strip() == identity, "Unexpected CLI version")
+        actual_identity = run("--version").stdout.strip()
+        require(actual_identity == identity,
+                f"Unexpected CLI version: expected {identity!r}, found {actual_identity!r}")
         require(run("scan", "--flavor=ai", code=2).stderr, "Missing CLI error diagnostic")
         cli = json.loads(run("check", "--json").stdout)
         cli_data = check_envelope(cli, "check", identity)
@@ -158,7 +160,9 @@ def smoke(binary, version, expect_render_deck=False, expected_go_version=None,
                     "protocolVersion": "2025-11-25", "capabilities": {},
                     "clientInfo": {"name": "release-smoke", "version": "1"},
                 }})
-                require(receive()["result"]["serverInfo"]["version"] == version, "Unexpected MCP version")
+                server_version = receive()["result"]["serverInfo"]["version"]
+                require(server_version == version,
+                        f"Unexpected MCP version: expected {version!r}, found {server_version!r}")
                 send({"method": "notifications/initialized"})
                 send({"id": 2, "method": "tools/list"})
                 tools = receive()["result"]["tools"]
