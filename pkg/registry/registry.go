@@ -27,7 +27,13 @@ const (
 	sourceNPMDL      = "npm-downloads"
 	fetchTimeout     = 10 * time.Second
 	maxConcurrent    = 8
-	maxMetadataBody  = int64(32 << 20)
+	// maxMetadataBody caps the slimmed packument retained in memory and in the cache.
+	maxMetadataBody = int64(32 << 20)
+	// maxMetadataRead caps bytes read from a successful metadata response. The
+	// full npm packument is streamed and unused fields are discarded, so this
+	// can be larger than maxMetadataBody. vite's packument is about 39 MiB and
+	// still growing; 128 MiB leaves headroom without an unbounded read.
+	maxMetadataRead  = int64(128 << 20)
 	maxDownloadsBody = int64(256 << 10)
 )
 
@@ -146,12 +152,9 @@ func (c *Client) fromCache(ctx context.Context, name, declared, constraintText s
 			}
 			return nil, false, nil
 		}
-		fetchErr, opErr := c.attachDownloads(ctx, dep, name, now)
+		dep, opErr := c.completeWithDownloads(ctx, name, declared, now, dep)
 		if opErr != nil {
 			return nil, false, opErr
-		}
-		if fetchErr != nil {
-			return degradedWithVersion(name, declared, types.FetchKind(fetchErr.Kind), fetchErr.Detail), true, nil
 		}
 		return dep, true, nil
 	}
@@ -173,7 +176,7 @@ func (c *Client) fetchHTTP(ctx context.Context, name, declared, constraintText s
 	if hasStale && stale.ETag != "" {
 		req.Header.Set("If-None-Match", stale.ETag)
 	}
-	status, headers, body, err := c.request(ctx, req, maxMetadataBody)
+	status, headers, body, err := c.requestMetadata(ctx, req)
 	if err != nil {
 		if ctx.Err() != nil {
 			return nil, ctx.Err()
@@ -199,12 +202,9 @@ func (c *Client) fetchHTTP(ctx context.Context, name, declared, constraintText s
 		if err != nil {
 			return degradedWithVersion(name, declared, fetchKindFor(err), err.Error()), nil
 		}
-		fetchErr, opErr := c.attachDownloads(ctx, dep, name, now)
-		if opErr != nil {
-			return nil, fmt.Errorf("cache downloads for %s: %w", name, opErr)
-		}
-		if fetchErr != nil {
-			return degradedWithVersion(name, declared, types.FetchKind(fetchErr.Kind), fetchErr.Detail), nil
+		dep, err = c.completeWithDownloads(ctx, name, declared, now, dep)
+		if err != nil {
+			return nil, fmt.Errorf("cache downloads for %s: %w", name, err)
 		}
 		return dep, nil
 	case http.StatusOK:
@@ -225,12 +225,9 @@ func (c *Client) fetchHTTP(ctx context.Context, name, declared, constraintText s
 		}); err != nil {
 			return nil, fmt.Errorf("cache metadata %s: %w", name, err)
 		}
-		fetchErr, opErr := c.attachDownloads(ctx, dep, name, now)
-		if opErr != nil {
-			return nil, fmt.Errorf("cache downloads for %s: %w", name, opErr)
-		}
-		if fetchErr != nil {
-			return degradedWithVersion(name, declared, types.FetchKind(fetchErr.Kind), fetchErr.Detail), nil
+		dep, err = c.completeWithDownloads(ctx, name, declared, now, dep)
+		if err != nil {
+			return nil, fmt.Errorf("cache downloads for %s: %w", name, err)
 		}
 		return dep, nil
 	case http.StatusNotFound:
@@ -247,6 +244,19 @@ func (c *Client) fetchHTTP(ctx context.Context, name, declared, constraintText s
 	default:
 		return degradedWithVersion(name, declared, types.FetchNetwork, fmt.Sprintf("npm returned %d", status)), nil
 	}
+}
+
+// completeWithDownloads adds weekly download facts, or degrades the Card when
+// the downloads request fails as a Fetch error.
+func (c *Client) completeWithDownloads(ctx context.Context, name, declared string, now time.Time, dep *types.Dependency) (*types.Dependency, error) {
+	fetchErr, err := c.attachDownloads(ctx, dep, name, now)
+	if err != nil {
+		return nil, err
+	}
+	if fetchErr != nil {
+		return degradedWithVersion(name, declared, types.FetchKind(fetchErr.Kind), fetchErr.Detail), nil
+	}
+	return dep, nil
 }
 
 func (c *Client) attachDownloads(ctx context.Context, dep *types.Dependency, name string, now time.Time) (*types.FetchError, error) {
@@ -453,6 +463,18 @@ func parseDownloads(body []byte) (int, bool) {
 }
 
 func (c *Client) request(ctx context.Context, req *http.Request, limit int64) (int, http.Header, []byte, error) {
+	return c.doRequest(ctx, req, func(r io.Reader) ([]byte, error) {
+		return readBounded(r, limit)
+	})
+}
+
+func (c *Client) requestMetadata(ctx context.Context, req *http.Request) (int, http.Header, []byte, error) {
+	return c.doRequest(ctx, req, func(r io.Reader) ([]byte, error) {
+		return slimMetadata(r, maxMetadataRead, maxMetadataBody)
+	})
+}
+
+func (c *Client) doRequest(ctx context.Context, req *http.Request, readBody func(io.Reader) ([]byte, error)) (int, http.Header, []byte, error) {
 	select {
 	case c.sem <- struct{}{}:
 		defer func() { <-c.sem }()
@@ -469,14 +491,71 @@ func (c *Client) request(ctx context.Context, req *http.Request, limit int64) (i
 	if resp.StatusCode != http.StatusOK {
 		return resp.StatusCode, resp.Header, nil, nil
 	}
-	body, err := io.ReadAll(io.LimitReader(resp.Body, limit+1))
+	body, err := readBody(resp.Body)
 	if err != nil {
 		return 0, nil, nil, err
 	}
-	if int64(len(body)) > limit {
-		return resp.StatusCode, resp.Header, nil, errResponseTooLarge
-	}
 	return resp.StatusCode, resp.Header, body, nil
+}
+
+func readBounded(r io.Reader, limit int64) ([]byte, error) {
+	body, err := io.ReadAll(io.LimitReader(r, limit+1))
+	if err != nil {
+		return nil, err
+	}
+	if int64(len(body)) > limit {
+		return nil, errResponseTooLarge
+	}
+	return body, nil
+}
+
+// slimMetadata streams a full npm packument and keeps only the fields depdeck
+// uses: name, dist-tags, per-version license, and the time map. Abbreviated
+// packuments (Accept: application/vnd.npm.install-v1+json) omit both license
+// and the per-version time map, so they cannot replace the full document.
+func slimMetadata(r io.Reader, readLimit, retainLimit int64) ([]byte, error) {
+	var p packument
+	if err := json.NewDecoder(&capReader{r: r, limit: readLimit}).Decode(&p); err != nil {
+		if errors.Is(err, errResponseTooLarge) {
+			return nil, err
+		}
+		return nil, &metadataDecodeError{err: err}
+	}
+	slim, err := json.Marshal(p)
+	if err != nil {
+		return nil, err
+	}
+	if int64(len(slim)) > retainLimit {
+		return nil, errResponseTooLarge
+	}
+	return slim, nil
+}
+
+// capReader counts bytes and fails when the read exceeds limit. One extra byte
+// is allowed so a document that ends exactly on the limit is still accepted.
+type capReader struct {
+	r     io.Reader
+	n     int64
+	limit int64
+}
+
+func (c *capReader) Read(p []byte) (int, error) {
+	if c.n > c.limit {
+		return 0, errResponseTooLarge
+	}
+	remain := c.limit - c.n + 1
+	if remain <= 0 {
+		return 0, errResponseTooLarge
+	}
+	if int64(len(p)) > remain {
+		p = p[:remain]
+	}
+	n, err := c.r.Read(p)
+	c.n += int64(n)
+	if c.n > c.limit {
+		return n, errResponseTooLarge
+	}
+	return n, err
 }
 
 func degradedWithVersion(name, declared string, kind types.FetchKind, detail string) *types.Dependency {
@@ -508,15 +587,27 @@ func degraded(name string, kind types.FetchKind, detail string) *types.Dependenc
 }
 
 func requestFailure(err error) (types.FetchKind, string) {
+	var decode *metadataDecodeError
 	switch {
 	case errors.Is(err, errResponseTooLarge):
 		return types.FetchParse, "npm response exceeds size limit"
+	case errors.As(err, &decode):
+		return types.FetchParse, decode.Error()
 	case errors.Is(err, context.DeadlineExceeded):
 		return types.FetchTimeout, "npm request timed out"
 	default:
 		return types.FetchNetwork, "npm request failed"
 	}
 }
+
+// metadataDecodeError marks a JSON error from streaming a packument so it is
+// classified as a parse failure, not a network failure.
+type metadataDecodeError struct {
+	err error
+}
+
+func (e *metadataDecodeError) Error() string { return e.err.Error() }
+func (e *metadataDecodeError) Unwrap() error { return e.err }
 
 func encodeName(name string) string {
 	return url.PathEscape(name)
