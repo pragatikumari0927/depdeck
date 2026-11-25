@@ -73,11 +73,16 @@ jobs:
         run: |
           npm install --prefix "$RUNNER_TEMP/depdeck-browser-tools" --no-save --no-package-lock playwright@1.65.0
           "$RUNNER_TEMP/depdeck-browser-tools/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Allow Chromium's user-namespace sandbox
+        # Ubuntu 24.04 runner images block unprivileged user namespaces through
+        # AppArmor, and Chromium's sandbox needs them ("No usable sandbox").
+        # Lift that restriction on this disposable runner VM so Chromium runs
+        # with its sandbox on, instead of passing --no-sandbox.
+        run: |
+          if [[ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]]; then
+            sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+          fi
       - name: Verify generated Pixel Archive in Chromium
-        env:
-          # Ubuntu hosted runners restrict Chromium's user-namespace sandbox.
-          # Keep sandboxing enabled for local runs unless this is explicitly set.
-          DEPDECK_CHROMIUM_NO_SANDBOX: '1'
         run: |
           export DEPDECK_CHROMIUM="$(node -e 'const { chromium } = require(process.env.RUNNER_TEMP + "/depdeck-browser-tools/node_modules/playwright"); process.stdout.write(chromium.executablePath())')"
           node scripts/verify-deck-reflow.cjs "$DEPDECK_CHROMIUM"
