@@ -16,10 +16,14 @@ preserve the original ticket list and release criteria. The
 [publication record](https://github.com/pragatikumari0927/depdeck/pull/23) covers archive verification and the
 public Go and Homebrew install checks.
 
-## v1.1.0 release closure
+## Published v1.1.0
 
-The v1.1.0 implementation and repository updates are merged to `main` but are
-not tagged or published. Published v1.0.0 remains the latest release. As of
+Depdeck v1.1.0 was published on YYYY-MM-DD. It includes Pixel Archive, the
+`render_deck` MCP tool, and the other changes listed below. The release
+provides six archives and a checksum manifest.
+[GitHub release](https://github.com/pragatikumari0927/depdeck/releases/tag/v1.1.0)
+
+As of
 [#73](https://github.com/pragatikumari0927/depdeck/pull/73), which finalized
 the closure documentation after
 [#71](https://github.com/pragatikumari0927/depdeck/pull/71) and
@@ -38,15 +42,9 @@ passed on that closure commit.
   vulnerability scans in release preflight. See
   [ADR-0023](adr/0023-go-patched-toolchains.md).
 
-Before creating a v1.1.0 tag, run release preflight on the exact commit that
-will receive the tag and retain the workflow URL in the release record.
-
-The [changelog](../CHANGELOG.md) keeps the prepared v1.1.0 entries under
-Unreleased, with a target publication date of 2026-11-25. If publication
-slips, record the actual date when the version heading is added. The
-[v1.1.0 release notes](../RELEASE_NOTES.md) describe the prepared release.
-Follow the [release guide](RELEASING.md) for artifact preparation. Tagging,
-publication, and the Homebrew tap update require separate approval.
+The [changelog](../CHANGELOG.md) records v1.1.0 as published on YYYY-MM-DD.
+The [v1.1.0 release notes](../RELEASE_NOTES.md) describe the release.
+Follow the [release guide](RELEASING.md) for later releases.
 
 ## Deferred ideas
 
