@@ -10,6 +10,8 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/pragatikumari0927/depdeck/pkg/atomicfile"
 )
 
 // Class selects the cache lifetime for a response.
@@ -184,7 +186,7 @@ func (s *Store) Put(source, name string, class Class, e Entry) error {
 		_ = os.Remove(tmpName)
 		return fmt.Errorf("write %s: %w", tmpName, err)
 	}
-	if err := replaceFile(tmpName, dest); err != nil {
+	if err := atomicfile.Replace(tmpName, dest); err != nil {
 		_ = os.Remove(tmpName) // best effort
 		return fmt.Errorf("rename cache %s: %w", dest, err)
 	}

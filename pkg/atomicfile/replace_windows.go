@@ -1,6 +1,6 @@
 //go:build windows
 
-package cache
+package atomicfile
 
 import (
 	"syscall"
@@ -9,12 +9,13 @@ import (
 
 var moveFileExW = syscall.NewLazyDLL("kernel32.dll").NewProc("MoveFileExW")
 
-func replaceFile(source, destination string) error {
-	from, err := syscall.UTF16PtrFromString(source)
+// Replace moves oldpath onto newpath, replacing an existing destination.
+func Replace(oldpath, newpath string) error {
+	from, err := syscall.UTF16PtrFromString(oldpath)
 	if err != nil {
 		return err
 	}
-	to, err := syscall.UTF16PtrFromString(destination)
+	to, err := syscall.UTF16PtrFromString(newpath)
 	if err != nil {
 		return err
 	}
