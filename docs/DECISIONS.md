@@ -22,7 +22,7 @@ Index only. Reasoning lives in `docs/adr/`.
 | D-014 | pkg/types freeze relaxed: additive fields allowed without ADR | [0014](adr/0014-freeze-policy-relaxed.md) |
 | D-015 | Grok Build is primary agent; Cursor secondary; rules sync via script | [0015](adr/0015-grok-build-primary-agent.md) |
 | D-016 | Canonical docs and security guidance | [0016](adr/0016-canonical-docs-and-security-guidance.md) |
-| D-017 | Go 1.25 and pinned npm/MCP dependencies | [0017](adr/0017-go-runtime-and-npm-version-ranges.md) |
+| D-017 | Go 1.25 and pinned npm/MCP dependencies (Go minimum superseded by D-023) | [0017](adr/0017-go-runtime-and-npm-version-ranges.md) |
 | D-018 | Assessment, standalone Card, and schema 1.1 | [0018](adr/0018-assessment-and-envelope-shapes.md) |
 | D-019 | CLI current-directory defaults and output contract | [0019](adr/0019-cli-path-and-output-contract.md) |
 | D-020 | Keep the upstream Go security minimum (superseded by D-023) | [0020](adr/0020-go-security-minimum.md) |

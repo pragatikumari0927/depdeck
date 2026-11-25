@@ -12,7 +12,7 @@ for shipped versions and [the roadmap](PHASES.md) for changes on `main`.
    Manually dispatch [release preflight](../.github/workflows/release-preflight.yml)
    on the candidate ref. Record the run and the tested commit for the six
    archives and the staged macOS Homebrew install.
-3. Use Go 1.27.4 for v1.1.0. Install the official prebuilt GoReleaser
+3. Use Go 1.27.4 for the v1.1.0 candidate. Install the official prebuilt GoReleaser
    OSS 2.20.3 and git-cliff 2.14.2 binaries. Verify their SHA-256 digests
    against the upstream release metadata. Install govulncheck 1.7.0.
 4. In a fresh checkout of the exact candidate, confirm `dist/` is absent,
@@ -47,8 +47,9 @@ Keep it disposable and verify its path before any cleanup.
 Preview Conventional Commits since the latest tag with
 `git-cliff --config cliff.toml --unreleased`. Use the preview to update the
 curated **Unreleased** entries in [CHANGELOG.md](../CHANGELOG.md). For the
-approved release, record its version and publication date. v1.1.0 was
-published on YYYY-MM-DD. Preserve the existing released sections.
+approved release, record its version and publication date. The v1.1.0 target
+date is 2026-11-25; update it if publication slips. Preserve the existing
+released sections.
 
 ## Source-built Homebrew formula
 

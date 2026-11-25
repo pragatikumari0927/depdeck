@@ -137,6 +137,61 @@ The Vite mark identifies the exact npm package. This use does not imply affiliat
         with self.assertRaises(SystemExit):
             verify_release.check_go_metadata({"GoVersion": "go1.27.3"}, "go1.27.4")
 
+    def test_go_module_identity_requires_exact_path_and_requested_tag(self):
+        metadata = {
+            "GoVersion": "go1.27.4",
+            "Main": {"Path": "github.com/pragatikumari0927/depdeck", "Version": "v1.1.0"},
+        }
+        self.assertEqual(
+            verify_release.check_go_metadata(
+                metadata, "go1.27.4", "github.com/pragatikumari0927/depdeck", "v1.1.0"
+            ),
+            "go1.27.4",
+        )
+        for changed in (
+            {**metadata, "Main": {"Path": "example.com/depdeck", "Version": "v1.1.0"}},
+            {**metadata, "Main": {"Path": "github.com/pragatikumari0927/depdeck", "Version": "v1.0.0"}},
+        ):
+            with self.subTest(main=changed["Main"]), self.assertRaisesRegex(SystemExit, "Expected module"):
+                verify_release.check_go_metadata(
+                    changed, "go1.27.4", "github.com/pragatikumari0927/depdeck", "v1.1.0"
+                )
+
+    def test_v1_0_0_legacy_identity_is_narrowly_accepted(self):
+        self.assertEqual(
+            verify_release.check_application_identity(
+                "depdeck v1.0.0", "1.0.0", "github.com/pragatikumari0927/depdeck", "v1.0.0"
+            ),
+            "v1.0.0",
+        )
+        with self.assertRaisesRegex(SystemExit, "Expected application identity 'depdeck 1.1.0'"):
+            verify_release.check_application_identity(
+                "depdeck v1.0.0", "1.1.0", "github.com/pragatikumari0927/depdeck", "v1.1.0"
+            )
+        with self.assertRaisesRegex(SystemExit, "Expected application identity 'depdeck 1.0.0'"):
+            verify_release.check_application_identity(
+                "depdeck v1.0.0", "1.0.0", "example.com/depdeck", "v1.0.0"
+            )
+
+    def test_canonical_version_identity_is_required_for_future_tag(self):
+        self.assertEqual(
+            verify_release.check_application_identity(
+                "depdeck 1.1.0", "1.1.0", "github.com/pragatikumari0927/depdeck", "v1.1.0"
+            ),
+            "1.1.0",
+        )
+        for observed in ("depdeck dev", "depdeck 1.0.0", "depdeck v1.1.0"):
+            with self.subTest(observed=observed), self.assertRaises(SystemExit):
+                verify_release.check_application_identity(
+                    observed, "1.1.0", "github.com/pragatikumari0927/depdeck", "v1.1.0"
+                )
+
+    def test_mcp_version_must_match_application_identity(self):
+        verify_release.check_mcp_server_version("v1.0.0", "v1.0.0")
+        verify_release.check_mcp_server_version("1.1.0", "1.1.0")
+        with self.assertRaisesRegex(SystemExit, "Expected MCP server version '1.1.0'.*observed 'dev'"):
+            verify_release.check_mcp_server_version("dev", "1.1.0")
+
     def test_binary_scan_must_pass(self):
         verify_release.check_binary_scan_result(SimpleNamespace(returncode=0, stdout="clean", stderr=""), "depdeck")
         with self.assertRaises(SystemExit):

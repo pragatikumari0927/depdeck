@@ -1,13 +1,17 @@
 package registry
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -812,7 +816,179 @@ func TestLicenseDropsControlCharacters(t *testing.T) {
 	}
 }
 
+func TestFetchStreamsMetadataLargerThan32MiB(t *testing.T) {
+	t.Parallel()
+	const padding = maxMetadataBody + 1
+	var hits atomic.Int32
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/downloads/point/last-week/") {
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"downloads":12345}`))
+			return
+		}
+		hits.Add(1)
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("ETag", `"vite-large"`)
+		_, _ = io.WriteString(w, `{"name":"vite","readme":"`)
+		if err := writeRepeat(w, 'a', padding); err != nil {
+			t.Errorf("write padding: %v", err)
+			return
+		}
+		_, _ = io.WriteString(w, `","dist-tags":{"latest":"1.2.3"},"versions":{"1.2.3":{"license":"MIT","description":"bundler"}},"time":{"1.2.3":"2024-06-01T12:00:00.000Z"}}`)
+	}))
+	t.Cleanup(srv.Close)
+	store := testStore(t)
+	c := testClient(t, srv, store)
+	frozen := time.Date(2026, 9, 11, 0, 0, 0, 0, time.UTC)
+	c.now = func() time.Time { return frozen }
+
+	dep, err := c.Fetch(context.Background(), "vite", "^1.0.0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(dep.Errors) != 0 {
+		t.Fatalf("Errors = %+v", dep.Errors)
+	}
+	if dep.Name != "vite" || dep.Version != "^1.0.0" || dep.License != "MIT" {
+		t.Fatalf("card = %+v", dep)
+	}
+	if dep.LastPublish != "2024-06-01T12:00:00Z" {
+		t.Fatalf("LastPublish = %q", dep.LastPublish)
+	}
+	if dep.WeeklyDownloads == nil || *dep.WeeklyDownloads != 12345 {
+		t.Fatalf("WeeklyDownloads = %v", dep.WeeklyDownloads)
+	}
+
+	entry, hit, err := store.Get(sourceNPM, "vite", cache.ClassOK, frozen)
+	if err != nil || !hit {
+		t.Fatalf("cache hit = %v, err = %v", hit, err)
+	}
+	if int64(len(entry.Body)) > 4<<10 {
+		t.Fatalf("cached slim body is %d bytes, want a small retained document", len(entry.Body))
+	}
+	if !bytes.Contains(entry.Body, []byte(`"license":"MIT"`)) || bytes.Contains(entry.Body, []byte(`"readme"`)) {
+		t.Fatalf("cached body should be slimmed: %s", entry.Body)
+	}
+	if hits.Load() != 1 {
+		t.Fatalf("metadata hits = %d, want 1", hits.Load())
+	}
+
+	// Fresh cache must not re-fetch, and must still produce a real card.
+	dep, err = c.Fetch(context.Background(), "vite", "^1.0.0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(dep.Errors) != 0 || dep.License != "MIT" || dep.LastPublish != "2024-06-01T12:00:00Z" {
+		t.Fatalf("cached refetch = %+v", dep)
+	}
+	if hits.Load() != 1 {
+		t.Fatalf("cache hit re-fetched metadata: hits = %d", hits.Load())
+	}
+}
+
+func TestFetchRejectsRetainedMetadataOverLimit(t *testing.T) {
+	t.Parallel()
+	const retained = maxMetadataBody + 1
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/downloads/point/last-week/") {
+			_, _ = w.Write([]byte(`{"downloads":1}`))
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, `{"name":"pkg","dist-tags":{"latest":"1.0.0"},"versions":{"1.0.0":{"license":"`)
+		if err := writeRepeat(w, 'B', retained); err != nil {
+			t.Errorf("write license: %v", err)
+			return
+		}
+		_, _ = io.WriteString(w, `"}},"time":{"1.0.0":"2024-01-01T00:00:00Z"}}`)
+	}))
+	t.Cleanup(srv.Close)
+	dep, err := testClient(t, srv, testStore(t)).Fetch(context.Background(), "pkg", "*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(dep.Errors) != 1 || dep.Errors[0].Kind != string(types.FetchParse) ||
+		dep.Errors[0].Detail != "npm response exceeds size limit" {
+		t.Fatalf("errors = %+v, want a size-limit parse error", dep.Errors)
+	}
+	if dep.License != "" || dep.WeeklyDownloads != nil {
+		t.Fatalf("oversized retained metadata must not populate facts: %+v", dep)
+	}
+}
+
+func TestSlimMetadataEnforcesReadAndRetainLimits(t *testing.T) {
+	t.Parallel()
+	padding := strings.Repeat("a", 64)
+	raw := `{"name":"pkg","readme":"` + padding + `","dist-tags":{"latest":"1.0.0"},"versions":{"1.0.0":{"license":"MIT"}},"time":{"1.0.0":"2024-01-01T00:00:00Z"}}`
+	if _, err := slimMetadata(strings.NewReader(raw), 32, 1024); !errors.Is(err, errResponseTooLarge) {
+		t.Fatalf("read limit: err = %v, want errResponseTooLarge", err)
+	}
+
+	slim, err := slimMetadata(strings.NewReader(raw), int64(len(raw)), 1024)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var p packument
+	if err := json.Unmarshal(slim, &p); err != nil {
+		t.Fatal(err)
+	}
+	if p.Name != "pkg" || p.DistTags.Latest != "1.0.0" || p.Time["1.0.0"] != "2024-01-01T00:00:00Z" {
+		t.Fatalf("slim packument = %+v", p)
+	}
+	if p.Versions["1.0.0"] == nil || licenseString(p.Versions["1.0.0"].License) != "MIT" {
+		t.Fatalf("slim license = %+v", p.Versions)
+	}
+	if bytes.Contains(slim, []byte("readme")) {
+		t.Fatalf("slim body retained unused fields: %s", slim)
+	}
+
+	license := strings.Repeat("C", 64)
+	heavy := `{"name":"pkg","dist-tags":{"latest":"1.0.0"},"versions":{"1.0.0":{"license":"` + license + `"}}}`
+	if _, err := slimMetadata(strings.NewReader(heavy), int64(len(heavy)), 32); !errors.Is(err, errResponseTooLarge) {
+		t.Fatalf("retain limit: err = %v, want errResponseTooLarge", err)
+	}
+}
+
+func TestFetchInvalidMetadataJSONIsParseError(t *testing.T) {
+	t.Parallel()
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/downloads/point/last-week/") {
+			_, _ = w.Write([]byte(`{"downloads":1}`))
+			return
+		}
+		_, _ = w.Write([]byte(`{"name":`))
+	}))
+	t.Cleanup(srv.Close)
+	dep, err := testClient(t, srv, testStore(t)).Fetch(context.Background(), "pkg", "*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(dep.Errors) != 1 || dep.Errors[0].Kind != string(types.FetchParse) {
+		t.Fatalf("errors = %+v, want parse", dep.Errors)
+	}
+	if dep.Errors[0].Detail == "npm request failed" || dep.Errors[0].Detail == "npm response exceeds size limit" {
+		t.Fatalf("detail = %q, want a JSON parse message", dep.Errors[0].Detail)
+	}
+}
+
+func writeRepeat(w io.Writer, ch byte, n int64) error {
+	buf := bytes.Repeat([]byte{ch}, 1<<20)
+	var written int64
+	for written < n {
+		chunk := buf
+		if remain := n - written; int64(len(chunk)) > remain {
+			chunk = chunk[:remain]
+		}
+		if _, err := w.Write(chunk); err != nil {
+			return err
+		}
+		written += int64(len(chunk))
+	}
+	return nil
+}
+
 func FuzzParsePackument(f *testing.F) {
+
 	f.Add("pkg", "^1.0.0", []byte(`{"name":"pkg","dist-tags":{"latest":"1.0.0"},"versions":{"1.0.0":{"license":"MIT"}}}`))
 	f.Add("@scope/pkg", "latest", []byte(`null`))
 	f.Fuzz(func(t *testing.T, name, declared string, body []byte) {

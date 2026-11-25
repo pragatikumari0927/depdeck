@@ -4,7 +4,7 @@ Use `task-observer` only for skill or workflow improvement work; it is not a req
 
 Read [the documentation map](docs/README.md), then follow the authority order in that file. The canonical project contract is [docs/SPEC.md](docs/SPEC.md); the decision index is [docs/DECISIONS.md](docs/DECISIONS.md); domain terms are in [docs/CONTEXT.md](docs/CONTEXT.md).
 
-Issues are Markdown files in `.scratch/<feature>/`. Follow [the issue workflow](docs/agents/issue-tracker.md) and [triage labels](docs/agents/triage-labels.md). Keep tool configs, hooks, rules, and skills at their discovery paths.
+Local planning issues may be Markdown files in `.scratch/<feature>/`, which Git ignores. Follow [the issue workflow](docs/agents/issue-tracker.md) and [triage labels](docs/agents/triage-labels.md). Keep tool configs, hooks, rules, and skills at their discovery paths.
 
 For CLI JSON and MCP, use `{schema_version, generated_at, generated_by, tool, data}`. Parse `data` by shape. Map CLI tools `scan` to `list_deck`, and `check` to `check_deck`; MCP also has `get_card` and `render_deck`. Check the major schema version only.
 

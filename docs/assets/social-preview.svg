@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="stitle">
+  <title id="stitle">depdeck — Pixel Archive</title>
+  <defs>
+    <linearGradient id="sbg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0d1117"/>
+      <stop offset="1" stop-color="#15101f"/>
+    </linearGradient>
+    <pattern id="sgrid" width="16" height="16" patternUnits="userSpaceOnUse">
+      <path d="M16 0H0v16" fill="none" stroke="#7c3aed" stroke-opacity=".12"/>
+    </pattern>
+    <filter id="sglow"><feGaussianBlur stdDeviation="40"/></filter>
+    <filter id="ssh" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000" flood-opacity=".55"/>
+    </filter>
+  </defs>
+  <rect width="1280" height="640" fill="url(#sbg)"/>
+  <circle cx="1100" cy="80" r="260" fill="#7c3aed" opacity=".22" filter="url(#sglow)"/>
+  <circle cx="200" cy="600" r="220" fill="#06b6d4" opacity=".14" filter="url(#sglow)"/>
+  <rect width="1280" height="640" fill="url(#sgrid)"/>
+
+  <!-- cartridge frame -->
+  <rect x="24" y="24" width="1232" height="592" fill="none" stroke="#3d4450" stroke-width="4"/>
+  <rect x="28" y="28" width="1224" height="40" fill="#1a1030" stroke="#3d4450" stroke-width="2"/>
+  <rect x="44" y="40" width="14" height="14" fill="#f59e0b"/>
+  <text x="68" y="54" font-family="JetBrains Mono, IBM Plex Mono, monospace" font-size="16" font-weight="700" fill="#f0f6fc">PIXEL ARCHIVE</text>
+  <g transform="translate(1188 36)" fill="#9aa4b2">
+    <rect width="14" height="14" fill="#2b3340" stroke="#6e7681" stroke-width="2"/>
+    <rect x="20" width="14" height="14" fill="#2b3340" stroke="#6e7681" stroke-width="2"/>
+    <rect x="40" width="14" height="14" fill="#2b3340" stroke="#6e7681" stroke-width="2"/>
+  </g>
+
+  <!-- logo badge -->
+  <g transform="translate(88 150)">
+    <rect width="112" height="112" fill="#0d1117" stroke="#f59e0b" stroke-width="4"/>
+    <rect x="8" y="8" width="96" height="96" fill="none" stroke="#7c3aed" stroke-width="2"/>
+    <!-- stacked cards + D + scan beam, remapped to brand palette -->
+    <path d="M40 16h28v8h10v8h8v48h-8v8h-10v8H40v-8h-8V32h8z" fill="#1a2740" stroke="#06b6d4" stroke-width="3" stroke-linejoin="miter"/>
+    <path d="M20 24h48v8h8v64h-8v8H20v-8h-8V32h8z" fill="#f0f6fc" stroke="#f59e0b" stroke-width="3" stroke-linejoin="miter"/>
+    <path d="M24 32h40v8H24z" fill="#1a2740"/>
+    <path d="M32 48h16v6h8v6h6v22h-6v6h-8v6H32z M42 58v24h6v-4h6V62h-6v-4z" fill="#0d1117" fill-rule="evenodd"/>
+    <path d="M16 72h56v6H16z" fill="#06b6d4"/>
+    <path d="M72 68h10v14H72z" fill="#f59e0b"/>
+  </g>
+
+  <text x="88" y="340" font-family="IBM Plex Sans, Inter, sans-serif" font-size="92" font-weight="700" fill="#f0f6fc" letter-spacing="-4">depdeck</text>
+  <rect x="88" y="358" width="220" height="8" fill="#7c3aed"/>
+  <text x="88" y="410" font-family="JetBrains Mono, IBM Plex Mono, monospace" font-size="26" font-weight="700" fill="#06b6d4" letter-spacing="6">PIXEL ARCHIVE</text>
+  <text x="88" y="468" font-family="IBM Plex Sans, Inter, sans-serif" font-size="26" fill="#9aa4b2">Turn your project's dependency list</text>
+  <text x="88" y="504" font-family="IBM Plex Sans, Inter, sans-serif" font-size="26" fill="#9aa4b2">into a trading-card deck</text>
+
+  <!-- three pixel cards -->
+  <g filter="url(#ssh)">
+    <g transform="translate(760 170) rotate(-12 110 150)">
+      <rect x="0" y="0" width="220" height="300" fill="#161b22" stroke="#7c3aed" stroke-width="6"/>
+      <rect x="16" y="16" width="188" height="120" fill="#7c3aed"/>
+      <text x="110" y="230" text-anchor="middle" font-family="IBM Plex Sans, Inter, sans-serif" font-size="28" font-weight="700" fill="#7c3aed">dep</text>
+    </g>
+    <g transform="translate(860 190) rotate(4 110 150)">
+      <rect x="0" y="0" width="220" height="300" fill="#161b22" stroke="#06b6d4" stroke-width="6"/>
+      <rect x="16" y="16" width="188" height="120" fill="#06b6d4"/>
+      <text x="110" y="230" text-anchor="middle" font-family="IBM Plex Sans, Inter, sans-serif" font-size="28" font-weight="700" fill="#06b6d4">dep</text>
+    </g>
+    <g transform="translate(980 200) rotate(14 110 150)">
+      <rect x="0" y="0" width="220" height="300" fill="#161b22" stroke="#f59e0b" stroke-width="6"/>
+      <rect x="16" y="16" width="188" height="120" fill="#f59e0b"/>
+      <text x="110" y="230" text-anchor="middle" font-family="IBM Plex Sans, Inter, sans-serif" font-size="28" font-weight="700" fill="#f59e0b">dep</text>
+    </g>
+  </g>
+</svg>

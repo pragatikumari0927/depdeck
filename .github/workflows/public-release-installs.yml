@@ -17,9 +17,15 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  # Superseded PR pushes are cancelled; runs on main and tags always finish.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   public-go:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
       RELEASE_TAG: ${{ inputs.tag || 'v1.0.0' }}
     steps:
@@ -41,14 +47,19 @@ jobs:
             GOPROXY=https://proxy.golang.org GOSUMDB=sum.golang.org \
             go install "github.com/pragatikumari0927/depdeck/cmd/depdeck@$RELEASE_TAG"
           go version -m "$install_dir/bin/depdeck"
+          # `go install module@vX.Y.Z` has no -ldflags version, so depdeck reports
+          # the module version from its build info, including the leading "v"
+          # (for example `depdeck v1.0.0`). GoReleaser and Homebrew builds set
+          # BuildVersion without the "v", so only this job keeps the tag as is.
           if [[ "$RELEASE_TAG" == "v1.0.0" ]]; then
-            python3 "$GITHUB_WORKSPACE/scripts/verify-release.py" --binary "$install_dir/bin/depdeck" --version "${RELEASE_TAG#v}" --expected-go-version go1.27.4
+            python3 "$GITHUB_WORKSPACE/scripts/verify-release.py" --binary "$install_dir/bin/depdeck" --version "${RELEASE_TAG#v}" --expected-go-version go1.27.4 --module-path github.com/pragatikumari0927/depdeck --module-version "$RELEASE_TAG"
           else
-            python3 "$GITHUB_WORKSPACE/scripts/verify-release.py" --binary "$install_dir/bin/depdeck" --version "${RELEASE_TAG#v}" --expect-render-deck --expected-go-version go1.27.4
+            python3 "$GITHUB_WORKSPACE/scripts/verify-release.py" --binary "$install_dir/bin/depdeck" --version "${RELEASE_TAG#v}" --expect-render-deck --expected-go-version go1.27.4 --module-path github.com/pragatikumari0927/depdeck --module-version "$RELEASE_TAG"
           fi
 
   public-homebrew:
     runs-on: macos-latest
+    timeout-minutes: 20
     env:
       RELEASE_TAG: ${{ inputs.tag || 'v1.0.0' }}
       HOMEBREW_NO_AUTO_UPDATE: '1'

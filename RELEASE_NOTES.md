@@ -1,5 +1,9 @@
 # Depdeck v1.1.0
 
+**Prepared, not published.** These notes describe the prepared v1.1.0
+release. They are not a published GitHub release. The latest published
+release remains [v1.0.0](https://github.com/pragatikumari0927/depdeck/releases/tag/v1.0.0).
+
 These notes cover changes since the
 [published v1.0.0 release](https://github.com/pragatikumari0927/depdeck/releases/tag/v1.0.0).
 This release adds Pixel Archive, a self-contained HTML Deck with an offline

@@ -1,74 +1,169 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1900" height="900" viewBox="0 0 1900 900"><defs>
-<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d1117"/><stop offset="1" stop-color="#161b22"/></linearGradient>
-<linearGradient id="pc" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7c3aed"/><stop offset="1" stop-color="#06b6d4"/></linearGradient>
-<linearGradient id="card" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c2230"/><stop offset="1" stop-color="#141925"/></linearGradient>
-<filter id="sh" x="-20%" y="-20%" width="140%" height="160%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000" flood-opacity=".55"/></filter>
-<filter id="glow"><feGaussianBlur stdDeviation="60"/></filter>
-<marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#9aa4b2"/></marker>
-<marker id="ac" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#06b6d4"/></marker>
-<marker id="aa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#f59e0b"/></marker>
-</defs>
-<rect width="1900" height="900" fill="url(#bg)"/>
-<circle cx="1750" cy="80" r="220" fill="#7c3aed" opacity=".18" filter="url(#glow)"/>
-<circle cx="120" cy="840" r="220" fill="#06b6d4" opacity=".12" filter="url(#glow)"/>
-<rect x="60" y="56" width="8" height="58" rx="4" fill="url(#pc)"/>
-<text x="86" y="92" font-family="Inter, DejaVu Sans, sans-serif" font-size="38" font-weight="700" fill="#f0f6fc">depdeck architecture</text>
-<text x="86" y="124" font-family="Inter, DejaVu Sans, sans-serif" font-size="19" fill="#8b949e">How package.json becomes cards: parser → cache / registry → stats → flavor → CLI, MCP and renderer</text><g font-family="Inter, DejaVu Sans, sans-serif" font-size="17" fill="#c9d1d9">
-<rect x="1600" y="80" width="18" height="18" rx="5" fill="#06b6d4"/><text x="1628" y="95">built</text>
-<rect x="1700" y="80" width="18" height="18" rx="5" fill="#f59e0b"/><text x="1728" y="95">planned</text></g><rect x="330" y="190" width="900" height="640" rx="24" fill="#7c3aed" fill-opacity=".06" stroke="#7c3aed" stroke-width="2" stroke-dasharray="10 8"/><text x="356" y="226" font-family="DejaVu Sans Mono, monospace" font-size="18" font-weight="700" fill="#a78bfa">internal/pipeline</text><g filter="url(#sh)"><rect x="60" y="440" width="230" height="110" rx="16" fill="#1c2230" stroke="#c9d1d9" stroke-width="2"/></g>
-<circle cx="94" cy="478" r="8" fill="#c9d1d9"/><text x="118" y="484" font-family="DejaVu Sans Mono, monospace" font-size="19" font-weight="700" fill="#f0f6fc">package.json</text>
-<text x="82" y="518" font-family="Inter, DejaVu Sans, sans-serif" font-size="16" fill="#9aa4b2">input: direct deps</text><g filter="url(#sh)"><rect x="370" y="440" width="250" height="110" rx="16" fill="url(#card)" stroke="#06b6d4" stroke-width="2" /></g>
-<rect x="370" y="440" width="6" height="110" rx="3" fill="#06b6d4"/>
-<circle cx="404" cy="472" r="8" fill="#06b6d4"/>
-<text x="426" y="478" font-family="DejaVu Sans Mono, monospace" font-size="18" font-weight="700" fill="#f0f6fc">pkg/parser</text>
-<text x="392" y="510" font-family="Inter, DejaVu Sans, sans-serif" font-size="16" fill="#9aa4b2">builds the roster</text>
-<rect x="532" y="520" width="76" height="20" rx="10" fill="#06b6d4" opacity=".18"/>
-<text x="570" y="535" text-anchor="middle" font-family="Inter, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#06b6d4">BUILT</text><g filter="url(#sh)"><rect x="680" y="440" width="250" height="110" rx="16" fill="url(#card)" stroke="#06b6d4" stroke-width="2" /></g>
-<rect x="680" y="440" width="6" height="110" rx="3" fill="#06b6d4"/>
-<circle cx="714" cy="472" r="8" fill="#06b6d4"/>
-<text x="736" y="478" font-family="DejaVu Sans Mono, monospace" font-size="18" font-weight="700" fill="#f0f6fc">pkg/cache</text>
-<text x="702" y="510" font-family="Inter, DejaVu Sans, sans-serif" font-size="16" fill="#9aa4b2">hit?</text>
-<rect x="842" y="520" width="76" height="20" rx="10" fill="#06b6d4" opacity=".18"/>
-<text x="880" y="535" text-anchor="middle" font-family="Inter, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#06b6d4">BUILT</text><g filter="url(#sh)"><rect x="680" y="260" width="250" height="110" rx="16" fill="url(#card)" stroke="#f59e0b" stroke-width="2" stroke-dasharray="8 6"/></g>
-<rect x="680" y="260" width="6" height="110" rx="3" fill="#f59e0b"/>
-<circle cx="714" cy="292" r="8" fill="#f59e0b"/>
-<text x="736" y="298" font-family="DejaVu Sans Mono, monospace" font-size="18" font-weight="700" fill="#f0f6fc">pkg/registry</text>
-<text x="702" y="330" font-family="Inter, DejaVu Sans, sans-serif" font-size="16" fill="#9aa4b2">npm, 8 concurrent</text>
-<rect x="842" y="340" width="76" height="20" rx="10" fill="#f59e0b" opacity=".18"/>
-<text x="880" y="355" text-anchor="middle" font-family="Inter, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#f59e0b">PLANNED</text><g filter="url(#sh)"><rect x="960" y="440" width="250" height="110" rx="16" fill="url(#card)" stroke="#06b6d4" stroke-width="2" /></g>
-<rect x="960" y="440" width="6" height="110" rx="3" fill="#06b6d4"/>
-<circle cx="994" cy="472" r="8" fill="#06b6d4"/>
-<text x="1016" y="478" font-family="DejaVu Sans Mono, monospace" font-size="18" font-weight="700" fill="#f0f6fc">pkg/stats</text>
-<text x="982" y="510" font-family="Inter, DejaVu Sans, sans-serif" font-size="16" fill="#9aa4b2">rarity and chaos</text>
-<rect x="1122" y="520" width="76" height="20" rx="10" fill="#06b6d4" opacity=".18"/>
-<text x="1160" y="535" text-anchor="middle" font-family="Inter, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#06b6d4">BUILT</text><g filter="url(#sh)"><rect x="960" y="660" width="250" height="110" rx="16" fill="url(#card)" stroke="#06b6d4" stroke-width="2" /></g>
-<rect x="960" y="660" width="6" height="110" rx="3" fill="#06b6d4"/>
-<circle cx="994" cy="692" r="8" fill="#06b6d4"/>
-<text x="1016" y="698" font-family="DejaVu Sans Mono, monospace" font-size="18" font-weight="700" fill="#f0f6fc">pkg/flavor</text>
-<text x="982" y="730" font-family="Inter, DejaVu Sans, sans-serif" font-size="16" fill="#9aa4b2">rule or none</text>
-<rect x="1122" y="740" width="76" height="20" rx="10" fill="#06b6d4" opacity=".18"/>
-<text x="1160" y="755" text-anchor="middle" font-family="Inter, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#06b6d4">BUILT</text><g filter="url(#sh)"><rect x="1310" y="330" width="250" height="110" rx="16" fill="url(#card)" stroke="#f59e0b" stroke-width="2" stroke-dasharray="8 6"/></g>
-<rect x="1310" y="330" width="6" height="110" rx="3" fill="#f59e0b"/>
-<circle cx="1344" cy="362" r="8" fill="#f59e0b"/>
-<text x="1366" y="368" font-family="DejaVu Sans Mono, monospace" font-size="18" font-weight="700" fill="#f0f6fc">internal/cli</text>
-<text x="1332" y="400" font-family="Inter, DejaVu Sans, sans-serif" font-size="16" fill="#9aa4b2">scan and check</text>
-<rect x="1472" y="410" width="76" height="20" rx="10" fill="#f59e0b" opacity=".18"/>
-<text x="1510" y="425" text-anchor="middle" font-family="Inter, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#f59e0b">PLANNED</text><g filter="url(#sh)"><rect x="1310" y="640" width="250" height="140" rx="16" fill="url(#card)" stroke="#f59e0b" stroke-width="2" stroke-dasharray="8 6"/></g>
-<rect x="1310" y="640" width="6" height="140" rx="3" fill="#f59e0b"/>
-<circle cx="1344" cy="672" r="8" fill="#f59e0b"/>
-<text x="1366" y="678" font-family="DejaVu Sans Mono, monospace" font-size="18" font-weight="700" fill="#f0f6fc">internal/mcp</text>
-<text x="1332" y="710" font-family="Inter, DejaVu Sans, sans-serif" font-size="16" fill="#9aa4b2">list_deck, get_card,</text>
-<rect x="1472" y="750" width="76" height="20" rx="10" fill="#f59e0b" opacity=".18"/>
-<text x="1510" y="765" text-anchor="middle" font-family="Inter, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#f59e0b">PLANNED</text><text x="1332" y="732" font-family="Inter, DejaVu Sans, sans-serif" font-size="16" fill="#9aa4b2">check_deck</text><g filter="url(#sh)"><rect x="1610" y="210" width="250" height="110" rx="16" fill="url(#card)" stroke="#06b6d4" stroke-width="2" /></g>
-<rect x="1610" y="210" width="6" height="110" rx="3" fill="#06b6d4"/>
-<circle cx="1644" cy="242" r="8" fill="#06b6d4"/>
-<text x="1666" y="248" font-family="DejaVu Sans Mono, monospace" font-size="18" font-weight="700" fill="#f0f6fc">pkg/render</text>
-<text x="1632" y="280" font-family="Inter, DejaVu Sans, sans-serif" font-size="16" fill="#9aa4b2">deck.html</text>
-<rect x="1772" y="290" width="76" height="20" rx="10" fill="#06b6d4" opacity=".18"/>
-<text x="1810" y="305" text-anchor="middle" font-family="Inter, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#06b6d4">BUILT</text><g filter="url(#sh)"><rect x="1610" y="480" width="250" height="110" rx="16" fill="url(#card)" stroke="#f59e0b" stroke-width="2" stroke-dasharray="8 6"/></g>
-<rect x="1610" y="480" width="6" height="110" rx="3" fill="#f59e0b"/>
-<circle cx="1644" cy="512" r="8" fill="#f59e0b"/>
-<text x="1666" y="518" font-family="DejaVu Sans Mono, monospace" font-size="18" font-weight="700" fill="#f0f6fc">JSON envelope</text>
-<text x="1632" y="550" font-family="Inter, DejaVu Sans, sans-serif" font-size="16" fill="#9aa4b2">machine-readable</text>
-<rect x="1772" y="560" width="76" height="20" rx="10" fill="#f59e0b" opacity=".18"/>
-<text x="1810" y="575" text-anchor="middle" font-family="Inter, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#f59e0b">PLANNED</text><path d="M290,495.0 L364,495.0" fill="none" stroke="#9aa4b2" stroke-width="2.5" marker-end="url(#a)" /><path d="M620,495.0 L674,495.0" fill="none" stroke="#9aa4b2" stroke-width="2.5" marker-end="url(#a)" /><path d="M805.0,440 L805.0,376" fill="none" stroke="#f59e0b" stroke-width="2.5" marker-end="url(#aa)" /><rect x="777.0" y="390" width="56" height="26" rx="13" fill="#0d1117" stroke="#f59e0b" stroke-width="1.2"/><text x="805.0" y="408" text-anchor="middle" font-family="Inter, DejaVu Sans, sans-serif" font-size="14" font-weight="600" fill="#f59e0b">miss</text><path d="M930,495.0 L954,495.0" fill="none" stroke="#06b6d4" stroke-width="2.5" marker-end="url(#ac)" /><rect x="946.5" y="452.0" width="47" height="26" rx="13" fill="#0d1117" stroke="#06b6d4" stroke-width="1.2"/><text x="970" y="470.0" text-anchor="middle" font-family="Inter, DejaVu Sans, sans-serif" font-size="14" font-weight="600" fill="#06b6d4">hit</text><path d="M930,315.0 C1000,315.0 1085.0,300 1085.0,434" fill="none" stroke="#9aa4b2" stroke-width="2.5" marker-end="url(#a)" /><path d="M1085.0,550 L1085.0,654" fill="none" stroke="#9aa4b2" stroke-width="2.5" marker-end="url(#a)" /><path d="M1210,695.0 C1270,695.0 1200,385.0 1304,385.0" fill="none" stroke="#9aa4b2" stroke-width="2.5" marker-end="url(#a)" /><path d="M1210,725.0 C1270,725.0 1260,710.0 1304,710.0" fill="none" stroke="#9aa4b2" stroke-width="2.5" marker-end="url(#a)" /><path d="M1560,365.0 C1590,365.0 1540,265.0 1604,265.0" fill="none" stroke="#9aa4b2" stroke-width="2.5" marker-end="url(#a)" /><path d="M1560,405.0 C1590,405.0 1540,535.0 1604,535.0" fill="none" stroke="#9aa4b2" stroke-width="2.5" marker-end="url(#a)" /><path d="M1560,710.0 C1590,710.0 1600,575.0 1735.0,596" fill="none" stroke="#9aa4b2" stroke-width="2.5" marker-end="url(#a)" /><text x="60" y="866" font-family="Inter, DejaVu Sans, sans-serif" font-size="15" fill="#6e7681">Dashed amber = planned, not runnable yet. Source: Mermaid architecture diagram in README.md</text></svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1900" height="980" viewBox="0 0 1900 980" role="img" aria-labelledby="title desc">
+  <title id="title">How depdeck builds a card deck</title>
+  <desc id="desc">Your project's dependency list and the package registry with a local cache feed a shared assessment engine. That engine powers Scan, which produces a card deck as an offline page or data export; Check, which returns a pass or fail policy verdict; and AI assistant tools, which can also look up one package without a project list.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0d1117"/>
+      <stop offset="1" stop-color="#161b22"/>
+    </linearGradient>
+    <linearGradient id="pc" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7c3aed"/>
+      <stop offset="1" stop-color="#06b6d4"/>
+    </linearGradient>
+    <linearGradient id="titlebar" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1a1030"/>
+      <stop offset="1" stop-color="#0f2a33"/>
+    </linearGradient>
+    <pattern id="grid" width="16" height="16" patternUnits="userSpaceOnUse">
+      <path d="M16 0H0v16" fill="none" stroke="#7c3aed" stroke-opacity=".08"/>
+    </pattern>
+    <filter id="sh" x="-15%" y="-15%" width="130%" height="150%">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#000" flood-opacity=".5"/>
+    </filter>
+    <filter id="glow"><feGaussianBlur stdDeviation="50"/></filter>
+    <marker id="arrC" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0l10 5-10 5z" fill="#06b6d4"/>
+    </marker>
+    <marker id="arrP" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0l10 5-10 5z" fill="#7c3aed"/>
+    </marker>
+    <marker id="arrA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0l10 5-10 5z" fill="#f59e0b"/>
+    </marker>
+    <marker id="arrM" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0l10 5-10 5z" fill="#9aa4b2"/>
+    </marker>
+  </defs>
+
+  <rect width="1900" height="980" fill="url(#bg)"/>
+  <circle cx="1760" cy="70" r="230" fill="#7c3aed" opacity=".16" filter="url(#glow)"/>
+  <circle cx="120" cy="900" r="220" fill="#06b6d4" opacity=".12" filter="url(#glow)"/>
+  <rect width="1900" height="980" fill="url(#grid)"/>
+
+  <!-- cartridge window -->
+  <rect x="28" y="28" width="1844" height="924" fill="none" stroke="#3d4450" stroke-width="4"/>
+  <rect x="32" y="32" width="1836" height="56" fill="url(#titlebar)" stroke="#3d4450" stroke-width="2"/>
+  <rect x="48" y="48" width="16" height="16" fill="#f59e0b"/>
+  <text x="76" y="68" font-family="JetBrains Mono, IBM Plex Mono, monospace" font-size="20" font-weight="700" fill="#f0f6fc">depdeck — Under the cartridge</text>
+  <g transform="translate(1788 44)" fill="#9aa4b2">
+    <rect width="18" height="18" fill="#2b3340" stroke="#6e7681" stroke-width="2"/>
+    <rect x="26" width="18" height="18" fill="#2b3340" stroke="#6e7681" stroke-width="2"/>
+    <rect x="52" width="18" height="18" fill="#2b3340" stroke="#6e7681" stroke-width="2"/>
+  </g>
+
+  <rect x="48" y="108" width="8" height="58" fill="url(#pc)"/>
+  <text x="72" y="140" font-family="IBM Plex Sans, Inter, sans-serif" font-size="36" font-weight="700" fill="#f0f6fc">How a project becomes a card deck</text>
+  <text x="72" y="176" font-family="IBM Plex Sans, Inter, sans-serif" font-size="20" fill="#9aa4b2">One shared engine reads your list, looks up package facts, and feeds Scan, Check, and AI assistant tools.</text>
+
+  <!-- INPUTS -->
+  <g filter="url(#sh)">
+    <rect x="72" y="280" width="360" height="150" fill="#161b22" stroke="#06b6d4" stroke-width="3"/>
+    <rect x="72" y="280" width="8" height="150" fill="#06b6d4"/>
+  </g>
+  <text x="100" y="328" font-family="IBM Plex Sans, Inter, sans-serif" font-size="22" font-weight="700" fill="#f0f6fc">Your project's</text>
+  <text x="100" y="356" font-family="IBM Plex Sans, Inter, sans-serif" font-size="22" font-weight="700" fill="#f0f6fc">dependency list</text>
+  <text x="100" y="396" font-family="IBM Plex Sans, Inter, sans-serif" font-size="16" fill="#9aa4b2">The packages listed directly</text>
+  <text x="100" y="416" font-family="IBM Plex Sans, Inter, sans-serif" font-size="16" fill="#9aa4b2">in the project</text>
+
+  <g filter="url(#sh)">
+    <rect x="72" y="470" width="360" height="150" fill="#161b22" stroke="#06b6d4" stroke-width="3"/>
+    <rect x="72" y="470" width="8" height="150" fill="#06b6d4"/>
+  </g>
+  <text x="100" y="518" font-family="IBM Plex Sans, Inter, sans-serif" font-size="22" font-weight="700" fill="#f0f6fc">Package registry</text>
+  <text x="100" y="546" font-family="IBM Plex Sans, Inter, sans-serif" font-size="22" font-weight="700" fill="#f0f6fc">and local cache</text>
+  <text x="100" y="586" font-family="IBM Plex Sans, Inter, sans-serif" font-size="16" fill="#9aa4b2">Public package facts,</text>
+  <text x="100" y="606" font-family="IBM Plex Sans, Inter, sans-serif" font-size="16" fill="#9aa4b2">remembered locally</text>
+
+  <!-- ENGINE (larger: visual hierarchy) -->
+  <g filter="url(#sh)">
+    <rect x="560" y="330" width="460" height="240" fill="#1a1330" stroke="#7c3aed" stroke-width="5"/>
+    <rect x="560" y="330" width="10" height="240" fill="#7c3aed"/>
+  </g>
+  <!-- pixel corner ticks -->
+  <rect x="560" y="330" width="16" height="4" fill="#c4b5fd"/>
+  <rect x="560" y="330" width="4" height="16" fill="#c4b5fd"/>
+  <rect x="1004" y="330" width="16" height="4" fill="#c4b5fd"/>
+  <rect x="1016" y="330" width="4" height="16" fill="#c4b5fd"/>
+  <rect x="560" y="566" width="16" height="4" fill="#c4b5fd"/>
+  <rect x="560" y="554" width="4" height="16" fill="#c4b5fd"/>
+  <rect x="1004" y="566" width="16" height="4" fill="#c4b5fd"/>
+  <rect x="1016" y="554" width="4" height="16" fill="#c4b5fd"/>
+  <text x="790" y="410" text-anchor="middle" font-family="IBM Plex Sans, Inter, sans-serif" font-size="28" font-weight="700" fill="#f0f6fc">Shared assessment engine</text>
+  <text x="790" y="452" text-anchor="middle" font-family="IBM Plex Sans, Inter, sans-serif" font-size="17" fill="#c4b5fd">The heart of the cartridge</text>
+  <text x="790" y="492" text-anchor="middle" font-family="IBM Plex Sans, Inter, sans-serif" font-size="17" fill="#9aa4b2">Turns package facts into rarity,</text>
+  <text x="790" y="516" text-anchor="middle" font-family="IBM Plex Sans, Inter, sans-serif" font-size="17" fill="#9aa4b2">freshness, and license notes</text>
+
+  <!-- OUTPUTS: Scan / Check / AI -->
+  <g filter="url(#sh)">
+    <rect x="1160" y="230" width="280" height="120" fill="#161b22" stroke="#f59e0b" stroke-width="3"/>
+    <rect x="1160" y="230" width="8" height="120" fill="#f59e0b"/>
+  </g>
+  <text x="1188" y="282" font-family="IBM Plex Sans, Inter, sans-serif" font-size="24" font-weight="700" fill="#f0f6fc">Scan</text>
+  <text x="1188" y="314" font-family="IBM Plex Sans, Inter, sans-serif" font-size="15" fill="#9aa4b2">Build the collection</text>
+
+  <g filter="url(#sh)">
+    <rect x="1550" y="230" width="300" height="120" fill="#161b22" stroke="#f59e0b" stroke-width="3"/>
+    <rect x="1550" y="230" width="8" height="120" fill="#f59e0b"/>
+  </g>
+  <text x="1578" y="276" font-family="IBM Plex Sans, Inter, sans-serif" font-size="20" font-weight="700" fill="#f0f6fc">Card deck</text>
+  <text x="1578" y="304" font-family="IBM Plex Sans, Inter, sans-serif" font-size="15" fill="#9aa4b2">Offline page or</text>
+  <text x="1578" y="324" font-family="IBM Plex Sans, Inter, sans-serif" font-size="15" fill="#9aa4b2">data export</text>
+
+  <g filter="url(#sh)">
+    <rect x="1160" y="400" width="280" height="120" fill="#161b22" stroke="#f59e0b" stroke-width="3"/>
+    <rect x="1160" y="400" width="8" height="120" fill="#f59e0b"/>
+  </g>
+  <text x="1188" y="452" font-family="IBM Plex Sans, Inter, sans-serif" font-size="24" font-weight="700" fill="#f0f6fc">Check</text>
+  <text x="1188" y="484" font-family="IBM Plex Sans, Inter, sans-serif" font-size="15" fill="#9aa4b2">Apply the default policy</text>
+
+  <g filter="url(#sh)">
+    <rect x="1550" y="400" width="300" height="120" fill="#161b22" stroke="#f59e0b" stroke-width="3"/>
+    <rect x="1550" y="400" width="8" height="120" fill="#f59e0b"/>
+  </g>
+  <text x="1578" y="452" font-family="IBM Plex Sans, Inter, sans-serif" font-size="20" font-weight="700" fill="#f0f6fc">Pass or fail</text>
+  <text x="1578" y="480" font-family="IBM Plex Sans, Inter, sans-serif" font-size="20" font-weight="700" fill="#f0f6fc">policy verdict</text>
+
+  <g filter="url(#sh)">
+    <rect x="1160" y="570" width="280" height="120" fill="#161b22" stroke="#f59e0b" stroke-width="3"/>
+    <rect x="1160" y="570" width="8" height="120" fill="#f59e0b"/>
+  </g>
+  <text x="1188" y="618" font-family="IBM Plex Sans, Inter, sans-serif" font-size="22" font-weight="700" fill="#f0f6fc">AI assistant</text>
+  <text x="1188" y="644" font-family="IBM Plex Sans, Inter, sans-serif" font-size="22" font-weight="700" fill="#f0f6fc">tools</text>
+  <text x="1188" y="672" font-family="IBM Plex Sans, Inter, sans-serif" font-size="15" fill="#9aa4b2">Browse, check, or render</text>
+
+  <!-- orthogonal connectors -->
+  <!-- list -> engine -->
+  <path d="M432 355 H496 V420 H554" fill="none" stroke="#06b6d4" stroke-width="3" marker-end="url(#arrC)"/>
+  <!-- registry -> engine -->
+  <path d="M432 545 H496 V480 H554" fill="none" stroke="#06b6d4" stroke-width="3" marker-end="url(#arrC)"/>
+  <!-- engine -> scan -->
+  <path d="M1020 390 H1080 V290 H1154" fill="none" stroke="#7c3aed" stroke-width="3" marker-end="url(#arrP)"/>
+  <!-- engine -> check -->
+  <path d="M1020 450 H1154" fill="none" stroke="#7c3aed" stroke-width="3" marker-end="url(#arrP)"/>
+  <!-- engine -> AI tools -->
+  <path d="M1020 510 H1080 V630 H1154" fill="none" stroke="#7c3aed" stroke-width="3" marker-end="url(#arrP)"/>
+  <!-- scan -> card deck -->
+  <path d="M1440 290 H1544" fill="none" stroke="#f59e0b" stroke-width="3" marker-end="url(#arrA)"/>
+  <!-- check -> verdict -->
+  <path d="M1440 460 H1544" fill="none" stroke="#f59e0b" stroke-width="3" marker-end="url(#arrA)"/>
+  <!-- dashed: registry to AI tools for lookup without a project list -->
+  <path d="M252 620 V736 H1300 V694" fill="none" stroke="#9aa4b2" stroke-width="2.5" stroke-dasharray="8 7" marker-end="url(#arrM)"/>
+  <rect x="430" y="698" width="420" height="28" fill="#0d1117"/>
+  <text x="640" y="718" text-anchor="middle" font-family="IBM Plex Sans, Inter, sans-serif" font-size="14" fill="#9aa4b2">Can look up one package without a project list</text>
+
+  <!-- legend -->
+  <line x1="72" y1="780" x2="1828" y2="780" stroke="#3d4450" stroke-width="2"/>
+  <text x="72" y="816" font-family="IBM Plex Sans, Inter, sans-serif" font-size="16" font-weight="700" fill="#f0f6fc">Legend</text>
+  <rect x="72" y="836" width="18" height="18" fill="#06b6d4"/>
+  <text x="98" y="851" font-family="IBM Plex Sans, Inter, sans-serif" font-size="15" fill="#c9d1d9">Inputs</text>
+  <rect x="200" y="836" width="18" height="18" fill="#7c3aed"/>
+  <text x="226" y="851" font-family="IBM Plex Sans, Inter, sans-serif" font-size="15" fill="#c9d1d9">Shared engine</text>
+  <rect x="400" y="836" width="18" height="18" fill="#f59e0b"/>
+  <text x="426" y="851" font-family="IBM Plex Sans, Inter, sans-serif" font-size="15" fill="#c9d1d9">Results</text>
+  <path d="M580 845 H640" fill="none" stroke="#7c3aed" stroke-width="3" marker-end="url(#arrP)"/>
+  <text x="652" y="851" font-family="IBM Plex Sans, Inter, sans-serif" font-size="15" fill="#c9d1d9">Data flow</text>
+  <path d="M800 845 H860" fill="none" stroke="#9aa4b2" stroke-width="2.5" stroke-dasharray="8 7" marker-end="url(#arrM)"/>
+  <text x="872" y="851" font-family="IBM Plex Sans, Inter, sans-serif" font-size="15" fill="#c9d1d9">Lookup without a project list</text>
+  <text x="72" y="900" font-family="IBM Plex Sans, Inter, sans-serif" font-size="14" fill="#6e7681">Colors are paired with labels and left-edge bars, so the meaning does not depend on color alone. This view matches the current product: Scan, Check, and AI assistant tools all use the same engine.</text>
+</svg>

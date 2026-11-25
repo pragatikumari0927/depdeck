@@ -8,7 +8,7 @@ This directory holds the canonical project guidance. Read `AGENTS.md` first. The
 2. [DECISIONS.md](DECISIONS.md) indexes accepted decisions. Read the linked ADR for the reason and scope of a decision.
 3. [CONTEXT.md](CONTEXT.md) defines domain terms.
 4. [Design](DESIGN.md), [development](DEVELOPMENT.md), [rules](RULES.md), [phases](PHASES.md), and [security](SECURITY.md) explain how to build and maintain the product.
-5. Tickets in `.scratch/` plan work. They do not override the contract.
+5. Local tickets in `.scratch/` (gitignored) may plan work. They do not override the contract.
 
 ## By task
 
@@ -18,7 +18,7 @@ This directory holds the canonical project guidance. Read `AGENTS.md` first. The
 - Tests: [TESTING.md](TESTING.md).
 - Connecting a coding agent: [MCP setup guide](guides/mcp-setup.md).
 - Release process: [RELEASING.md](RELEASING.md).
-- Release history: [CHANGELOG.md](../CHANGELOG.md). Current release notes:
+- Release history: [CHANGELOG.md](../CHANGELOG.md). Active release candidate:
   [RELEASE_NOTES.md](../RELEASE_NOTES.md).
 - Demo and diagrams: [asset index](assets/README.md).
 - Agent work: [agents/README.md](agents/README.md).
