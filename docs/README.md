@@ -18,7 +18,7 @@ This directory holds the canonical project guidance. Read `AGENTS.md` first. The
 - Tests: [TESTING.md](TESTING.md).
 - Connecting a coding agent: [MCP setup guide](guides/mcp-setup.md).
 - Release process: [RELEASING.md](RELEASING.md).
-- Release history: [CHANGELOG.md](../CHANGELOG.md). Active release candidate:
+- Release history: [CHANGELOG.md](../CHANGELOG.md). Current release notes:
   [RELEASE_NOTES.md](../RELEASE_NOTES.md).
 - Demo and diagrams: [asset index](assets/README.md).
 - Agent work: [agents/README.md](agents/README.md).

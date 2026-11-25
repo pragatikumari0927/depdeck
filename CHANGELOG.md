@@ -5,10 +5,9 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) an
 
 ## [Unreleased]
 
-These entries are prepared for v1.1.0 and are not published. The latest
-published release remains v1.0.0. Target publication date: 2026-11-25.
-If publication slips, record the actual publication date when the version
-heading is added. See the [v1.1.0 release notes](RELEASE_NOTES.md).
+## [1.1.0] - YYYY-MM-DD
+
+See the [v1.1.0 release notes](RELEASE_NOTES.md).
 
 ### Added
 
