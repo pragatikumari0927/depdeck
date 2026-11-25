@@ -48,6 +48,151 @@ func TestSingleDependency(t *testing.T) {
 	}
 }
 
+func TestParseFileReadsDirectResolutionsFromPackageLockV3(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	manifest := writePkg(t, dir, `{"dependencies":{"react":"^18.0.0","@scope/pkg":"~2.0.0"},"devDependencies":{"parent":"^1.0.0"}}`)
+	lock := `{"name":"app","lockfileVersion":3,"packages":{"":{"name":"app"},"node_modules/react":{"version":"18.3.1"},"node_modules/@scope/pkg":{"version":"2.4.0"},"node_modules/parent":{"version":"1.2.0"},"node_modules/parent/node_modules/react":{"version":"17.0.0"},"node_modules/transitive":{"version":"9.9.9"}}}`
+	if err := os.WriteFile(filepath.Join(dir, "package-lock.json"), []byte(lock), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := ParseFile(manifest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	byName := names(got)
+	if len(got) != 3 {
+		t.Fatalf("lockfile changed direct Card count: %+v", got)
+	}
+	for name, want := range map[string]string{"react": "18.3.1", "@scope/pkg": "2.4.0", "parent": "1.2.0"} {
+		if byName[name].ResolvedVersion != want {
+			t.Errorf("%s resolved_version = %q, want %q", name, byName[name].ResolvedVersion, want)
+		}
+	}
+	if byName["react"].Version != "^18.0.0" || byName["@scope/pkg"].Version != "~2.0.0" {
+		t.Errorf("lockfile overwrote declared versions: %+v", got)
+	}
+	if _, ok := byName["transitive"]; ok {
+		t.Fatal("lockfile added a transitive Card")
+	}
+}
+
+func TestParseFileReadsDirectResolutionsFromPackageLockV1(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	manifest := writePkg(t, dir, `{"dependencies":{"react":"^18.0.0"}}`)
+	lock := `{"name":"app","lockfileVersion":1,"dependencies":{"react":{"version":"18.2.0","requires":{"shared":"^1.0.0"}},"shared":{"version":"1.4.0"}}}`
+	if err := os.WriteFile(filepath.Join(dir, "package-lock.json"), []byte(lock), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := ParseFile(manifest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 1 || got[0].Name != "react" || got[0].ResolvedVersion != "18.2.0" || got[0].Version != "^18.0.0" {
+		t.Fatalf("parsed dependencies = %+v", got)
+	}
+}
+
+func TestParseFileReadsDirectResolutionsFromPackageLockV2(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	manifest := writePkg(t, dir, `{"dependencies":{"react":"^18.0.0"}}`)
+	lock := `{"name":"app","lockfileVersion":2,"packages":{"":{"name":"app"},"node_modules/react":{"version":"18.2.0"},"node_modules/parent/node_modules/react":{"version":"17.0.0"}},"dependencies":{"react":{"version":"18.2.0"}}}`
+	if err := os.WriteFile(filepath.Join(dir, "package-lock.json"), []byte(lock), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := ParseFile(manifest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 1 || got[0].ResolvedVersion != "18.2.0" || got[0].Version != "^18.0.0" {
+		t.Fatalf("parsed dependencies = %+v", got)
+	}
+}
+
+func TestParseFileIgnoresMalformedOrUnmatchedPackageLock(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		body string
+	}{
+		{name: "malformed", body: `{"lockfileVersion":3,"packages":`},
+		{name: "unmatched", body: `{"lockfileVersion":3,"packages":{"node_modules/other":{"version":"9.9.9"}}}`},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			dir := t.TempDir()
+			manifest := writePkg(t, dir, `{"dependencies":{"react":"^18.0.0"}}`)
+			if err := os.WriteFile(filepath.Join(dir, "package-lock.json"), []byte(tc.body), 0o644); err != nil {
+				t.Fatal(err)
+			}
+			got, err := ParseFile(manifest)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(got) != 1 || got[0].ResolvedVersion != "" || got[0].Version != "^18.0.0" {
+				t.Fatalf("invalid or unmatched lock changed parsed Roster: %+v", got)
+			}
+		})
+	}
+}
+
+func TestParseFileIgnoresUnsupportedOrInvalidPackageLockEntries(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		body string
+	}{
+		{name: "unsupported version", body: `{"lockfileVersion":4,"packages":{"node_modules/react":{"version":"18.2.0"}}}`},
+		{name: "null direct entry", body: `{"lockfileVersion":3,"packages":{"node_modules/react":null}}`},
+		{name: "empty resolved version", body: `{"lockfileVersion":3,"packages":{"node_modules/react":{"version":""}}}`},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			dir := t.TempDir()
+			manifest := writePkg(t, dir, `{"dependencies":{"react":"^18.0.0"}}`)
+			if err := os.WriteFile(filepath.Join(dir, "package-lock.json"), []byte(tc.body), 0o644); err != nil {
+				t.Fatal(err)
+			}
+			got, err := ParseFile(manifest)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(got) != 1 || got[0].Version != "^18.0.0" || got[0].ResolvedVersion != "" {
+				t.Fatalf("unsupported or invalid lock entry changed Roster: %+v", got)
+			}
+		})
+	}
+}
+
+func TestParseFileOversizedPackageLockDoesNotBreakRoster(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	manifest := writePkg(t, dir, `{"dependencies":{"react":"^18.0.0"}}`)
+	lockPath := filepath.Join(dir, "package-lock.json")
+	f, err := os.Create(lockPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := f.Truncate(maxPackageLockSize + 1); err != nil {
+		_ = f.Close()
+		t.Fatal(err)
+	}
+	if err := f.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := ParseFile(manifest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 1 || got[0].Name != "react" || got[0].Version != "^18.0.0" || got[0].ResolvedVersion != "" {
+		t.Fatalf("oversized lockfile changed parsed Roster: %+v", got)
+	}
+}
+
 func TestPrecedenceDepsOverDev(t *testing.T) {
 	t.Parallel()
 	p := writePkg(t, t.TempDir(), `{

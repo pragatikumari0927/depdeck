@@ -30,6 +30,7 @@ Index only. Reasoning lives in `docs/adr/`.
 | D-023 | Use patched Go toolchains for source and release builds | [0023](adr/0023-go-patched-toolchains.md) |
 | D-025 | MCP can create a Deck with the canonical HTML renderer | [0025](adr/0025-mcp-canonical-deck-renderer.md) |
 | D-026 | Exact-name local package artwork with deterministic fallback | [0026](adr/0026-offline-package-artwork.md) |
+| D-027 | Read supported npm lockfiles for direct resolved versions only | [0027](adr/0027-direct-lockfile-version-enrichment.md) |
 
 ## Standing conventions
 
@@ -42,4 +43,4 @@ Index only. Reasoning lives in `docs/adr/`.
 
 ## v2
 
-Deferred: GitHub enrichment, lockfile pinning, workspace walk, `--flavor=ai` runtime, `depdeck serve`, audit/compare MCP tools, private-registry auth, transitives on the Deck.
+Deferred: GitHub enrichment, workspace walk, `--flavor=ai` runtime, `depdeck serve`, audit/compare MCP tools, private-registry auth, transitives on the Deck. Reading Yarn and pnpm lockfiles remains deferred.
