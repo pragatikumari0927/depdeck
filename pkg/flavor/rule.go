@@ -29,6 +29,16 @@ func Apply(dep *types.Dependency) {
 	}
 
 	dep.FlavorSource = types.FlavorRuleFull
+	if dep.WeeklyDownloads == nil {
+		moves := []string{"Quiet Ledger", "Unverified Signal", "Blank Shelf"}
+		texts := []string{
+			"{name} waits for a verified weekly download count.",
+			"{name} keeps its place while weekly reach remains unverified.",
+		}
+		dep.SpecialMove = moves[r.Intn(len(moves))]
+		dep.FlavorText = strings.ReplaceAll(texts[r.Intn(len(texts))], "{name}", dep.Name)
+		return
+	}
 	if dep.Rarity == types.RarityLegendary || (dep.WeeklyDownloads != nil && *dep.WeeklyDownloads >= 10000) {
 		moves := []string{"Crowd Surge", "Legendary Draw", "Wide Pull"}
 		texts := []string{

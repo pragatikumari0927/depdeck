@@ -23,6 +23,9 @@ func (f *fakeRegistry) Fetch(_ context.Context, name, declared string) (*types.D
 	if name == "missing" {
 		return &types.Dependency{Name: name, Version: declared, Errors: []types.FetchError{{Source: "npm", Kind: "not_found", Detail: "missing"}}}, nil
 	}
+	if name == "unknown" {
+		return &types.Dependency{Name: name, Version: declared, License: "MIT", LastPublish: "2026-01-01T00:00:00Z"}, nil
+	}
 	n := 0
 	return &types.Dependency{Name: name, Version: declared, WeeklyDownloads: &n, License: "MIT", LastPublish: "2026-01-01T00:00:00Z"}, nil
 }
@@ -71,6 +74,30 @@ func TestAIRejectedBeforeManifestRead(t *testing.T) {
 	}
 	if len(f.calls) != 0 {
 		t.Fatalf("ai mode fetched %d packages", len(f.calls))
+	}
+}
+
+func TestRunKeepsUnknownDownloadsDistinctFromVerifiedZero(t *testing.T) {
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "package.json"), []byte(`{"dependencies":{"unknown":"^1.0.0","zero":"^1.0.0"}}`), 0600); err != nil {
+		t.Fatal(err)
+	}
+	deps, err := Run(context.Background(), root, Options{
+		Registry: &fakeRegistry{calls: map[string]int{}},
+		Now:      func() time.Time { return time.Date(2026, 2, 1, 0, 0, 0, 0, time.UTC) },
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(deps) != 2 {
+		t.Fatalf("assessed dependencies = %d, want 2", len(deps))
+	}
+	unknown, zero := deps[0], deps[1]
+	if unknown.Name != "unknown" || unknown.WeeklyDownloads != nil || unknown.Rarity != "" {
+		t.Errorf("unknown downloads were converted into a numeric tier: %+v", unknown)
+	}
+	if zero.Name != "zero" || zero.WeeklyDownloads == nil || *zero.WeeklyDownloads != 0 || zero.Rarity != types.RarityCommon {
+		t.Errorf("verified zero downloads lost their Common tier: %+v", zero)
 	}
 }
 

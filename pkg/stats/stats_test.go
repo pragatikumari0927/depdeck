@@ -81,7 +81,7 @@ func TestApplyDegradedOmitsStats(t *testing.T) {
 	now := time.Date(2026, 9, 11, 0, 0, 0, 0, time.UTC)
 	errs := []types.FetchError{{Source: "npm", Kind: string(types.FetchNotFound), Detail: "missing"}}
 	in := types.Dependency{Name: "left-pad", Version: "1.0.0", Tag: types.TagDependencies}
-	got := Apply(in, 10000, now.Add(-year), now, "MIT", errs)
+	got := Apply(in, intPtr(10000), now.Add(-year), now, "MIT", errs)
 	if got.Rarity != "" {
 		t.Errorf("Rarity = %q, want empty", got.Rarity)
 	}
@@ -115,7 +115,7 @@ func TestApplySuccessSetsStats(t *testing.T) {
 	now := time.Date(2026, 9, 11, 0, 0, 0, 0, time.UTC)
 	pub := now.Add(-year)
 	in := types.Dependency{Name: "react", Version: "^18.2.0", Tag: types.TagDependencies}
-	got := Apply(in, 10000, pub, now, "MIT", nil)
+	got := Apply(in, intPtr(10000), pub, now, "MIT", nil)
 	if got.WeeklyDownloads == nil || *got.WeeklyDownloads != 10000 {
 		t.Errorf("WeeklyDownloads = %v, want 10000", got.WeeklyDownloads)
 	}
@@ -131,7 +131,7 @@ func TestApplySuccessSetsStats(t *testing.T) {
 	if got.License != "MIT" {
 		t.Errorf("License = %q, want MIT", got.License)
 	}
-	zeroPub := Apply(in, 0, time.Time{}, now, "MIT", nil)
+	zeroPub := Apply(in, intPtr(0), time.Time{}, now, "MIT", nil)
 	if zeroPub.LastPublish != "" {
 		t.Errorf("zero lastPublish LastPublish = %q, want empty", zeroPub.LastPublish)
 	}
@@ -140,6 +140,34 @@ func TestApplySuccessSetsStats(t *testing.T) {
 	}
 	if zeroPub.Rarity != types.RarityCommon {
 		t.Errorf("zero downloads Rarity = %q, want Common", zeroPub.Rarity)
+	}
+}
+
+func TestApplyUnknownDownloadsRemainUnknown(t *testing.T) {
+	t.Parallel()
+	now := time.Date(2026, 9, 11, 0, 0, 0, 0, time.UTC)
+	published := now.Add(-year)
+	in := types.Dependency{Name: "package", Version: "^1.0.0", Tag: types.TagDependencies}
+
+	got := Apply(in, nil, published, now, "MIT", nil)
+	if got.WeeklyDownloads != nil || got.Rarity != "" {
+		t.Errorf("unknown weekly downloads became a numeric tier: %+v", got)
+	}
+	if got.Chaos == nil || *got.Chaos != 0 || got.License != "MIT" || got.LastPublish != published.UTC().Format(time.RFC3339) {
+		t.Errorf("known metadata was lost with unknown downloads: %+v", got)
+	}
+	encoded, err := json.Marshal(got)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(encoded), `"weekly_downloads"`) || strings.Contains(string(encoded), `"rarity"`) {
+		t.Errorf("unknown download data must be omitted from JSON: %s", encoded)
+	}
+
+	zero := 0
+	knownZero := Apply(in, &zero, published, now, "MIT", nil)
+	if knownZero.WeeklyDownloads == nil || *knownZero.WeeklyDownloads != 0 || knownZero.Rarity != types.RarityCommon {
+		t.Errorf("verified zero downloads did not remain Common: %+v", knownZero)
 	}
 }
 
@@ -154,7 +182,7 @@ func TestApplyClearsStaleErrorsAndEnrichment(t *testing.T) {
 		FlavorText: "stale", SpecialMove: "stale move", FlavorSource: types.FlavorRuleFull,
 		Errors: []types.FetchError{{Source: "npm", Kind: string(types.FetchTimeout)}},
 	}
-	got := Apply(in, 0, now.Add(-year), now, "MIT", nil)
+	got := Apply(in, intPtr(0), now.Add(-year), now, "MIT", nil)
 	if len(got.Errors) != 0 {
 		t.Errorf("Errors = %+v, want cleared", got.Errors)
 	}
@@ -175,7 +203,7 @@ func TestApplyDegradedClearsPreviousFacts(t *testing.T) {
 		LastPublish: "2020-01-01T00:00:00Z", License: "MIT",
 		FlavorText: "stale", SpecialMove: "stale move", FlavorSource: types.FlavorRuleFull,
 	}
-	got := Apply(dep, 0, time.Time{}, time.Now(), "", []types.FetchError{{Source: "npm", Kind: string(types.FetchNetwork)}})
+	got := Apply(dep, intPtr(0), time.Time{}, time.Now(), "", []types.FetchError{{Source: "npm", Kind: string(types.FetchNetwork)}})
 	if got.WeeklyDownloads != nil || got.Rarity != "" || got.Chaos != nil || got.LastPublish != "" || got.License != "" {
 		t.Errorf("degraded result retained old facts: %+v", got)
 	}
