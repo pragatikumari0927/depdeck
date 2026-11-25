@@ -1,23 +1,30 @@
 # Documentation assets
 
-The [README](../../README.md) uses the Pixel Archive hero, current demo, and a
-mobile screenshot. The [testing guide](../TESTING.md#pixel-archive-verification)
-records the offline fixture and browser checks.
+The [README](../../README.md) uses the Pixel Archive hero, current demo, a
+mobile screenshot, a terminal scan recording, and a plain-language architecture
+diagram. The [testing guide](../TESTING.md#pixel-archive-verification)
+records historical offline fixture and browser checks; that write-up still
+describes an earlier demo capture.
 
 | Asset | Use |
 | --- | --- |
 | [pixel-archive-hero.svg](pixel-archive-hero.svg) | README branding |
-| [deck-demo.gif](deck-demo.gif) | Current Pixel Archive capture from the Go renderer; offline sample Cards and working group filters |
-| [pixel-archive-desktop.png](pixel-archive-desktop.png) | Static desktop Pixel Archive capture, retained for test evidence |
-| [pixel-archive-mobile.png](pixel-archive-mobile.png) | Mobile Pixel Archive capture |
+| [depdeck-logo.svg](depdeck-logo.svg) | README logo |
+| [deck-demo.gif](deck-demo.gif) | Current Pixel Archive capture from a real scan of a sample project, including package identity artwork and working group filters |
+| [scan-terminal.gif](scan-terminal.gif) | Terminal recording of the scan that produced the current demo Deck |
+| [pixel-archive-mobile.png](pixel-archive-mobile.png) | Mobile Pixel Archive capture of the same Deck |
+| [architecture.svg](architecture.svg), [architecture.png](architecture.png) | Current plain-language architecture diagram for the README; the PNG is a high-resolution export |
+| [social-preview.png](social-preview.png), [social-preview.svg](social-preview.svg) | 1280×640 GitHub social preview. Upload the PNG under Settings → Social preview; there is no API for that step |
+| [pixel-archive-desktop.png](pixel-archive-desktop.png) | Historical desktop Pixel Archive capture, retained for test evidence. It predates package identity artwork |
 | [deck-demo-v1.gif](deck-demo-v1.gif) | Historical demonstration of the earlier Card layout, retained for reference |
 | [banner.png](banner.png) | Earlier README branding |
-| [architecture.svg](architecture.svg), [architecture.png](architecture.png) | Earlier exported architecture diagram |
-| [scan-sequence.svg](scan-sequence.svg), [scan-sequence.png](scan-sequence.png) | Earlier exported scan sequence diagram |
+| [scan-sequence.svg](scan-sequence.svg), [scan-sequence.png](scan-sequence.png) | Earlier exported scan sequence diagram, superseded in the README by a plain-language Mermaid sequence |
 
-The current README uses Mermaid for the architecture and scan sequence. The
-current GIF was captured from Go-rendered HTML using the offline sample
-assessment described in the testing guide. It predates package identity artwork:
-it shows the Pixel Archive layout, but not the curated Vite mark or deterministic
-fallback now present on `main`. Keep that visual limitation clear when using the
-capture. The older Card design remains in `deck-demo-v1.gif`.
+The current README uses a designed architecture image and Mermaid for the scan
+sequence. The current GIF was captured from Go-rendered HTML after a live scan
+of a five-package sample project (react, vite, chalk, typescript, and fsevents)
+against the public package registry on 25 Nov 2026. It shows package identity
+artwork: the curated Vite mark and deterministic fallback art, separate from
+the Rarity seal. In that capture, Vite is Unknown because the registry response
+exceeded the current size limit. The older Card design remains in
+`deck-demo-v1.gif`.
