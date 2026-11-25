@@ -24,7 +24,7 @@ _Avoid_: version_range, spec, constraint (when meaning this field)
 The published npm version selected for facts at scan time. Use `dist-tags.latest` when it satisfies the Declared version; otherwise use the highest matching stable version. This value does not replace the Declared version or populate `resolved_version`. `last_publish` is the publish time of this selected version.
 
 **Resolved version**:
-The version actually installed, taken from the lockfile when one exists (`resolved_version` in the shared contract). The current implementation leaves this field empty and does not read a lockfile. [Issue #75](https://github.com/pragatikumari0927/depdeck/issues/75) tracks populating it.
+The version pinned for a direct dependency by the root npm `package-lock.json` when a supported lockfile entry exists (`resolved_version` in the shared contract). depdeck reads only npm lockfile formats 1, 2, and 3; missing, unsupported, malformed, or unmatched entries leave the field empty. This field does not add dependencies to the Roster or replace the Declared version.
 _Avoid_: installed version, pinned version (use this term)
 
 **Card**:

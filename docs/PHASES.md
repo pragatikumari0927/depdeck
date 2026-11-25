@@ -56,8 +56,8 @@ These ideas have no assigned release version.
   returns an error.
 - Individual Card PNG export, an `install_size` stat, and a `depdeck doctor`
   command for local configuration diagnostics.
-- GitHub enrichment, additional ecosystems, `depdeck battle` for Deck
-  comparison, workspace traversal, and graph analysis.
+- GitHub enrichment, additional ecosystems, Yarn and pnpm lockfile support,
+  `depdeck battle` for Deck comparison, workspace traversal, and graph analysis.
 
 ## Contributing
 

@@ -1,10 +1,10 @@
 # SPEC — depdeck v1
 
-Frozen v1 technical contract. Claims are checkable against code. Index of why: [DECISIONS.md](DECISIONS.md). Successor ADRs 0016–0021 update the original decisions for v1. Changing a marked claim requires changing the cited ADR first.
+Frozen v1 technical contract. Claims are checkable against code. Index of why: [DECISIONS.md](DECISIONS.md). Successor ADRs 0016–0021 and 0027 update the original decisions for v1. Changing a marked claim requires changing the cited ADR first.
 
 ## Non-goals
 
-v1 does not implement: GitHub enrichment; lockfile resolution (`resolved_version` stays empty); workspace walk; `--flavor=ai` runtime (flag errors); `depdeck serve`; MCP `audit` / `search_deck` / `compare_decks`; private-registry auth; transitives, `peerDependencies`, or `bundledDependencies` on the Deck. The registry selects a version that matches the declared npm range. MCP `render_html` was not implemented; the additive `render_deck` tool uses the canonical renderer.
+v1 does not implement: GitHub enrichment; workspace walk; `--flavor=ai` runtime (flag errors); `depdeck serve`; MCP `audit` / `search_deck` / `compare_decks`; private-registry auth; transitives, `peerDependencies`, or `bundledDependencies` on the Deck. The root `package-lock.json` may supply `resolved_version` for direct dependencies only; other lockfile formats are not read. The registry selects a version that matches the declared npm range. MCP `render_html` was not implemented; the additive `render_deck` tool uses the canonical renderer.
 
 Requires ADR-0002, ADR-0005, ADR-0007, ADR-0011, and DECISIONS.md v2 to change.
 
@@ -14,7 +14,7 @@ Requires ADR-0002, ADR-0005, ADR-0007, ADR-0011, and DECISIONS.md v2 to change.
 |---------|----------------|
 | `pkg/types` | Shared Dependency, FetchError, Envelope, Check types |
 | `pkg/cache` | On-disk HTTP cache |
-| `pkg/parser` | Root `package.json` Roster |
+| `pkg/parser` | Root `package.json` Roster and direct versions from supported `package-lock.json` formats |
 | `pkg/registry` | npm fetch, range selection, semaphore 8, cache-aware |
 | `pkg/stats` | Rarity, Chaos, Check flagging |
 | `pkg/flavor` | `rule` / `none`; `ai` is an error |
@@ -143,7 +143,7 @@ Requires ADR-0010, ADR-0003.
 
 ## Parser
 
-Reads the root `package.json` only. Rejects manifest files larger than 4 MiB. Ignores `workspaces` and nested manifests. Emits directs from `dependencies`, `devDependencies`, `optionalDependencies`, in Tag order and sorted by name within each Tag. Skips `peerDependencies` and `bundledDependencies`. Duplicate name: first Tag in order `dependencies`, `devDependencies`, `optionalDependencies`. No lockfile read. `version` is the declared string. `resolved_version` is empty.
+Reads the root `package.json` and, when available, the adjacent root `package-lock.json`. Rejects manifest files larger than 4 MiB. Reads at most 64 MiB of lockfile data. Ignores `workspaces` and nested manifests. Emits directs from `dependencies`, `devDependencies`, `optionalDependencies`, in Tag order and sorted by name within each Tag. Skips `peerDependencies` and `bundledDependencies`. Duplicate name: first Tag in order `dependencies`, `devDependencies`, `optionalDependencies`. Supports npm package-lock formats 1, 2, and 3; other formats and lockfile errors leave `resolved_version` empty and do not prevent parsing the manifest. Only exact root entries for manifest dependencies can populate `resolved_version`; nested/transitive entries never add Cards or set a direct version. `version` is always the declared string. See [ADR-0027](adr/0027-direct-lockfile-version-enrichment.md).
 
 Requires ADR-0002, ADR-0011.
 
