@@ -41,10 +41,14 @@ jobs:
             GOPROXY=https://proxy.golang.org GOSUMDB=sum.golang.org \
             go install "github.com/pragatikumari0927/depdeck/cmd/depdeck@$RELEASE_TAG"
           go version -m "$install_dir/bin/depdeck"
+          # `go install module@vX.Y.Z` has no -ldflags version, so depdeck reports
+          # the module version from its build info, including the leading "v"
+          # (for example `depdeck v1.0.0`). GoReleaser and Homebrew builds set
+          # BuildVersion without the "v", so only this job keeps the tag as is.
           if [[ "$RELEASE_TAG" == "v1.0.0" ]]; then
-            python3 "$GITHUB_WORKSPACE/scripts/verify-release.py" --binary "$install_dir/bin/depdeck" --version "${RELEASE_TAG#v}" --expected-go-version go1.27.4
+            python3 "$GITHUB_WORKSPACE/scripts/verify-release.py" --binary "$install_dir/bin/depdeck" --version "$RELEASE_TAG" --expected-go-version go1.27.4
           else
-            python3 "$GITHUB_WORKSPACE/scripts/verify-release.py" --binary "$install_dir/bin/depdeck" --version "${RELEASE_TAG#v}" --expect-render-deck --expected-go-version go1.27.4
+            python3 "$GITHUB_WORKSPACE/scripts/verify-release.py" --binary "$install_dir/bin/depdeck" --version "$RELEASE_TAG" --expect-render-deck --expected-go-version go1.27.4
           fi
 
   public-homebrew:
