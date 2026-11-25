@@ -19,11 +19,13 @@ public Go and Homebrew install checks.
 ## v1.1.0 release closure
 
 The v1.1.0 implementation and repository updates are merged to `main` but are
-not tagged or published. Published v1.0.0 remains the latest release. PRs
+not tagged or published. Published v1.0.0 remains the latest release. As of
+[#73](https://github.com/pragatikumari0927/depdeck/pull/73), which finalized
+the closure documentation after
 [#71](https://github.com/pragatikumari0927/depdeck/pull/71) and
-[#72](https://github.com/pragatikumari0927/depdeck/pull/72) are merged. Current
-main is `7193bce971930d79edc0e5f0b56d83f411f77d08` with tree
-`a3e45c1847fe020358661c32b965085388d0fe9d`.
+[#72](https://github.com/pragatikumari0927/depdeck/pull/72), the
+[post-merge test workflow](https://github.com/pragatikumari0927/depdeck/actions/runs/45532168280)
+passed on that closure commit.
 
 - Pixel Archive adds the Rarity Atlas, group filters, Field Journals, Archive
   Notices, deterministic package artwork, and the `render_deck` MCP tool.
@@ -36,14 +38,13 @@ main is `7193bce971930d79edc0e5f0b56d83f411f77d08` with tree
   vulnerability scans in release preflight. See
   [ADR-0023](adr/0023-go-patched-toolchains.md).
 
-The [post-merge test workflow](https://github.com/pragatikumari0927/depdeck/actions/runs/45525786354)
-passed all nine jobs on current `main`. Before creating a v1.1.0 tag, run
-release preflight on the exact commit that will receive the tag and retain the
-workflow URL in the release record.
+Before creating a v1.1.0 tag, run release preflight on the exact commit that
+will receive the tag and retain the workflow URL in the release record.
 
-The [changelog](../CHANGELOG.md) records v1.1.0 with the approved target date
-of 2026-11-25. If publication slips, update the date to the actual release
-date. The [v1.1.0 release notes](../RELEASE_NOTES.md) describe the release.
+The [changelog](../CHANGELOG.md) keeps the prepared v1.1.0 entries under
+Unreleased, with a target publication date of 2026-11-25. If publication
+slips, record the actual date when the version heading is added. The
+[v1.1.0 release notes](../RELEASE_NOTES.md) describe the prepared release.
 Follow the [release guide](RELEASING.md) for artifact preparation. Tagging,
 publication, and the Homebrew tap update require separate approval.
 
