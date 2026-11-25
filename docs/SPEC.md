@@ -84,6 +84,8 @@ Successful CLI `--json` and MCP results:
 
 `schema_version` is `"1.1"`, the first supported shipped baseline. The earlier documented MCP 1.0 shape was not shipped. Consumers check the major component only. JSON is not byte-identical across runs (`generated_at`). HTML must not contain `generated_at`.
 
+`generated_by` and MCP `serverInfo.version` use the same application version. Go installs from a valid tagged depdeck module report the semver version without its leading `v` (for example, module `v1.1.0` reports `1.1.0`). Release linker versions remain authoritative; local or unverified builds report `dev`. The published v1.0.0 Go module binary predates this normalization and reports `depdeck v1.0.0` and MCP version `v1.0.0`.
+
 Requires ADR-0008 to change.
 
 ## CLI surface
