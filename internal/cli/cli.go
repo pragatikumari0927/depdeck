@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/pragatikumari0927/depdeck/internal/pipeline"
+	"github.com/pragatikumari0927/depdeck/pkg/atomicfile"
 	"github.com/pragatikumari0927/depdeck/pkg/cache"
 	"github.com/pragatikumari0927/depdeck/pkg/flavor"
 	"github.com/pragatikumari0927/depdeck/pkg/render"
@@ -277,7 +278,7 @@ func writeHTML(target string, manifest os.FileInfo, deps []types.Dependency) err
 	if err := checkOutputTarget(target, manifest); err != nil {
 		return err
 	}
-	if err := replaceOutput(f.Name(), target); err != nil {
+	if err := atomicfile.Replace(f.Name(), target); err != nil {
 		return fmt.Errorf("replace output %s: %w", target, err)
 	}
 	return nil
