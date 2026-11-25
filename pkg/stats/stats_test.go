@@ -79,7 +79,7 @@ func TestDefaultPolicy(t *testing.T) {
 func TestApplyDegradedOmitsStats(t *testing.T) {
 	t.Parallel()
 	now := time.Date(2026, 9, 11, 0, 0, 0, 0, time.UTC)
-	errs := []types.FetchError{{Source: "npm", Kind: string(types.FetchNotFound), Detail: "missing"}}
+	errs := []types.FetchError{{Source: "npm", Kind: types.FetchNotFound, Detail: "missing"}}
 	in := types.Dependency{Name: "left-pad", Version: "1.0.0", Tag: types.TagDependencies}
 	got := Apply(in, intPtr(10000), now.Add(-year), now, "MIT", errs)
 	if got.Rarity != "" {
@@ -97,7 +97,7 @@ func TestApplyDegradedOmitsStats(t *testing.T) {
 	if got.LastPublish != "" {
 		t.Errorf("LastPublish = %q, want empty", got.LastPublish)
 	}
-	if len(got.Errors) != 1 || got.Errors[0].Kind != string(types.FetchNotFound) {
+	if len(got.Errors) != 1 || got.Errors[0].Kind != types.FetchNotFound {
 		t.Errorf("Errors = %+v, want not_found kept", got.Errors)
 	}
 	b, err := json.Marshal(got)
@@ -180,7 +180,7 @@ func TestApplyClearsStaleErrorsAndEnrichment(t *testing.T) {
 		WeeklyDownloads: intPtr(42), Rarity: types.RarityRare, Chaos: &oldChaos,
 		LastPublish: "2020-01-01T00:00:00Z", License: "OLD",
 		FlavorText: "stale", SpecialMove: "stale move", FlavorSource: types.FlavorRuleFull,
-		Errors: []types.FetchError{{Source: "npm", Kind: string(types.FetchTimeout)}},
+		Errors: []types.FetchError{{Source: "npm", Kind: types.FetchTimeout}},
 	}
 	got := Apply(in, intPtr(0), now.Add(-year), now, "MIT", nil)
 	if len(got.Errors) != 0 {
@@ -203,7 +203,7 @@ func TestApplyDegradedClearsPreviousFacts(t *testing.T) {
 		LastPublish: "2020-01-01T00:00:00Z", License: "MIT",
 		FlavorText: "stale", SpecialMove: "stale move", FlavorSource: types.FlavorRuleFull,
 	}
-	got := Apply(dep, intPtr(0), time.Time{}, time.Now(), "", []types.FetchError{{Source: "npm", Kind: string(types.FetchNetwork)}})
+	got := Apply(dep, intPtr(0), time.Time{}, time.Now(), "", []types.FetchError{{Source: "npm", Kind: types.FetchNetwork}})
 	if got.WeeklyDownloads != nil || got.Rarity != "" || got.Chaos != nil || got.LastPublish != "" || got.License != "" {
 		t.Errorf("degraded result retained old facts: %+v", got)
 	}
@@ -229,7 +229,7 @@ func TestFlagged(t *testing.T) {
 		Name:    "gone",
 		Version: "1.0.0",
 		Tag:     types.TagDependencies,
-		Errors:  []types.FetchError{{Source: "npm", Kind: string(types.FetchNotFound), Detail: "404"}},
+		Errors:  []types.FetchError{{Source: "npm", Kind: types.FetchNotFound, Detail: "404"}},
 	}
 	pass, flagged, _ = Flagged([]types.Dependency{degradedLicense}, p)
 	if !pass || flaggedHas(flagged, "gone") {
@@ -246,7 +246,7 @@ func TestFlagged(t *testing.T) {
 		Name:    "unknown",
 		Version: "1.0.0",
 		Tag:     types.TagDependencies,
-		Errors:  []types.FetchError{{Source: "npm", Kind: string(types.FetchTimeout), Detail: "timeout"}},
+		Errors:  []types.FetchError{{Source: "npm", Kind: types.FetchTimeout, Detail: "timeout"}},
 	}
 	pass, flagged, _ = Flagged([]types.Dependency{degradedNilChaos}, p)
 	if !pass || flaggedHas(flagged, "unknown") {

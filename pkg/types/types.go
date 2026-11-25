@@ -58,9 +58,9 @@ const (
 
 // FetchError records a failure to read one npm fact.
 type FetchError struct {
-	Source string `json:"source"`
-	Kind   string `json:"kind"`
-	Detail string `json:"detail"`
+	Source string    `json:"source"`
+	Kind   FetchKind `json:"kind"`
+	Detail string    `json:"detail"`
 }
 
 // Dependency contains a project's declared dependency and its npm facts.

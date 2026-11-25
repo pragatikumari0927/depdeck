@@ -28,10 +28,13 @@ func TestDependencyOmitempty(t *testing.T) {
 
 func TestFetchErrorRoundTrip(t *testing.T) {
 	t.Parallel()
-	in := FetchError{Source: "npm", Kind: string(FetchNotFound), Detail: "missing"}
+	in := FetchError{Source: "npm", Kind: FetchNotFound, Detail: "missing"}
 	b, err := json.Marshal(in)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if got, want := string(b), `{"source":"npm","kind":"not_found","detail":"missing"}`; got != want {
+		t.Fatalf("JSON = %s, want byte-for-byte %s", got, want)
 	}
 	var out FetchError
 	if err := json.Unmarshal(b, &out); err != nil {
