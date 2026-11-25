@@ -2,6 +2,7 @@
 
 **Date:** 2026-11-02
 **Status:** accepted
+**Go minimum:** later superseded by [ADR-0020](0020-go-security-minimum.md) and then [ADR-0023](0023-go-patched-toolchains.md). The SDK and semver pins in this decision still apply.
 
 ## Decision
 

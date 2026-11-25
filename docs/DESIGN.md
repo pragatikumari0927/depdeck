@@ -26,8 +26,10 @@ One named color per tier. Assignment cutoffs live in ADR-0009; this file does no
 
 ## Typography
 
-- `font-html` (v1): `system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif` — HTML Deck only; no external font loads (ADR-0006).
-- `font-terminal` (v1): `ui-monospace, "Cascadia Mono", Consolas, monospace`
+- `font-html` (v1 baseline): `system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif` — HTML Deck only; no external font loads (ADR-0006).
+- `font-terminal` (v1 baseline): `ui-monospace, "Cascadia Mono", Consolas, monospace`
+
+The live Pixel Archive template uses `--font-html: system-ui, "Segoe UI", sans-serif` and `--font-display: ui-monospace, "Cascadia Mono", Consolas, monospace`.
 
 ## Layout
 
@@ -41,6 +43,9 @@ Target: 47 Cards readable in one desktop page; one column on mobile.
 Self-contained Deck file: ADR-0006.
 
 ## Terminal tokens
+
+These v1 terminal tokens are unimplemented. There is no terminal Deck
+renderer or lipgloss dependency in the current code.
 
 lipgloss color names, same rarity hues, shifted for terminal contrast (v1).
 
@@ -76,7 +81,7 @@ summary, Rarity Atlas, Tag controls, and a status area.
   gaps. Align labels and values across Cards. Use `minmax(0, 1fr)` for tracks
   containing long text and keep page padding within the available width.
 - Use `--archive-surface` (#16263B), `--archive-panel` (#101D31),
-  `--archive-line` (#536A89), `--archive-ink` (#F1F5FB), and
+  `--archive-line` (#6A83A4), `--archive-ink` (#F1F5FB), and
   `--archive-muted` (#B9CADF) for the window and its panels. Use a compact
   title bar and square, beveled controls. Give buttons visible default, hover,
   pressed, and keyboard-focus states. Use `aria-pressed` for the active Tag
@@ -138,6 +143,8 @@ Chaos, or license availability measures security.
   adding rendering optimizations. No external UI framework or added dependency.
 
 ### File-level plan
+
+This Pixel Archive rollout is complete on `main`. The historical steps were:
 
 1. `pkg/render/render.go` builds the renderer-only view and full-Deck counts
    from assessed dependencies. `pkg/render/templates/deck.html` defines the
