@@ -110,4 +110,16 @@ func TestApplyZeroDownloadsStillFull(t *testing.T) {
 	forbidIssues(t, dep.SpecialMove)
 }
 
+func TestApplyUnknownDownloadsDoesNotClaimModestReach(t *testing.T) {
+	t.Parallel()
+	dep := types.Dependency{Name: "unverified-package", Chaos: ptr(0)}
+	Apply(&dep)
+	if strings.Contains(dep.FlavorText, "modest weekly downloads") {
+		t.Fatalf("Flavor inferred low popularity from missing downloads: %q", dep.FlavorText)
+	}
+	if !strings.Contains(strings.ToLower(dep.FlavorText), "unverified") {
+		t.Fatalf("Flavor does not explain that downloads are unverified: %q", dep.FlavorText)
+	}
+}
+
 func ptr(v float64) *float64 { return &v }

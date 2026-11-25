@@ -49,7 +49,7 @@ func DefaultPolicy() types.CheckPolicy {
 }
 
 // Apply clears stale facts and adds the latest successful enrichment or errors.
-func Apply(dep types.Dependency, weekly int, lastPublish, now time.Time, license string, fetchErrs []types.FetchError) types.Dependency {
+func Apply(dep types.Dependency, weekly *int, lastPublish, now time.Time, license string, fetchErrs []types.FetchError) types.Dependency {
 	out := dep
 	if len(fetchErrs) > 0 {
 		out.Errors = fetchErrs
@@ -64,8 +64,13 @@ func Apply(dep types.Dependency, weekly int, lastPublish, now time.Time, license
 		return out
 	}
 	out.Errors = nil
-	out.WeeklyDownloads = &weekly
-	out.Rarity = Rarity(weekly)
+	out.WeeklyDownloads = nil
+	out.Rarity = ""
+	if weekly != nil {
+		count := *weekly
+		out.WeeklyDownloads = &count
+		out.Rarity = Rarity(count)
+	}
 	c := Chaos(lastPublish, now)
 	out.Chaos = &c
 	if lastPublish.IsZero() {

@@ -164,11 +164,7 @@ func assessWithDeclared(ctx context.Context, original types.Dependency, declared
 	if facts.LastPublish != "" {
 		published, _ = time.Parse(time.RFC3339, facts.LastPublish)
 	}
-	weekly := 0
-	if facts.WeeklyDownloads != nil {
-		weekly = *facts.WeeklyDownloads
-	}
-	out := stats.Apply(original, weekly, published, now, facts.License, facts.Errors)
+	out := stats.Apply(original, facts.WeeklyDownloads, published, now, facts.License, facts.Errors)
 	if err := flavor.ApplyMode(&out, opt.Flavor); err != nil {
 		return original, err
 	}
