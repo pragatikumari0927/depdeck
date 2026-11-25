@@ -8,7 +8,7 @@ This directory holds the canonical project guidance. Read `AGENTS.md` first. The
 2. [DECISIONS.md](DECISIONS.md) indexes accepted decisions. Read the linked ADR for the reason and scope of a decision.
 3. [CONTEXT.md](CONTEXT.md) defines domain terms.
 4. [Design](DESIGN.md), [development](DEVELOPMENT.md), [rules](RULES.md), [phases](PHASES.md), and [security](SECURITY.md) explain how to build and maintain the product.
-5. Tickets in `.scratch/` plan work. They do not override the contract.
+5. Local tickets in `.scratch/` (gitignored) may plan work. They do not override the contract.
 
 ## By task
 

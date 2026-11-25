@@ -32,7 +32,10 @@ Rule bodies live in those files. This file does not restate them.
 
 ## Skill selection
 
-See `SKILLS.md` for the curated skill list and divergence pins. The rules here are separate from skills — rules are `.mdc` files loaded by Cursor; skills are `SKILL.md` files loaded by the agent on invocation.
+See `SKILLS.md` for the curated skill list and divergence pins. This
+repository does not currently contain `SKILLS.md`. The rules here are
+separate from skills — rules are `.mdc` files loaded by Cursor; skills are
+`SKILL.md` files loaded by the agent on invocation.
 
 ## Cross-tool contract
 
@@ -40,12 +43,14 @@ See `SKILLS.md` for the curated skill list and divergence pins. The rules here a
 
 ## Rule sync
 
-`.cursor/rules/*.mdc` is the source of truth. `.grok/rules/*.md` is
-generated from it, because Grok Build does not read `.mdc` and every
-`.md` in `.grok/rules/` loads unconditionally.
+`.cursor/rules/*.mdc` is the source of truth when those files are present
+locally. This repository does not currently contain `.cursor/rules/`;
+`/.cursor/` is gitignored. `.grok/rules/*.md` is generated from the Cursor
+rules, because Grok Build does not read `.mdc` and every `.md` in
+`.grok/rules/` loads unconditionally.
 
 Git ignores the generated Grok copies. Keep them in `.grok/rules/` for tool
-discovery. The [previously tracked copies](https://github.com/pragatikumari0927/depdeck/tree/510113e561b931b1d888b247026322b082d8c30d/.grok/rules)
+discovery when a local checkout has them. The [previously tracked copies](https://github.com/pragatikumari0927/depdeck/tree/510113e561b931b1d888b247026322b082d8c30d/.grok/rules)
 are available for an existing setup that needs them.
 
 With local Cursor rule sources installed, regenerate the Grok copies after
