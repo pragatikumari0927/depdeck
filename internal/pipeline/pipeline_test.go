@@ -73,3 +73,24 @@ func TestAIRejectedBeforeManifestRead(t *testing.T) {
 		t.Fatalf("ai mode fetched %d packages", len(f.calls))
 	}
 }
+
+type declaredVersionRegistry struct{ declared string }
+
+func (r *declaredVersionRegistry) Fetch(_ context.Context, name, declared string) (*types.Dependency, error) {
+	r.declared = declared
+	return &types.Dependency{Name: name, License: "MIT"}, nil
+}
+
+func TestGetCardLooksUpLatestWithoutAddingProjectVersion(t *testing.T) {
+	registry := &declaredVersionRegistry{}
+	card, err := GetCard(context.Background(), "vite", Options{Registry: registry})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if registry.declared != "*" {
+		t.Fatalf("standalone package lookup declaration = %q, want wildcard", registry.declared)
+	}
+	if card.Version != "" {
+		t.Fatalf("standalone Card exposed project version %q", card.Version)
+	}
+}

@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/pragatikumari0927/depdeck/pkg/types"
@@ -127,6 +128,24 @@ func TestEmptyDeps(t *testing.T) {
 	}
 }
 
+func TestNullDependencyVersionIsPreservedAsEmptyForRegistryValidation(t *testing.T) {
+	t.Parallel()
+	p := writePkg(t, t.TempDir(), `{"dependencies":{"null-version":null,"empty-version":"","whitespace-version":"  "}}`)
+	got, err := ParseFile(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	byName := names(got)
+	for _, name := range []string{"null-version", "empty-version", "whitespace-version"} {
+		if _, ok := byName[name]; !ok {
+			t.Fatalf("version entry %q was lost: %+v", name, got)
+		}
+	}
+	if byName["null-version"].Version != "" {
+		t.Fatalf("null version = %q, want empty for registry validation", byName["null-version"].Version)
+	}
+}
+
 func TestSkipPeerAndBundled(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()
@@ -211,4 +230,40 @@ func TestOversizedManifestIsRejected(t *testing.T) {
 	if _, err := ParseFile(p); err == nil {
 		t.Fatal("oversized manifest must be rejected")
 	}
+}
+
+func TestManifestAtSizeLimitIsAccepted(t *testing.T) {
+	content := []byte(`{"dependencies":{"pkg":"1.0.0"}}`)
+	content = append(content, bytes.Repeat([]byte(" "), maxManifestSize-len(content))...)
+	p := filepath.Join(t.TempDir(), "package.json")
+	if err := os.WriteFile(p, content, 0600); err != nil {
+		t.Fatal(err)
+	}
+	got, err := ParseFile(p)
+	if err != nil || len(got) != 1 || got[0].Name != "pkg" {
+		t.Fatalf("manifest at byte limit = %+v, error = %v", got, err)
+	}
+}
+
+func FuzzParseFile(f *testing.F) {
+	for _, seed := range []string{`{}`, `null`, `{"dependencies":{"pkg":"*"}}`, "{bad json", strings.Repeat(" ", 128)} {
+		f.Add(seed)
+	}
+	f.Fuzz(func(t *testing.T, body string) {
+		if len(body) > maxManifestSize+1 {
+			t.Skip()
+		}
+		p := filepath.Join(t.TempDir(), "package.json")
+		if err := os.WriteFile(p, []byte(body), 0600); err != nil {
+			t.Fatal(err)
+		}
+		deps, err := ParseFile(p)
+		if err == nil {
+			for i := 1; i < len(deps); i++ {
+				if deps[i-1].Tag > deps[i].Tag || (deps[i-1].Tag == deps[i].Tag && deps[i-1].Name > deps[i].Name) {
+					t.Fatalf("dependencies are not sorted: %+v", deps)
+				}
+			}
+		}
+	})
 }

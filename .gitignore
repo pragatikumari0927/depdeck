@@ -5,10 +5,11 @@
 /.agents/
 /.cursor/
 /.claude/skills/
-/agent/skills/
+/.codex/hooks.json
 /.codex/migration-state.json
 /.serena/project.local.yml
 /.serena/cache/
+/agent/skills/
 
 # Build artifacts
 /depdeck

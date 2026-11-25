@@ -2,7 +2,7 @@ name: release preflight
 
 on:
   push:
-    branches: ['codex/depdeck-v1-rc']
+    branches: ['codex/depdeck-v1-rc', 'codex/release-blockers']
   workflow_dispatch:
 
 permissions:

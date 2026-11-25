@@ -91,6 +91,7 @@ jobs:
           node-version: '24.22.3'
       - run: node scripts/codex-go-checks.test.cjs
       - run: node --test scripts/deck-filter.test.cjs
+      - run: python -m unittest scripts.test_quality_gate -v
       - name: Install pinned checks
         run: |
           go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0
@@ -105,3 +106,18 @@ jobs:
         run: |
           gitleaks git . --redact=100 --log-opts=HEAD
           gitleaks dir . --redact=100
+
+  quality-gate:
+    if: always()
+    needs: [test, browser, security]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Require all quality jobs to pass
+        env:
+          TEST_RESULT: ${{ needs.test.result }}
+          BROWSER_RESULT: ${{ needs.browser.result }}
+          SECURITY_RESULT: ${{ needs.security.result }}
+        run: python scripts/check_quality_gate.py "$TEST_RESULT" "$BROWSER_RESULT" "$SECURITY_RESULT"

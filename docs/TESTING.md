@@ -20,6 +20,10 @@ The [CI workflow](../.github/workflows/test.yml) tests the minimum and stable Go
 versions on Linux, Windows, and macOS. The Linux jobs run race tests and the
 stable Linux job records statement coverage. The security job runs the Node
 tests, Go lint, vulnerability scanning, and secret scanning.
+The `quality-gate` job depends on the complete test matrix, browser job, and
+security job. It runs even when a dependency fails or is skipped, and succeeds
+only when all three job results are `success`. Configure branch protection to
+require `quality-gate` after confirming that check appears on a pull request.
 
 ## Acceptance coverage
 
@@ -59,8 +63,8 @@ the HTML messages and the original JSON error kinds and publish date.
 ## Pixel Archive browser regression
 
 The `browser` job in the test workflow runs an offline Chromium regression on
-pushes and pull requests. It is a separate status check and is not configured
-as a required branch-protection check. The job uses Node 24.22.3,
+pushes and pull requests. It is a separate status check and is not currently
+configured as a required branch-protection check. The job uses Node 24.22.3,
 Playwright 1.65.0 to install its matching Chromium build, and the Go 1.26.11
 minimum toolchain. It adds one Ubuntu runner and downloads Chromium plus its
 system libraries; the exact duration depends on GitHub-hosted runner cache and
@@ -68,9 +72,10 @@ package download time.
 
 The test builds a temporary Deck by running
 `scripts/browser-fixture/main.go` through the production Go HTML renderer. The
-fixture is synthetic, includes all five Rarity states, all three dependency
-groups, degraded Cards, and hostile package text. It does not contact npm or
-use a project cache. The test renders it twice and compares the output bytes
+fixture is synthetic, includes the curated `vite` artwork, generated fallback
+artwork, all five Rarity states, all three dependency groups, degraded Cards,
+and hostile package text. It does not contact npm or use a project cache. The
+test renders it twice and compares the output bytes
 before opening the first Deck as a local file in Chromium.
 
 The browser check covers:
@@ -80,6 +85,8 @@ The browser check covers:
   Card layout and unchanged Rarity Atlas totals.
 - The five Atlas counts, semantic landmarks, labeled filter controls, and
   keyboard-visible focus.
+- The curated Vite symbol and generated fallback both have visible geometry at
+  Card size, and the Rarity seal remains separate.
 - Hostile package names and versions as escaped text.
 - 100% and 200% root text size at 320, 390, 768, 1024, and 1440 CSS pixels.
 
@@ -118,8 +125,29 @@ Chromium verification confirmed all five Atlas rows, visible Card counts of
 5, 2, 1, and 2 for All, Runtime, Development, and Optional, unchanged Atlas
 totals after filtering, no horizontal overflow at 1280 pixels, and no external
 requests (the only request was the local `file:` document). The GIF is 800 by
-719 pixels. Package-specific artwork is not part of `main`; the cards use the
-shared Rarity illustrations. Browser verification covered Chromium. Firefox,
-Safari, and screen readers were outside this run.
+719 pixels. This recorded browser run predates package artwork and its fixture
+contains no known package such as `vite`; it does not verify package identity
+art. Current `main` includes a curated Vite mark and a deterministic original
+fallback, separate from the Rarity seal. Browser verification covered Chromium.
+Firefox, Safari, and screen readers were outside this run.
 
 <img src="assets/pixel-archive-mobile.png" alt="Mobile Deck with collection summary, Rarity Atlas, Tag filters, and the first Card" width="375">
+
+## Fuzzing and assessment benchmark
+
+Short fuzz runs exercise the public manifest parser, npm metadata parser, and
+MCP output-path validator. Longer campaigns can increase `-fuzztime`:
+
+```sh
+go test ./pkg/parser -run '^$' -fuzz FuzzParseFile -fuzztime 30s
+go test ./pkg/registry -run '^$' -fuzz FuzzParsePackument -fuzztime 30s
+go test ./internal/mcp -run '^$' -fuzz FuzzCleanDeckOutput -fuzztime 30s
+```
+
+The 47-package shared-pipeline benchmark uses a loopback npm fixture. It reports
+Go allocation totals (`B/op`), not process RSS, and does not include HTML
+rendering or operating-system process startup:
+
+```sh
+go test ./internal/pipeline -run '^$' -bench BenchmarkPipelineColdWarmScan47 -benchmem -count=5 -benchtime=1x
+```

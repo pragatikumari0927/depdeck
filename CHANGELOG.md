@@ -14,6 +14,10 @@ These changes are proposed for v1.1.0. See the [candidate notes](RELEASE_NOTES.m
   (#24, #26).
 - Add the `render_deck` MCP tool. It writes the canonical self-contained HTML
   Deck inside the project and refuses to overwrite an existing file (#59).
+- Add deterministic package identity artwork, with a curated Vite mark and an
+  original fallback for other names. Keep artwork separate from Rarity (#68).
+- Add offline Chromium regression coverage for the generated Pixel Archive
+  (#65, #69).
 
 ### Changed
 
@@ -24,16 +28,25 @@ These changes are proposed for v1.1.0. See the [candidate notes](RELEASE_NOTES.m
   tool names and schemas; the MCP server now exposes four tools (#39, #59).
 - Revise the README to show the Pixel Archive interface and distinguish the
   published 1.0.0 binaries from builds of `main` (#36).
+- Refresh the README demo and add original depdeck branding and setup prompts
+  (#66, #70).
+- Restrict permissions on newly created Unix cache directories without
+  changing existing cache directories (#67).
 
 ### Fixed
 
 - Return `data.dependencies: []` for empty Checks in CLI JSON and MCP (#38).
+- Treat null, empty, and whitespace-only manifest versions as unsupported
+  declarations instead of selecting an unrelated latest release. Standalone
+  `get_card` lookups still use the latest npm version.
 
 ### Security
 
 - Raise the minimum Go toolchain to 1.26.11. Build release archives with
   Go 1.27.4 and scan for known vulnerabilities with that compiler before
   packaging (#48).
+- Include the Vite artwork's source attribution and MIT license in release
+  notices; preserve its trademark disclaimer.
 
 ## [1.0.0] - 2026-11-13
 

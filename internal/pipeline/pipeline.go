@@ -142,6 +142,10 @@ func Run(ctx context.Context, path string, opt Options) ([]types.Dependency, err
 }
 
 func assess(ctx context.Context, original types.Dependency, now time.Time, opt Options) (result types.Dependency, err error) {
+	return assessWithDeclared(ctx, original, original.Version, now, opt)
+}
+
+func assessWithDeclared(ctx context.Context, original types.Dependency, declared string, now time.Time, opt Options) (result types.Dependency, err error) {
 	// Run calls assess in worker goroutines, outside the Face's recovery boundary.
 	defer func() {
 		if recover() != nil {
@@ -149,7 +153,7 @@ func assess(ctx context.Context, original types.Dependency, now time.Time, opt O
 			err = errors.New("dependency assessment failed")
 		}
 	}()
-	facts, err := opt.Registry.Fetch(ctx, original.Name, original.Version)
+	facts, err := opt.Registry.Fetch(ctx, original.Name, declared)
 	if err != nil {
 		return original, fmt.Errorf("fetch %s: %w", original.Name, err)
 	}
@@ -209,5 +213,5 @@ func GetCard(ctx context.Context, name string, opt Options) (types.Dependency, e
 	if err != nil {
 		return types.Dependency{}, err
 	}
-	return assess(ctx, types.Dependency{Name: name}, opt.Now(), opt)
+	return assessWithDeclared(ctx, types.Dependency{Name: name}, "*", opt.Now(), opt)
 }

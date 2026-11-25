@@ -18,7 +18,7 @@ func main() {
 			FlavorText: "A sample runtime Card with verified fixture facts.", SpecialMove: "Fixture Star",
 		},
 		{
-			Name: "runtime-common", Version: "~1.2.0", Tag: types.TagDependencies,
+			Name: "vite", Version: "~7.0.0", Tag: types.TagDependencies,
 			WeeklyDownloads: intPtr(42), Rarity: types.RarityCommon,
 			Chaos: floatPtr(0.6), LastPublish: "2025-09-12T00:00:00Z", License: "ISC",
 			FlavorText: "A sample Card from the Runtime group.", SpecialMove: "Small Step",

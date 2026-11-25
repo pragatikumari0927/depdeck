@@ -17,6 +17,7 @@ records the offline fixture and browser checks.
 
 The current README uses Mermaid for the architecture and scan sequence. The
 current GIF was captured from Go-rendered HTML using the offline sample
-assessment described in the testing guide. It has no package-specific artwork;
-that feature is not on `main`. Keep historical artwork distinct from the
-current demo.
+assessment described in the testing guide. It predates package identity artwork:
+it shows the Pixel Archive layout, but not the curated Vite mark or deterministic
+fallback now present on `main`. Keep that visual limitation clear when using the
+capture. The older Card design remains in `deck-demo-v1.gif`.
