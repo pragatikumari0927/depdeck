@@ -28,24 +28,28 @@ go mod download
 GOPROXY=off govulncheck -show version ./...
 goreleaser check
 GOPROXY=off goreleaser release --snapshot --skip=publish
-python3 scripts/verify-release.py dist --expect-render-deck --expected-go-version go1.27.4 --govulncheck "$(command -v govulncheck)"
+python3 scripts/verify-release.py dist --version 1.1.0 --expect-render-deck --expected-go-version go1.27.4 --govulncheck "$(command -v govulncheck)"
 ```
 
-The verifier checks the expected OS and architecture combinations, archive
-members and SHA-256, then checks the embedded compiler in every archive. Pass
+The verifier requires the approved version on every archive and checks the
+expected OS and architecture combinations, archive members and SHA-256, then
+checks the embedded compiler in every archive. Pass
 `--govulncheck` with the pinned scanner path to scan each extracted binary as
 well as the source tree. The candidate command also requires the
 `render_deck` MCP tool and runs the host's extracted binary through CLI and MCP
 smoke tests, including an offline Deck render. Omit `--expect-render-deck` only
-when verifying the published v1.0.0 binary, which has the original three MCP
-tools. Use a fresh checkout for each snapshot comparison. GoReleaser writes
-to `dist/`. Keep it disposable and verify its path before any cleanup.
+when verifying the published v1.0.0 archive set, which predates curated
+package artwork and has the original three MCP tools. The v1.1.0 snapshot
+version is `1.1.0`, matching the approved archive and binary version. Use a
+fresh checkout for each snapshot comparison. GoReleaser writes to `dist/`.
+Keep it disposable and verify its path before any cleanup.
 
 Preview Conventional Commits since the latest tag with
 `git-cliff --config cliff.toml --unreleased`. Use the preview to update the
 curated **Unreleased** entries in [CHANGELOG.md](../CHANGELOG.md). For the
-approved release, record its version and publication date. Preserve the
-existing released sections.
+approved release, record its version and publication date. The v1.1.0 target
+date is 2026-11-25; update it if publication slips. Preserve the existing
+released sections.
 
 ## Source-built Homebrew formula
 
@@ -53,7 +57,7 @@ The [formula template](../release/Formula/depdeck.rb.in) builds
 `./cmd/depdeck` from source. Its test checks the version and the Check
 envelope. The preflight workflow serves a Git archive of the candidate on
 loopback, installs via a disposable tap, and runs `brew test`. It uses
-`1.0.0` as the staged formula's fixture version and records the compiler
+`1.1.0` as the staged formula's version and records the compiler
 embedded in the installed executable. The production formula uses the GitHub
 tarball and version for the approved tag.
 

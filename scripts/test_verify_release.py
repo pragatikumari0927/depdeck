@@ -1,7 +1,13 @@
+import hashlib
+import io
 import importlib.util
+import tarfile
+import tempfile
+import zipfile
 from types import SimpleNamespace
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 SCRIPT = Path(__file__).with_name("verify-release.py")
@@ -11,6 +17,40 @@ SPEC.loader.exec_module(verify_release)
 
 
 class MCPReleaseSmokeTests(unittest.TestCase):
+    def create_archive_set(self, dist, version_for_target, notice, default_version="1.1.0"):
+        entries = []
+        for os_name, arch in sorted(
+            (os_name, arch)
+            for os_name in ("windows", "linux", "darwin")
+            for arch in ("amd64", "arm64")
+        ):
+            version = version_for_target.get((os_name, arch), default_version)
+            extension = "zip" if os_name == "windows" else "tar.gz"
+            name = f"depdeck_{version}_{os_name}_{arch}.{extension}"
+            binary = "depdeck.exe" if os_name == "windows" else "depdeck"
+            files = {
+                binary: b"test executable",
+                "LICENSE": b"MIT",
+                "THIRD_PARTY_NOTICES.txt": notice.encode("utf-8"),
+                "README.md": b"README",
+                "CHANGELOG.md": b"CHANGELOG",
+            }
+            archive = dist / name
+            if extension == "zip":
+                with zipfile.ZipFile(archive, "w") as package:
+                    for member, payload in files.items():
+                        package.writestr(member, payload)
+            else:
+                with tarfile.open(archive, "w:gz") as package:
+                    for member, payload in files.items():
+                        info = tarfile.TarInfo(member)
+                        info.size = len(payload)
+                        package.addfile(info, io.BytesIO(payload))
+            entries.append((hashlib.sha256(archive.read_bytes()).hexdigest(), name))
+        (dist / "checksums.txt").write_text(
+            "".join(f"{digest}  {name}\n" for digest, name in entries), encoding="utf-8"
+        )
+
     def test_repository_third_party_notices_include_complete_vite_license(self):
         root_notices = verify_release.VITE_LICENSE_PATH.parents[3] / "THIRD_PARTY_NOTICES.txt"
         verify_release.check_artwork_notice(root_notices.read_text(encoding="utf-8"))
@@ -39,6 +79,28 @@ The Vite mark identifies the exact npm package. This use does not imply affiliat
         # Archive-level extraction uses the same notice validator as the public helper.
         with self.assertRaises(SystemExit):
             verify_release.check_artwork_notice("Depdeck third-party notices\n")
+
+    def test_legacy_release_notice_without_package_artwork_is_accepted(self):
+        # v1.0.0 predates curated package artwork and has no Vite attribution.
+        with tempfile.TemporaryDirectory() as directory:
+            dist = Path(directory)
+            notice = "Depdeck third-party notices\nNo curated package marks are included.\n"
+            self.create_archive_set(dist, {}, notice, default_version="1.0.0")
+            with mock.patch.object(verify_release, "verify_go_metadata"), \
+                 mock.patch.object(verify_release, "smoke"):
+                verify_release.verify(dist, "1.0.0", expect_render_deck=False)
+
+    def test_archive_set_must_match_an_explicit_approved_version(self):
+        with tempfile.TemporaryDirectory() as directory:
+            dist = Path(directory)
+            self.create_archive_set(
+                dist, {("linux", "arm64"): "1.0.0"}, "Placeholder notice"
+            )
+            with mock.patch.object(verify_release, "check_artwork_notice"), \
+                 mock.patch.object(verify_release, "verify_go_metadata"), \
+                 mock.patch.object(verify_release, "smoke"):
+                with self.assertRaisesRegex(SystemExit, "expected approved version 1.1.0"):
+                    verify_release.verify(dist, "1.1.0")
 
     def test_v1_release_requires_original_three_tools(self):
         self.assertEqual(

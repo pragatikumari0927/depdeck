@@ -16,14 +16,14 @@ preserve the original ticket list and release criteria. The
 [publication record](https://github.com/pragatikumari0927/depdeck/pull/23) covers archive verification and the
 public Go and Homebrew install checks.
 
-## v1.1.0 release preparation
+## v1.1.0 release closure
 
-The v1.1.0 changes are merged to `main` but are not tagged or published.
-Published v1.0.0 remains the latest release. PR
-[#71](https://github.com/pragatikumari0927/depdeck/pull/71) merged reviewed
-candidate `62f5dc99af869c8d4372302e24d8e03288b2bf3c` as
-`bb415d41009d6419c1ace1d432f7b1dba408c0cc`; both commits have tree
-`0aef71309a72c7a10c40c7af1df6e0dc6011b110`.
+The v1.1.0 implementation and repository updates are merged to `main` but are
+not tagged or published. Published v1.0.0 remains the latest release. PRs
+[#71](https://github.com/pragatikumari0927/depdeck/pull/71) and
+[#72](https://github.com/pragatikumari0927/depdeck/pull/72) are merged. Current
+main is `7193bce971930d79edc0e5f0b56d83f411f77d08` with tree
+`a3e45c1847fe020358661c32b965085388d0fe9d`.
 
 - Pixel Archive adds the Rarity Atlas, group filters, Field Journals, Archive
   Notices, deterministic package artwork, and the `render_deck` MCP tool.
@@ -36,17 +36,16 @@ candidate `62f5dc99af869c8d4372302e24d8e03288b2bf3c` as
   vulnerability scans in release preflight. See
   [ADR-0023](adr/0023-go-patched-toolchains.md).
 
-The [test workflow](https://github.com/pragatikumari0927/depdeck/actions/runs/45517402993)
-passed all nine jobs on the merged commit. The earlier
-[release preflight](https://github.com/pragatikumari0927/depdeck/actions/runs/45442068391)
-passed on candidate `62f5dc99af869c8d4372302e24d8e03288b2bf3c`, whose tree
-matches merged `main`. Run preflight again on the final release commit; this
-candidate run is retained as supporting evidence, not a substitute.
+The [post-merge test workflow](https://github.com/pragatikumari0927/depdeck/actions/runs/45525786354)
+passed all nine jobs on current `main`. Before creating a v1.1.0 tag, run
+release preflight on the exact commit that will receive the tag and retain the
+workflow URL in the release record.
 
-The [changelog](../CHANGELOG.md) keeps v1.1.0 under Unreleased until the
-release date is approved. The [v1.1.0 release notes](../RELEASE_NOTES.md)
-describe the upcoming release. Follow the [release guide](RELEASING.md) for
-artifact preparation and the separate approval required for publication.
+The [changelog](../CHANGELOG.md) records v1.1.0 with the approved target date
+of 2026-11-25. If publication slips, update the date to the actual release
+date. The [v1.1.0 release notes](../RELEASE_NOTES.md) describe the release.
+Follow the [release guide](RELEASING.md) for artifact preparation. Tagging,
+publication, and the Homebrew tap update require separate approval.
 
 ## Deferred ideas
 

@@ -29,11 +29,20 @@
 
 ## Start your collection
 
-### Install the published v1.0.0 release
+### Install the currently published release (v1.0.0)
 
 - **Prebuilt executable.** Choose the archive for Windows, macOS, or Linux and your CPU architecture (`amd64` or `arm64`). Compare its SHA-256 checksum with the matching line in `checksums.txt`. Extract the executable and put it on your `PATH`, the list of directories your terminal searches for programs. [Release archives](https://github.com/pragatikumari0927/depdeck/releases/tag/v1.0.0) · [Checksums](https://github.com/pragatikumari0927/depdeck/releases/download/v1.0.0/checksums.txt)
 - **Homebrew on macOS.** Run `brew install pragatikumari0927/tap/depdeck`. [Homebrew tap](https://github.com/pragatikumari0927/homebrew-tap)
 - **Go install.** Use a current security patch for your Go line, such as Go 1.26.11 or Go 1.27.4. Run `go install github.com/pragatikumari0927/depdeck/cmd/depdeck@v1.0.0`.
+
+**v1.1.0 is prepared but not published yet.** After it appears on the
+[releases page](https://github.com/pragatikumari0927/depdeck/releases), use its
+archives and checksums. On Homebrew, run `brew upgrade depdeck` if it is
+already installed, or `brew install pragatikumari0927/tap/depdeck` on a new
+machine. With Go, run
+`go install github.com/pragatikumari0927/depdeck/cmd/depdeck@v1.1.0`.
+Until then, v1.0.0 remains the published build; the Pixel Archive renderer is
+available from `main` as described below.
 
 For either Go install in this guide, add the directory from `go env GOBIN` to your `PATH`. If that command returns an empty value, use the `bin` directory under `go env GOPATH`. Run `depdeck --version` to check which executable your shell found.
 
