@@ -161,7 +161,6 @@ run the default publish-age and license-declaration Check, or write the
 canonical HTML Deck. Rarity measures weekly downloads and Chaos reflects publish
 age; neither is a vulnerability score. Missing npm data is not proof of risk.
 For exact tool arguments and schemas, see the [MCP contract](docs/SPEC.md#mcp-surface).
-
 ## Under the cartridge
 
 ```mermaid
