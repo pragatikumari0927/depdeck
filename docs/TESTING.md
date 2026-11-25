@@ -116,25 +116,29 @@ remain responsible for the complete HTML contract and escaping regressions.
 
 The [desktop screenshot](assets/pixel-archive-desktop.png) and
 [mobile screenshot](assets/pixel-archive-mobile.png) are crops of the
-CLI-generated Deck. The [current README demo](assets/deck-demo.gif) captures
-the Go renderer at 1280 by 1150 CSS pixels. Its offline assessed fixture has
-five sample Cards: `react` (Legendary, Runtime), `chalk` (Rare, Runtime),
-`typescript` (Epic, Development), `tiny-helper` (Common, Optional), and
-`unlisted-demo` (Unknown, Optional). The facts and dates are illustrative, not
-live npm results. The capture shows All, Runtime, Development, and Optional
-filters; Atlas totals remain one Card per rarity.
+CLI-generated Deck. The [current README demo](assets/deck-demo.gif) is a live
+scan of `react`, `vite`, `chalk`, `typescript`, and `fsevents` against the
+public package registry on 25 Nov 2026. The Go binary wrote a self-contained
+HTML Deck from that scan; headless Chrome then filmed the All, Runtime,
+Development, and Optional filters. The five Cards are `chalk` (Legendary,
+Runtime), `fsevents` (Legendary, Optional), `react` (Legendary, Runtime),
+`typescript` (Legendary, Development), and `vite` (Unknown, Runtime). `vite`
+shows as Unknown because the registry response exceeded the current size
+limit; see issue #97. The other facts are live registry results from the
+capture date. The GIF includes package identity artwork: the curated Vite
+mark and deterministic fallback art, separate from the Rarity seal.
 
-Chromium verification confirmed all five Atlas rows, visible Card counts of
-5, 2, 1, and 2 for All, Runtime, Development, and Optional, unchanged Atlas
-totals after filtering, no horizontal overflow at 1280 pixels, and no external
-requests (the only request was the local `file:` document). The GIF is 800 by
-719 pixels. This recorded browser run predates package artwork and its fixture
-contains no known package such as `vite`; it does not verify package identity
-art. Current `main` includes a curated Vite mark and a deterministic original
-fallback, separate from the Rarity seal. Browser verification covered Chromium.
-Firefox, Safari, and screen readers were outside this run.
+The GIF is 960 by 1050 pixels and has six frames: All (1400 ms), Runtime
+(920 ms), Development (880 ms), Optional (920 ms), All (1800 ms), and a
+final 40 ms All frame left by the encoder. Visible Card counts are 5, 3, 1,
+and 1 for All, Runtime, Development, and Optional. Atlas totals stay at four
+Legendary and one Unknown after filtering. The [mobile
+screenshot](assets/pixel-archive-mobile.png) is from the same Deck. The
+desktop screenshot predates package artwork and is retained as earlier test
+evidence. This capture used Chromium. Firefox, Safari, and screen readers
+were outside this run.
 
-<img src="assets/pixel-archive-mobile.png" alt="Mobile Deck with collection summary, Rarity Atlas, Tag filters, and the first Card" width="375">
+<img src="assets/pixel-archive-mobile.png" alt="Mobile Deck with collection summary, Rarity Atlas, Tag filters, and the first Card, including package identity artwork" width="375">
 
 ## Fuzzing and assessment benchmark
 
