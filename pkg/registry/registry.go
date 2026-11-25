@@ -146,12 +146,9 @@ func (c *Client) fromCache(ctx context.Context, name, declared, constraintText s
 			}
 			return nil, false, nil
 		}
-		fetchErr, opErr := c.attachDownloads(ctx, dep, name, now)
+		dep, opErr := c.completeWithDownloads(ctx, name, declared, now, dep)
 		if opErr != nil {
 			return nil, false, opErr
-		}
-		if fetchErr != nil {
-			return degradedWithVersion(name, declared, types.FetchKind(fetchErr.Kind), fetchErr.Detail), true, nil
 		}
 		return dep, true, nil
 	}
@@ -199,12 +196,9 @@ func (c *Client) fetchHTTP(ctx context.Context, name, declared, constraintText s
 		if err != nil {
 			return degradedWithVersion(name, declared, fetchKindFor(err), err.Error()), nil
 		}
-		fetchErr, opErr := c.attachDownloads(ctx, dep, name, now)
-		if opErr != nil {
-			return nil, fmt.Errorf("cache downloads for %s: %w", name, opErr)
-		}
-		if fetchErr != nil {
-			return degradedWithVersion(name, declared, types.FetchKind(fetchErr.Kind), fetchErr.Detail), nil
+		dep, err = c.completeWithDownloads(ctx, name, declared, now, dep)
+		if err != nil {
+			return nil, fmt.Errorf("cache downloads for %s: %w", name, err)
 		}
 		return dep, nil
 	case http.StatusOK:
@@ -225,12 +219,9 @@ func (c *Client) fetchHTTP(ctx context.Context, name, declared, constraintText s
 		}); err != nil {
 			return nil, fmt.Errorf("cache metadata %s: %w", name, err)
 		}
-		fetchErr, opErr := c.attachDownloads(ctx, dep, name, now)
-		if opErr != nil {
-			return nil, fmt.Errorf("cache downloads for %s: %w", name, opErr)
-		}
-		if fetchErr != nil {
-			return degradedWithVersion(name, declared, types.FetchKind(fetchErr.Kind), fetchErr.Detail), nil
+		dep, err = c.completeWithDownloads(ctx, name, declared, now, dep)
+		if err != nil {
+			return nil, fmt.Errorf("cache downloads for %s: %w", name, err)
 		}
 		return dep, nil
 	case http.StatusNotFound:
@@ -247,6 +238,19 @@ func (c *Client) fetchHTTP(ctx context.Context, name, declared, constraintText s
 	default:
 		return degradedWithVersion(name, declared, types.FetchNetwork, fmt.Sprintf("npm returned %d", status)), nil
 	}
+}
+
+// completeWithDownloads adds weekly download facts, or degrades the Card when
+// the downloads request fails as a Fetch error.
+func (c *Client) completeWithDownloads(ctx context.Context, name, declared string, now time.Time, dep *types.Dependency) (*types.Dependency, error) {
+	fetchErr, err := c.attachDownloads(ctx, dep, name, now)
+	if err != nil {
+		return nil, err
+	}
+	if fetchErr != nil {
+		return degradedWithVersion(name, declared, types.FetchKind(fetchErr.Kind), fetchErr.Detail), nil
+	}
+	return dep, nil
 }
 
 func (c *Client) attachDownloads(ctx context.Context, dep *types.Dependency, name string, now time.Time) (*types.FetchError, error) {
